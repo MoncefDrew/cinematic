@@ -19,32 +19,41 @@ export default function RootLayout() {
 
 
     return (
+
+        //Architecture
+        //Gesture Handler Root view :
+            //- Status Bar
+            //- Drawer :
+            //
         <GestureHandlerRootView>
-            <StatusBar style="light" backgroundColor="#14171C" />
+            <StatusBar style="light" backgroundColor="#445566" />
 
             <Drawer
                 screenOptions={{
 
                     drawerContentStyle: {
                         padding: 10, // Adjust the padding between the drawer content and screen
-
-                        //@ debugging it later
-                        borderRadius: 1,
-                        overflow: 'hidden', // This ensures that content inside the drawer doesn't overflow outside the border radius
-
                     },
 
+                    //drawer style
                     drawerStyle: {
                         backgroundColor: Colors.theme.background, // Drawer background color
                         width: 300, // Optional: Adjust drawer width if needed
-
                     },
-
                     drawerActiveTintColor: '#ffffff', // Active item text/icon color
                     drawerInactiveTintColor: '#888888', // Inactive item text/icon color
                     drawerActiveBackgroundColor: '#333333', // Active item background
                     drawerLabelStyle: {
                         fontSize: 15, // Adjust font size
+                    },
+
+                    // Header styles
+                    headerStyle: {
+                        backgroundColor: '#445566', // Change the nav bar color here
+                    },
+                    headerTintColor: '#ffffff', // Change the text/icon color in the nav bar
+                    headerTitleStyle: {
+                        fontSize: 18, // Optional: Adjust the title font size
                     },
                 }}
 
@@ -145,7 +154,7 @@ export default function RootLayout() {
                         drawerLabel: 'Settings',
                         headerTitle: 'Settings',
                         drawerIcon: ({size, color}) => (
-                            <Ionicons name="pencil" size={size} color={color} style={{marginRight: 10}}></Ionicons>
+                            <Ionicons name="settings" size={size} color={color} style={{marginRight: 10}}></Ionicons>
                         )
                     }}
                 />

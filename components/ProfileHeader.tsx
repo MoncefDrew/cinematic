@@ -11,8 +11,8 @@ const ProfileHeader = () => {
             {/* Circle around the profile picture */}
             <View
                 style={{
-                    width: 90, // Container size
-                    height: 90, // Container size
+                    width: 80, // Container size
+                    height: 80, // Container size
                     borderRadius: 50, // Half of the width/height to make it circular
                     borderWidth: 1, // Border width around the profile picture
                     borderColor: Colors.theme.tabIconDefault, // Border color
