@@ -2,37 +2,38 @@ import {useFonts} from 'expo-font';
 import {Colors} from "../constants/Colors"
 import 'react-native-reanimated';
 import {Ionicons} from '@expo/vector-icons';
-import {View, Text} from "react-native";
+import {View, Text, Button, TouchableOpacity} from "react-native";
 import {GestureHandlerRootView} from "react-native-gesture-handler";
 import {Drawer} from "expo-router/drawer";
 import ProfileHeader from "@/components/ProfileHeader";
 import {DrawerContentScrollView, DrawerItemList} from "@react-navigation/drawer";
 import {StatusBar} from "expo-status-bar";
+import SearchButton from "@/components/SearchButton";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 
 export default function RootLayout() {
     const [loaded] = useFonts({
-        SpaceMono: require('../assets/fonts/Satoshi-Variable.ttf'),
+        SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+        Satoshi: require('../assets/fonts/Satoshi-Variable.ttf')
     });
-
 
 
     return (
 
         //Architecture
         //Gesture Handler Root view :
-            //- Status Bar
-            //- Drawer :
-            //
+            //Status Bar
+                //-Drawer :
+                //
         <GestureHandlerRootView>
-            <StatusBar style="light" backgroundColor="#445566" />
+            <StatusBar style="light" backgroundColor="#445566"/>
 
             <Drawer
                 screenOptions={{
 
                     drawerContentStyle: {
-                        padding: 10, // Adjust the padding between the drawer content and screen
+                        padding: 12, // Adjust the padding between the drawer content and screen
                     },
 
                     //drawer style
@@ -40,9 +41,9 @@ export default function RootLayout() {
                         backgroundColor: Colors.theme.background, // Drawer background color
                         width: 300, // Optional: Adjust drawer width if needed
                     },
-                    drawerActiveTintColor: '#ffffff', // Active item text/icon color
-                    drawerInactiveTintColor: '#888888', // Inactive item text/icon color
-                    drawerActiveBackgroundColor: '#333333', // Active item background
+                    drawerActiveTintColor: Colors.theme.Activetint, // Active item text/icon color
+                    drawerInactiveTintColor: Colors.theme.InactiveTint, // Inactive item text/icon color
+                    drawerActiveBackgroundColor: Colors.theme.currentTab, // Active item background
                     drawerLabelStyle: {
                         fontSize: 15, // Adjust font size
                     },
@@ -55,19 +56,22 @@ export default function RootLayout() {
                     headerTitleStyle: {
                         fontSize: 18, // Optional: Adjust the title font size
                     },
+
+
                 }}
 
                 //Drawer Structure
                 drawerContent={(props) => (
                     <DrawerContentScrollView {...props}>
-                        {/* Profile Header at the top of the Drawer */}
-                        <ProfileHeader />
 
+                        {/* Profile Header at the top of the Drawer */}
+                        <ProfileHeader/>
                         {/* Drawer Items */}
                         <DrawerItemList {...props} />
+
+
                     </DrawerContentScrollView>
                 )}>
-
 
 
 
@@ -77,10 +81,17 @@ export default function RootLayout() {
                         drawerLabel: 'Popular',
                         headerTitle: 'Popular',
                         drawerIcon: ({size, color}) => (
-                            <Ionicons name="copy" size={size} color={color} style={{marginRight: 10}} ></Ionicons>
-                        )
+                            <Ionicons name="copy" size={size} color={color} style={{marginRight: 25}}></Ionicons>
+                        ),
+                        headerRight: () => (
+                            <View style={{margin: 10,}}>
+                                <SearchButton/>
+                            </View>
+                        ),
+
                     }}
                 />
+
 
                 <Drawer.Screen
                     name='(tabs)/Search'
@@ -88,8 +99,11 @@ export default function RootLayout() {
                         drawerLabel: 'Search',
                         headerTitle: 'Search for a movie',
                         drawerIcon: ({size, color}) => (
-                            <Ionicons name="search" size={size} color={color} style={{marginRight: 10}}></Ionicons>
-                        )
+                            <Ionicons name="search" size={size} color={color} style={{marginRight: 25}}></Ionicons>
+                        ),
+                        headerRight: () => (
+                            <SearchButton/>
+                        ),
                     }}
                 />
 
@@ -99,7 +113,7 @@ export default function RootLayout() {
                         drawerLabel: 'Profile',
                         headerTitle: 'Profile',
                         drawerIcon: ({size, color}) => (
-                            <Ionicons name="person" size={size} color={color} style={{marginRight: 10}}></Ionicons>
+                            <Ionicons name="person" size={size} color={color} style={{marginRight: 25}}></Ionicons>
                         )
                     }}
                 />
@@ -110,7 +124,7 @@ export default function RootLayout() {
                         drawerLabel: 'Watch list',
                         headerTitle: 'Watchlist',
                         drawerIcon: ({size, color}) => (
-                            <Ionicons name="time" size={size} color={color} style={{marginRight: 10}}></Ionicons>
+                            <Ionicons name="time" size={size} color={color} style={{marginRight: 25}}></Ionicons>
                         )
                     }}
                 />
@@ -121,7 +135,7 @@ export default function RootLayout() {
                         drawerLabel: 'Program',
                         headerTitle: 'Program',
                         drawerIcon: ({size, color}) => (
-                            <Ionicons name="calendar" size={size} color={color} style={{marginRight: 10}}></Ionicons>
+                            <Ionicons name="calendar" size={size} color={color} style={{marginRight: 25}}></Ionicons>
                         )
                     }}
                 />
@@ -132,7 +146,8 @@ export default function RootLayout() {
                         drawerLabel: 'Reviews',
                         headerTitle: 'Reviews',
                         drawerIcon: ({size, color}) => (
-                            <Ionicons name="reorder-four" size={size} color={color} style={{marginRight: 10}}></Ionicons>
+                            <Ionicons name="reorder-four" size={size} color={color}
+                                      style={{marginRight: 25}}></Ionicons>
                         )
                     }}
                 />
@@ -143,7 +158,7 @@ export default function RootLayout() {
                         drawerLabel: 'Activity',
                         headerTitle: 'Activity',
                         drawerIcon: ({size, color}) => (
-                            <Ionicons name="bar-chart" size={size} color={color} style={{marginRight: 10}}></Ionicons>
+                            <Ionicons name="bar-chart" size={size} color={color} style={{marginRight: 25}}></Ionicons>
                         )
                     }}
                 />
@@ -154,7 +169,7 @@ export default function RootLayout() {
                         drawerLabel: 'Settings',
                         headerTitle: 'Settings',
                         drawerIcon: ({size, color}) => (
-                            <Ionicons name="settings" size={size} color={color} style={{marginRight: 10}}></Ionicons>
+                            <Ionicons name="settings" size={size} color={color} style={{marginRight: 25}}></Ionicons>
                         )
                     }}
                 />
@@ -165,11 +180,12 @@ export default function RootLayout() {
                         drawerLabel: 'Sign Out',
                         headerTitle: 'SignOut',
                         drawerIcon: ({size, color}) => (
-                            <Ionicons name="log-out" size={size} color={color} style={{marginRight: 10}}></Ionicons>
+                            <Ionicons name="log-out" size={size} color={color} style={{marginRight: 25}}></Ionicons>
                         )
                     }}
                 />
             </Drawer>
+
 
         </GestureHandlerRootView>
     );

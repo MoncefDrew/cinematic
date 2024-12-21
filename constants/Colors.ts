@@ -13,6 +13,7 @@ export const Colors = {
 
     //Drawer active and inactive items
     Activetint: '#FFFFFF',
+    InactiveTint : '#FFFFFF',
 
     icon: '#C4D8E0',
     icontTitle: '#C8D4E0',

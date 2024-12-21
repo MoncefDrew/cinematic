@@ -6,7 +6,7 @@ export default function Search() {
 
     return (
         <View style={[styles.container, {backgroundColor: '#14171C'}]}>
-            <Text style={styles.text}>Popular</Text>
+            <Text style={styles.text}>Search</Text>
         </View>
     )
 }
