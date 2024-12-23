@@ -21,9 +21,12 @@ export const Colors = {
     currentTab: '#445566',
 
     tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
+    tabIconSelected: '#fff',
 
     favColor:'#F27405',
-    starColor:'#00E054'
+    starColor:'#00E054',
+
+    //CARDS
+    cardBorder : "#969696",
   },
 };
