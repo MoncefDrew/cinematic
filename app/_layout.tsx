@@ -9,6 +9,8 @@ import ProfileHeader from "@/components/ProfileHeader";
 import {DrawerContentScrollView, DrawerItemList} from "@react-navigation/drawer";
 import {StatusBar} from "expo-status-bar";
 import SearchButton from "@/components/SearchButton";
+import TextButton from '@/components/textinput';
+import React from 'react';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 
@@ -83,11 +85,6 @@ export default function RootLayout() {
                         drawerIcon: ({size, color}) => (
                             <Ionicons name="copy" size={size} color={color} style={{marginRight: 25}}></Ionicons>
                         ),
-                        headerRight: () => (
-                            <View style={{margin: 10,}}>
-                                <SearchButton/>
-                            </View>
-                        ),
 
                     }}
                 />
@@ -97,7 +94,7 @@ export default function RootLayout() {
                     name='(tabs)/Search'
                     options={{
                         drawerLabel: 'Search',
-                        headerTitle: 'Search for a movie',
+                        headerTitle: '',
                         drawerIcon: ({size, color}) => (
                             <Ionicons name="search" size={size} color={color} style={{marginRight: 25}}></Ionicons>
                         ),
