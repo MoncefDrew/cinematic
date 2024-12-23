@@ -1,23 +1,49 @@
-import React from 'react';
-import { TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useRef } from 'react';
+import { TouchableOpacity, StyleSheet, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function SearchButton() {
-    const handleSearch = () => {
-        alert("Search icon pressed!");
-    };
 
+    const inputRef = useRef<TextInput>(null);
 
-    return (
-        <TouchableOpacity  onPress={handleSearch} style={styles.searchButton}>
-            <Ionicons name="search" size={20} color="white" />
-        </TouchableOpacity>
-    );
+  const handleFocus = () => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <TextInput
+        ref={inputRef}
+        style={styles.input}
+        placeholder="Search..."
+        placeholderTextColor="white"
+      />
+      <TouchableOpacity onPress={handleFocus} style={styles.iconContainer}>
+        <Ionicons name="search" size={24} color="white" />
+      </TouchableOpacity>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    searchButton: {
-        padding: 20,
-
-    },
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#14171C',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    width: '100%', // Full width of the container
+    marginRight: 8,
+  },
+  input: {
+    flex: 1,
+    color: 'white',
+    fontSize: 16,
+    paddingVertical: 5,
+  },
+  iconContainer: {
+    padding: 10,
+  },
 });
