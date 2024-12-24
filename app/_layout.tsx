@@ -11,6 +11,7 @@ import {StatusBar} from "expo-status-bar";
 import SearchButton from "@/components/SearchButton";
 import TextButton from '@/components/textinput';
 import React from 'react';
+import {createStackNavigator} from "@react-navigation/stack";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 
@@ -21,6 +22,8 @@ export default function RootLayout() {
     });
 
 
+
+
     return (
 
         //Architecture
@@ -28,8 +31,9 @@ export default function RootLayout() {
         //Status Bar
         //-Drawer :
         //
+
         <GestureHandlerRootView>
-            <StatusBar style="light" backgroundColor="#445566"/>
+            <StatusBar style="light" backgroundColor='transparent'/>
 
             <Drawer
                 screenOptions={{
@@ -76,7 +80,6 @@ export default function RootLayout() {
                 )}>
 
 
-
                 <Drawer.Screen
                     name='(tabs)/Popular'
                     options={{
@@ -85,9 +88,8 @@ export default function RootLayout() {
                         drawerIcon: ({size, color}) => (
                             <Ionicons name="copy" size={size} color={color} style={{marginRight: 25}}></Ionicons>
                         ),
-                        headerRight: () => (
-                            <SearchButton/>
-                        ),
+
+                        // Custom header component
 
 
                     }}
@@ -142,7 +144,6 @@ export default function RootLayout() {
                 />
 
 
-
                 <Drawer.Screen
                     name='(tabs)/Activity'
                     options={{
@@ -174,6 +175,18 @@ export default function RootLayout() {
                             <Ionicons name="log-out" size={size} color={color} style={{marginRight: 25}}></Ionicons>
                         )
                     }}
+                />
+
+                <Drawer.Screen
+                    name='(tabs)/MovieDetails'
+                    options={{
+                        drawerLabel:'movie',
+                        headerShown: false,
+
+                    }}
+
+
+
                 />
             </Drawer>
 

@@ -28,5 +28,12 @@ export const Colors = {
 
     //CARDS
     cardBorder : "#969696",
+
+
+    //text cards
+    backgroundCard : "#223344",
+
+    //stars
+    start:"#00E054"
   },
 };
