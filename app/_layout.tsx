@@ -2,12 +2,9 @@ import {useFonts} from 'expo-font';
 import {Colors} from "@/constants/Colors"
 import 'react-native-reanimated';
 import {Ionicons} from '@expo/vector-icons';
-import {GestureHandlerRootView} from "react-native-gesture-handler";
-import {Drawer} from "expo-router/drawer";
 import ProfileHeader from "@/components/ProfileHeader";
 import {createDrawerNavigator, DrawerContentScrollView, DrawerItemList} from "@react-navigation/drawer";
 import {StatusBar} from "expo-status-bar";
-import SearchButton from "@/components/SearchButton";
 import React from 'react';
 import Popular from "@/app/(tabs)/Popular";
 import Search from "@/app/(tabs)/Search";

@@ -12,7 +12,7 @@ export default function SearchButton() {
     }
   };
         //backend shit
-    };
+
 
     return (
         <View style={styles.container}>
@@ -26,7 +26,7 @@ export default function SearchButton() {
                 <Ionicons name="search" size={24} color="white" />
             </TouchableOpacity>
         </View>
-    );
+    )
 }
 
 const styles = StyleSheet.create({
