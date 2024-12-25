@@ -1,15 +1,24 @@
 import React from "react";
-import {View, Text, StyleSheet, Image, ScrollView, TouchableOpacity} from "react-native";
+import {View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Button} from "react-native";
 import {Colors} from "@/constants/Colors";
 import {useFonts} from "expo-font";
 import {MovieCard} from "@/components/MovieCard";
 import {Ionicons} from "@expo/vector-icons";
+import {createNativeStackNavigator} from "@react-navigation/native-stack";
+import {Props} from '@/constants/movieDetailsTypes';
 
-const MovieDetails = () => {
+
+
+const MovieDetails: React.FC<Props> = ({navigation}) => {
     const [loaded] = useFonts({
         Satoshi: require("../../assets/fonts/Satoshi-Variable.ttf"),
         SpaceMono: require("../../assets/fonts/SpaceMono-Regular.ttf"),
     });
+
+
+
+
+    const Stack = createNativeStackNavigator();
 
 
     const movie = {
@@ -30,9 +39,18 @@ const MovieDetails = () => {
 
     return (
         <ScrollView style={styles.container}>
+            <TouchableOpacity
+                style={{padding:20,margin:30,position:'absolute'}}
+                onPress={() => navigation.goBack()}>
+                <Ionicons name='arrow-back-outline' color='white' size={24}/>
+            </TouchableOpacity>
+
             {/* Cover with Gradient */}
             <View style={styles.cover}>
-                    <Image source={{ uri: movie.cover }} style={styles.cover} />
+                <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                    <Text>Profile Screen</Text>
+                </View>
+                <Image source={{uri: movie.cover}} style={styles.cover}/>
             </View>
 
 
@@ -50,7 +68,7 @@ const MovieDetails = () => {
                     <Text style={[styles.directedByperson, {fontFamily: 'Satoshi'}]}>{movie.directedBy}</Text>
 
                     <Text style={[styles.directedBy, {fontFamily: "Satoshi"}]}>
-                        {movie.year} • {movie.time} <Text style={{fontFamily:'Satoshi',}}>TRAILER</Text>
+                        {movie.year} • {movie.time} <Text style={{fontFamily: 'Satoshi',}}>TRAILER</Text>
                     </Text>
 
                 </View>
@@ -214,7 +232,7 @@ const styles = StyleSheet.create({
         marginVertical: 20,
         padding: 5,
         flexDirection: "row",
-        justifyContent:'center'
+        justifyContent: 'center'
 
     },
     ratingTitle: {
@@ -223,7 +241,7 @@ const styles = StyleSheet.create({
         color: "#ffffff",
     },
     starsContainer: {
-        marginLeft:10,
+        marginLeft: 10,
         flexDirection: "row",
         justifyContent: "space-between",
     },
