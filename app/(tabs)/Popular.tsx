@@ -55,6 +55,7 @@ export default function Popular() {
     //movie pressing button handler --> goes to the film page
     const handleMoviePress = (id: string) => {
         console.log(`Movie ${id} pressed!`);
+        
     };
 
     return (
@@ -63,8 +64,12 @@ export default function Popular() {
               //  <Image/>
             //</View>
         */}
-            <View style={styles.main}>
-
+            <View style={styles.main} >
+                <View style={styles.welcome}>
+                    <Text style={styles.heading}>Welcome to cinematik</Text>
+                    <Text style={styles.text}>you can navigate popular movies and book a ticket for your favorite movie
+                        if you had a chance to, hurry up now ! </Text>
+                </View>
                 <Text style={styles.heading}>Popular Movies</Text>
                 <FlatList
                     data={movies}
@@ -83,6 +88,8 @@ export default function Popular() {
                         />
                     )}
                 />
+
+
             </View>
         </>
 
@@ -97,13 +104,14 @@ const styles = StyleSheet.create({
 
     },
     main: {
-        paddingLeft: 25,
-        flex: 1,
-        justifyContent: "center",
+        height:'100%',
+        flex:1,
         backgroundColor: Colors.theme.background,
-        paddingVertical: 20,
+        padding: 20,
     },
     heading: {
+
+        marginTop:10,
         color: Colors.theme.BigTitle,
         fontSize: 17,
         marginBottom: 15,
@@ -111,5 +119,21 @@ const styles = StyleSheet.create({
         //
 
     },
+
+    text : {
+        textAlign: 'center',
+        color: "#8899AA",
+        fontWeight : "400",
+    },
+    welcome : {
+        padding:15,
+        backgroundColor: Colors.theme.backgroundCard,
+        borderColor: Colors.theme.tabIconDefault,
+        borderRadius:4,
+        alignItems:'center',
+        borderWidth:1,
+        marginTop:10,
+
+    }
 });
 

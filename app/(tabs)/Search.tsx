@@ -50,6 +50,10 @@ export default function Search() {
         </TouchableOpacity>
         {renderButton('language', languages, selectedLanguages, showLanguageButtons)}
       </View>
+
+      {/* Result Container*/}
+
+      
     </View>
   );
 }
