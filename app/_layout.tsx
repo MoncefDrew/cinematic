@@ -1,5 +1,5 @@
 import {useFonts} from 'expo-font';
-import {Colors} from "../constants/Colors"
+import {Colors} from "@/constants/Colors"
 import 'react-native-reanimated';
 import {Ionicons} from '@expo/vector-icons';
 import {GestureHandlerRootView} from "react-native-gesture-handler";
@@ -23,9 +23,9 @@ export default function RootLayout() {
 
         //Architecture
         //Gesture Handler Root view :
-            //Status Bar
-                //-Drawer :
-                //
+        //Status Bar
+        //-Drawer :
+        //
         <GestureHandlerRootView>
             <StatusBar style="light" backgroundColor="#445566"/>
 
@@ -83,6 +83,10 @@ export default function RootLayout() {
                         drawerIcon: ({size, color}) => (
                             <Ionicons name="copy" size={size} color={color} style={{marginRight: 25}}></Ionicons>
                         ),
+                        headerRight: () => (
+                            <SearchButton/>
+                        ),
+
 
                     }}
                 />
@@ -135,17 +139,7 @@ export default function RootLayout() {
                     }}
                 />
 
-                <Drawer.Screen
-                    name='(tabs)/Reviews'
-                    options={{
-                        drawerLabel: 'Reviews',
-                        headerTitle: 'Reviews',
-                        drawerIcon: ({size, color}) => (
-                            <Ionicons name="reorder-four" size={size} color={color}
-                                      style={{marginRight: 25}}></Ionicons>
-                        )
-                    }}
-                />
+
 
                 <Drawer.Screen
                     name='(tabs)/Activity'
