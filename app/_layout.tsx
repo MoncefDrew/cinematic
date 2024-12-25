@@ -2,14 +2,12 @@ import {useFonts} from 'expo-font';
 import {Colors} from "../constants/Colors"
 import 'react-native-reanimated';
 import {Ionicons} from '@expo/vector-icons';
-import {View, Text, Button, TouchableOpacity} from "react-native";
 import {GestureHandlerRootView} from "react-native-gesture-handler";
 import {Drawer} from "expo-router/drawer";
 import ProfileHeader from "@/components/ProfileHeader";
 import {DrawerContentScrollView, DrawerItemList} from "@react-navigation/drawer";
 import {StatusBar} from "expo-status-bar";
 import SearchButton from "@/components/SearchButton";
-import TextButton from '@/components/textinput';
 import React from 'react';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.

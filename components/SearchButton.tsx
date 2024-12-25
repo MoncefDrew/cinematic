@@ -6,7 +6,7 @@ export default function SearchButton() {
 
     const inputRef = useRef<TextInput>(null);
 
-  const handleFocus = () => {
+    const handleFocus = () => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
