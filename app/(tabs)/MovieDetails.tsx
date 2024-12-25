@@ -5,7 +5,8 @@ import {useFonts} from "expo-font";
 import {MovieCard} from "@/components/MovieCard";
 import {Ionicons} from "@expo/vector-icons";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
-import {Props} from '@/constants/movieDetailsTypes';
+import {DrawerScreenProps} from "@react-navigation/drawer";
+type Props = DrawerScreenProps<any, "MovieDetails">; // Adjust "MovieDetails" to your route name
 
 
 

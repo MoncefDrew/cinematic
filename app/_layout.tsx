@@ -5,7 +5,6 @@ import {Ionicons} from '@expo/vector-icons';
 import ProfileHeader from "@/components/ProfileHeader";
 import {createDrawerNavigator, DrawerContentScrollView, DrawerItemList} from "@react-navigation/drawer";
 import {StatusBar} from "expo-status-bar";
-import SearchButton from "@/components/SearchButton";
 import React from 'react';
 import Popular from "@/app/(tabs)/Popular";
 import Search from "@/app/(tabs)/Search";
@@ -16,7 +15,8 @@ import Activity from "@/app/(tabs)/Activity";
 import Settings from "@/app/(tabs)/Settings";
 import SignOut from "@/app/(tabs)/SignOut";
 import MovieDetails from "@/app/(tabs)/MovieDetails";
-import {Props} from '../constants/movieDetailsTypes';
+import CustomHeader from '../components/CustomHeader';
+import SearchButton from "@/components/SearchButton";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 
@@ -45,16 +45,24 @@ export default function RootLayout() {
 
                 drawerContentStyle: {
                     padding: 12, // Adjust the padding between the drawer content and screen
+
                 },
 
                 //drawer style
                 drawerStyle: {
                     backgroundColor: Colors.theme.background, // Drawer background color
-                    width: 300, // Optional: Adjust drawer width if needed
+                    width: 280, // Optional: Adjust drawer width if needed
+                    borderTopRightRadius: 10,
+                    borderBottomRightRadius: 10,
+                },
+                drawerItemStyle:{
+                  borderRadius:6
                 },
                 drawerActiveTintColor: Colors.theme.Activetint, // Active item text/icon color
-                drawerInactiveTintColor: Colors.theme.InactiveTint, // Inactive item text/icon color
+                drawerInactiveTintColor: Colors.theme.currentTab, // Inactive item text/icon color
+
                 drawerActiveBackgroundColor: Colors.theme.currentTab, // Active item background
+
                 drawerLabelStyle: {
                     fontSize: 15, // Adjust font size
                 },
@@ -67,6 +75,7 @@ export default function RootLayout() {
                 headerTitleStyle: {
                     fontSize: 18, // Optional: Adjust the title font size
                 },
+
 
 
             }}
@@ -86,7 +95,7 @@ export default function RootLayout() {
 
 
             <Drawer.Screen
-                name='(tabs)/Popular'
+                name='Popular'
                 component={Popular}
                 options={{
                     drawerLabel: 'Popular',
@@ -98,12 +107,13 @@ export default function RootLayout() {
                     // Custom header component
 
 
+
                 }}
             />
 
 
             <Drawer.Screen
-                name='(tabs)/Search'
+                name='Search'
                 component={Search}
 
                 options={{
@@ -119,7 +129,7 @@ export default function RootLayout() {
             />
 
             <Drawer.Screen
-                name='(tabs)/Profile'
+                name='Profile'
                 component={Profile}
 
                 options={{
@@ -132,7 +142,7 @@ export default function RootLayout() {
             />
 
             <Drawer.Screen
-                name='(tabs)/Watchlist'
+                name='Watchlist'
                 component={Watchlist}
 
                 options={{
@@ -145,7 +155,7 @@ export default function RootLayout() {
             />
 
             <Drawer.Screen
-                name='(tabs)/Program'
+                name='Program'
                 component={Program}
 
                 options={{
@@ -159,7 +169,7 @@ export default function RootLayout() {
 
 
             <Drawer.Screen
-                name='(tabs)/Activity'
+                name='Activity'
                 component={Activity}
 
                 options={{
@@ -172,7 +182,7 @@ export default function RootLayout() {
             />
 
             <Drawer.Screen
-                name='(tabs)/Settings'
+                name='Settings'
                 component={Settings}
 
                 options={{
@@ -185,7 +195,7 @@ export default function RootLayout() {
             />
 
             <Drawer.Screen
-                name='(tabs)/SignOut'
+                name='SignOut'
                 component={SignOut}
 
                 options={{
@@ -198,7 +208,7 @@ export default function RootLayout() {
             />
 
             <Drawer.Screen
-                name='(tabs)/MovieDetails'
+                name='MovieDetails'
                 component={MovieDetails}
 
                 options={{
