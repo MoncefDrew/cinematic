@@ -2,17 +2,15 @@ import {Text, TouchableOpacity, View} from "react-native";
 import { StyleSheet } from 'react-native';
 import { Image } from 'react-native';
 import {Colors} from "@/constants/Colors";
+import {Movie} from "@/constants/Movie";
+import React from "react";
+
 
 //movie props for type safety
-type MovieCardProps = {
-    id: string;
-    title: string;
-    poster: string;
-    projectionDate :string,
-    projectionTime : string,
-    Evaluaton : number,
-    onMovieClick?: (id: string) => void; // Optional callback for handling presses
-};
+export interface MovieCardProps extends Movie {
+    onMovieClick?: (id: number) => void; // Optional callback for handling presses
+}
+
 
 
 

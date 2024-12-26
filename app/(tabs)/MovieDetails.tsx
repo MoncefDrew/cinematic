@@ -2,10 +2,11 @@ import React from "react";
 import {View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Button} from "react-native";
 import {Colors} from "@/constants/Colors";
 import {useFonts} from "expo-font";
-import {MovieCard} from "@/components/MovieCard";
+import { MovieCard} from "@/components/MovieCard";
 import {Ionicons} from "@expo/vector-icons";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import {DrawerScreenProps} from "@react-navigation/drawer";
+import {Movie} from "@/constants/Movie";
 type Props = DrawerScreenProps<any, "MovieDetails">; // Adjust "MovieDetails" to your route name
 
 
@@ -22,20 +23,20 @@ const MovieDetails: React.FC<Props> = ({navigation}) => {
     const Stack = createNativeStackNavigator();
 
 
-    const movie = {
-        id: "4",
+    const movie:Movie = {
+        id:4,
         title: "The Matrix",
         cover:
             "https://film-grab.com/wp-content/uploads/2017/02/thematrixreloaded044.jpg",
-        date: "18/6/2025",
+        projectionDate: "18/6/2025",
         poster: "https://www.coverwhiz.com/uploads/movies/the-matrix.jpg",
-        time: "119 mins",
-        year: 2012,
-        evaluation: 3,
-        description:
+        projectionTime: "119 mins",
+        dateReleased: 2012,
+        Evaluation: 3,
+        Description:
             "A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.",
         directedBy: "Jaume Collet-Serra",
-        trailer: ''
+
     };
 
     return (
@@ -69,7 +70,7 @@ const MovieDetails: React.FC<Props> = ({navigation}) => {
                     <Text style={[styles.directedByperson, {fontFamily: 'Satoshi'}]}>{movie.directedBy}</Text>
 
                     <Text style={[styles.directedBy, {fontFamily: "Satoshi"}]}>
-                        {movie.year} • {movie.time} <Text style={{fontFamily: 'Satoshi',}}>TRAILER</Text>
+                        {movie.dateReleased} • {movie.projectionTime} <Text style={{fontFamily: 'Satoshi',}}>TRAILER</Text>
                     </Text>
 
                 </View>
@@ -80,9 +81,8 @@ const MovieDetails: React.FC<Props> = ({navigation}) => {
                         poster={movie.poster}
                         id={movie.id}
                         title={movie.title}
-                        Evaluaton={movie.evaluation}
-                        projectionTime={movie.time}
-                        projectionDate={movie.date}
+                        projectionTime={movie.projectionTime}
+                        projectionDate={movie.projectionDate}
                     />
                 </View>
             </View>
@@ -90,7 +90,7 @@ const MovieDetails: React.FC<Props> = ({navigation}) => {
 
             <View style={styles.disContainer}>
                 <Text style={styles.titleDescription}>DESCRIPTION</Text>
-                <Text style={styles.description}>{movie.description}</Text>
+                <Text style={styles.description}>{movie.Description}</Text>
             </View>
 
             <View style={styles.separator}/>
@@ -120,7 +120,7 @@ const MovieDetails: React.FC<Props> = ({navigation}) => {
                     <Ionicons name="star" size={15} color={Colors.theme.starColor}/>
                     <Ionicons name="star" size={15} color={Colors.theme.starColor}/>
                 </View>
-                <Text style={styles.ratingTitle}>{movie.evaluation}</Text>
+                <Text style={styles.ratingTitle}>{movie.Evaluation}</Text>
             </View>
 
         </ScrollView>

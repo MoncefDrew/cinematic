@@ -6,9 +6,7 @@ export default function Settings() {
 
 
     return (
-        <View style={[styles.container, { backgroundColor: '#14171C' }]}>
-            <Text style={styles.text}>Settings</Text>
-        </View>
+        <View></View>
     )
 }
 const styles = StyleSheet.create({
