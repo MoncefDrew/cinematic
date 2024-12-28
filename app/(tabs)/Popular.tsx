@@ -1,6 +1,6 @@
 import {FlatList, Image, Text, View} from "react-native";
 import {StyleSheet} from 'react-native';
-import { MovieCard} from "@/components/MovieCard";
+import  MovieCard from "@/components/MovieCard";
 import {Colors} from "@/constants/Colors";
 import {useFonts} from "expo-font";
 import React from "react";
@@ -42,13 +42,13 @@ export default function Popular() {
                     showsHorizontalScrollIndicator={false}
                     renderItem={({item}) => (
                         <MovieCard
-                            id={item.id}
-                            title={item.title}
-                            poster={item.poster}
-                            onMovieClick={handleMoviePress}
+                            movie={item}
                         />
                     )}
                 />
+                {/*Streaming this week*/}
+
+                
 
 
             </View>

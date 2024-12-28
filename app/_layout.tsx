@@ -86,6 +86,7 @@ export default function RootLayout() {
 
                     {/* Profile Header at the top of the Drawer */}
                     <ProfileHeader/>
+
                     {/* Drawer Items */}
                     <DrawerItemList {...props} />
 
@@ -212,6 +213,7 @@ export default function RootLayout() {
                 component={MovieDetails}
 
                 options={{
+                    drawerItemStyle: { display: 'none' },
                     drawerLabel: 'movie',
                     headerTitle: '',
                     headerStyle: {

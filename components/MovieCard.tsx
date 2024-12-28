@@ -2,22 +2,28 @@ import {Text, TouchableOpacity, View} from "react-native";
 import { StyleSheet } from 'react-native';
 import { Image } from 'react-native';
 import {Colors} from "@/constants/Colors";
-import {Movie} from "@/constants/Movie";
+import {Movie, RootStackParamList} from "@/constants/Movie";
 import React from "react";
+import {useNavigation} from "expo-router";
+import {StackNavigationProp} from "@react-navigation/stack";
 
 
-//movie props for type safety
-export interface MovieCardProps extends Movie {
-    onMovieClick?: (id: number) => void; // Optional callback for handling presses
-}
+type NavigationProp = StackNavigationProp<RootStackParamList, 'Popular'>;
 
+type MovieCardProps = {
+    movie: Movie;
+};
 
+const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
+    const navigation = useNavigation<NavigationProp>();
 
+    const handlePress = () => {
+        navigation.navigate('MovieDetails', { movie });
+    };
 
-export const MovieCard: React.FC<MovieCardProps> = ({ id, title, poster, onMovieClick }) => {
     return (
-        <TouchableOpacity onPress={() => onMovieClick?.(id)} style={styles.container}>
-            <Image source={{ uri: poster }} style={styles.poster} />
+        <TouchableOpacity style={styles.card} onPress={handlePress}>
+            <Image source={{ uri: movie.poster }} style={styles.image} />
         </TouchableOpacity>
     );
 };
@@ -25,16 +31,17 @@ export const MovieCard: React.FC<MovieCardProps> = ({ id, title, poster, onMovie
 
 
 
+
 // styles for movie card
 const styles = StyleSheet.create({
-    container: {
+    card: {
         width: 100, // Width of each movie card
         marginRight: 5,
         alignItems: "center",
 
     },
 
-    poster: {
+    image: {
         width: 100,
         height: 150, // Poster size
         borderRadius: 2,
@@ -45,3 +52,5 @@ const styles = StyleSheet.create({
 
 
 });
+
+export default MovieCard;

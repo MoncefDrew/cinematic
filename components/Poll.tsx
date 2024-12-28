@@ -68,7 +68,7 @@ export default function Poll() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#14171C", padding: 16 },
+    container: {  backgroundColor: Colors.theme.backgroundCard, margin: 16 },
     adminContainer: { flexDirection: "row", alignItems: "center" },
     adminPhoto: { width: 50, height: 50, borderRadius: 25, marginRight: 12 },
     adminName: { color: "#ffffff", fontSize: 18 },

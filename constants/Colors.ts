@@ -9,7 +9,7 @@ const tintColorDark = '#fff';
 export const Colors = {
   theme: {
     BigTitle: '#FFFFFF',
-    background: '#14171C',
+    background: '#181b20',
 
     //Drawer active and inactive items
     Activetint: '#FFFFFF',
@@ -27,13 +27,16 @@ export const Colors = {
     starColor:'#00E054',
 
     //CARDS
-    cardBorder : "#969696",
+    cardBorder : "#4d5c69",
 
 
     //text cards
     backgroundCard : "#223344",
+    textColorSmall : '#7a8693',
 
     //stars
-    start:"#00E054"
+    start:"#00E054",
+
+    button:'#445565',
   },
 };
