@@ -15,7 +15,9 @@ import Activity from "@/app/(tabs)/Activity";
 import Settings from "@/app/(tabs)/Settings";
 import SignOut from "@/app/(tabs)/SignOut";
 import MovieDetails from "@/app/(tabs)/MovieDetails";
+import ReserveTicket from "@/app/(tabs)/ReserveTicket";
 import CustomHeader from '../components/CustomHeader';
+// @ts-ignore
 import SearchButton from "@/components/SearchButton";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -29,6 +31,8 @@ export default function RootLayout() {
     const Drawer = createDrawerNavigator();
 
 
+    // @ts-ignore
+    // @ts-ignore
     return (
 
         //Architecture
@@ -210,8 +214,8 @@ export default function RootLayout() {
 
             <Drawer.Screen
                 name='MovieDetails'
+                // @ts-ignore
                 component={MovieDetails}
-
                 options={{
                     drawerItemStyle: { display: 'none' },
                     drawerLabel: 'movie',
@@ -226,6 +230,24 @@ export default function RootLayout() {
 
 
             />
+
+                <Drawer.Screen
+                    name='ReserveTicket'
+                    // @ts-ignore
+                    component={ReserveTicket}
+                    options={{
+                        drawerLabel: 'movie',
+                        headerTitle: '',
+                        headerStyle: {
+                            height: 0, // Set the header height to 0
+                        },
+                        headerTransparent: true, // Makes header background transparent
+
+                        headerLeft: () => (null),
+                    }}
+
+
+                />
         </Drawer.Navigator>
         </>
 

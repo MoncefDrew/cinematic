@@ -31,24 +31,39 @@ export default function Popular() {
         */}
             <View style={styles.main} >
                 <View style={styles.welcome}>
-                    <Text style={styles.heading}>Welcome to cinematik</Text>
+                    <Text style={styles.heading}>Welcome to cinematic</Text>
                     <Text style={styles.text}>you can navigate popular movies and book a ticket for your favorite movie
                         if you had a chance to, hurry up now ! </Text>
                 </View>
                 <Text style={styles.heading}>Popular Movies</Text>
-                <FlatList
-                    data={moviesList}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    renderItem={({item}) => (
-                        <MovieCard
-                            movie={item}
-                        />
-                    )}
-                />
+                <View style={{}}>
+                    <FlatList
+                        data={moviesList}
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        renderItem={({item}) => (
+                            <MovieCard
+                                movie={item}
+                            />
+                        )}
+                    />
+                </View>
                 {/*Streaming this week*/}
+                <Text style={styles.heading}>Streaming this week</Text>
 
-                
+                <View>
+                    <FlatList
+                        data={moviesList}
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        renderItem={({item}) => (
+                            <MovieCard
+                                movie={item}
+                            />
+                        )}
+                    />
+                </View>
+
 
 
             </View>
