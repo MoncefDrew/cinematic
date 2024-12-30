@@ -15,6 +15,8 @@ type MovieCardProps = {
 };
 
 const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
+
+
     const navigation = useNavigation<NavigationProp>();
 
     const handlePress = () => {

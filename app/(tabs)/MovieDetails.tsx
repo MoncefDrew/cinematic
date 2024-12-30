@@ -11,15 +11,17 @@ import {
     KeyboardAvoidingView,
 } from "react-native";
 import { Colors } from "@/constants/Colors";
-import { useRouter } from "expo-router";
+import {useNavigation, useRouter} from "expo-router";
 import MovieCard from "@/components/MovieCard";
 import { Ionicons } from "@expo/vector-icons";
-import { RouteProp } from "@react-navigation/native";
+import { RouteProp} from "@react-navigation/native";
 import { RootStackParamList, Movie } from "@/constants/Movie";
 import { LinearGradient } from "expo-linear-gradient";
 import ProfilePic from "@/components/ProfilePic";
+import {StackNavigationProp} from "@react-navigation/stack";
 
 type MovieDetailsRouteProp = RouteProp<RootStackParamList, "MovieDetails">;
+type NavigationProp = StackNavigationProp<RootStackParamList, 'Popular'>;
 
 type MovieDetailsProps = {
     route: MovieDetailsRouteProp;
@@ -28,6 +30,7 @@ type MovieDetailsProps = {
 const MovieDetails: React.FC<MovieDetailsProps> = ({ route }) => {
     const router = useRouter();
     const { movie } = route.params;
+    const navigation = useNavigation<NavigationProp>();
 
     const [isModalVisible, setModalVisible] = useState(false);
     const [userRating, setUserRating] = useState(0);
@@ -188,8 +191,8 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ route }) => {
                             {/* Options List */}
                             <TouchableOpacity onPress={() => {
                                 toggleModal(); // Close the modal
-                                router.push("/ReserveTicket"); // Navigate to the "Rate Movie" page
-                            }} style={styles.reserveTicket}>
+                                navigation.navigate("ReserveTicket", {movie})}}
+                                style={styles.reserveTicket}>
                                 <Ionicons name='ticket' size={25} color='white'/>
                                 <Text style={styles.modalButtonText}>Reserve Ticket</Text>
                             </TouchableOpacity>

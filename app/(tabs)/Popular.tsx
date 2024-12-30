@@ -49,7 +49,7 @@ export default function Popular() {
                     />
                 </View>
                 {/*Streaming this week*/}
-                <Text style={styles.heading}>Streaming this week</Text>
+                <Text style={styles.heading}>Popular Movies</Text>
 
                 <View>
                     <FlatList
