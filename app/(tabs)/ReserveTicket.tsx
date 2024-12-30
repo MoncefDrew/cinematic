@@ -39,7 +39,10 @@ const ReserveTicket: React.FC<MovieDetailsProps> = (movie) => {
             {/* Movie Cover with Gradient */}
             <View style={styles.coverContainer}>
                 <Image source={{ uri: Movie.movie.poster }} style={styles.coverImage} />
-                
+                <LinearGradient
+                    colors={["transparent", Colors.theme.background]}
+                    style={styles.lineargrad}
+                />
             </View>
 
             {/* Movie Details */}
@@ -52,7 +55,7 @@ const ReserveTicket: React.FC<MovieDetailsProps> = (movie) => {
             <View style={styles.ticketSection}>
                 <Text style={styles.reserveTitle}>Reserve Your Ticket</Text>
                 <TouchableOpacity style={styles.reserveButton}>
-                    <Text style={styles.reserveButtonText}>Reserve</Text>
+                    <Text style={styles.reserveButtonText}>book your seat</Text>
                 </TouchableOpacity>
             </View>
         </ScrollView>
@@ -65,37 +68,32 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.theme.background,
     },
     coverContainer: {
-        width: '100%',
-        height: 200,
-        position: 'relative',
+        height: 500,
     },
     coverImage: {
         width: '100%',
         height: '100%',
-        resizeMode: 'cover',
-        borderBottomLeftRadius: 15,
-        borderBottomRightRadius: 15,
     },
 
     detailsContainer: {
+        alignItems:'center',
         padding: 20,
         backgroundColor: Colors.theme.background,
     },
     movieTitle: {
         fontSize: 28,
-        fontWeight: 'bold',
-        color: Colors.theme.textColorSmall,
+        fontWeight: 'thin',
+        color: Colors.theme.icontTitle,
     },
     movieDate: {
-        fontSize: 18,
-        color: Colors.theme.InactiveTint,
+        fontSize: 12,
+        color: Colors.theme.tabIconDefault,
         marginTop: 5,
     },
     ticketSection: {
         padding: 20,
         backgroundColor: Colors.theme.background,
         alignItems: 'center',
-        marginTop: 20,
     },
     reserveTitle: {
         fontSize: 22,
@@ -114,6 +112,8 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 18,
     },
+    lineargrad: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 },
+
 });
 
 export default ReserveTicket;

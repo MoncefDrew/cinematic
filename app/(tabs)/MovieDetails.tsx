@@ -147,7 +147,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ route }) => {
                     <View style={styles.containerRate}>
                         <ProfilePic />
                         <Text style={{ color: "white", paddingHorizontal: 20 }}>
-                            Rate, log, review, add to list + more
+                            Rate, reserve, add to list + more
                         </Text>
                         <Ionicons name="ellipsis-horizontal" color="white" size={17} />
                     </View>
@@ -191,6 +191,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ route }) => {
                             {/* Options List */}
                             <TouchableOpacity onPress={() => {
                                 toggleModal(); // Close the modal
+                                //@ts-ignore
                                 navigation.navigate("ReserveTicket", {movie})}}
                                 style={styles.reserveTicket}>
                                 <Ionicons name='ticket' size={25} color='white'/>

@@ -48,7 +48,6 @@ export default function RootLayout() {
             screenOptions={{
 
                 drawerContentStyle: {
-                    padding: 12, // Adjust the padding between the drawer content and screen
 
                 },
 
@@ -218,7 +217,6 @@ export default function RootLayout() {
                 component={MovieDetails}
                 options={{
                     drawerItemStyle: { display: 'none' },
-                    drawerLabel: 'movie',
                     headerTitle: '',
                     headerStyle: {
                         height: 0, // Set the header height to 0
@@ -236,7 +234,7 @@ export default function RootLayout() {
                     // @ts-ignore
                     component={ReserveTicket}
                     options={{
-                        drawerLabel: 'movie',
+                        drawerItemStyle: { display: 'none' },
                         headerTitle: '',
                         headerStyle: {
                             height: 0, // Set the header height to 0
