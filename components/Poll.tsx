@@ -68,8 +68,8 @@ export default function Poll() {
 }
 
 const styles = StyleSheet.create({
-    container: {  backgroundColor: Colors.theme.backgroundCard, margin: 16 },
-    adminContainer: { flexDirection: "row", alignItems: "center" },
+    container: {  backgroundColor: '#0d1117', margin: 16 },
+    adminContainer: { flexDirection: "row", alignItems: "center"},
     adminPhoto: { width: 50, height: 50, borderRadius: 25, marginRight: 12 },
     adminName: { color: "#ffffff", fontSize: 18 },
     postContainer: {borderWidth: 1, borderColor: Colors.theme.tabIconDefault, borderRadius: 10, padding: 16, marginTop: 16,},

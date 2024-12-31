@@ -76,6 +76,7 @@ export default function RootLayout() {
                 },
                 headerTintColor: '#ffffff', // Change the text/icon color in the nav bar
                 headerTitleStyle: {
+                    fontFamily:'Satoshi',
                     fontSize: 18, // Optional: Adjust the title font size
                 },
 
