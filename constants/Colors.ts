@@ -38,5 +38,9 @@ export const Colors = {
     start:"#00E054",
 
     button:'#445565',
+
+    error:'#FF3B30',
+    accent:'#4caf50',
+    cardBackground:'#0352a6',
   },
 };
