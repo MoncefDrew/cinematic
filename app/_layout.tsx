@@ -1,11 +1,11 @@
-import {useFonts} from 'expo-font';
-import {Colors} from "@/constants/Colors"
-import 'react-native-reanimated';
-import {Ionicons} from '@expo/vector-icons';
-import ProfileHeader from "@/components/ProfileHeader";
+import { useFonts } from 'expo-font';
+import { Colors } from "@/constants/Colors";
 import {createDrawerNavigator, DrawerContentScrollView, DrawerItemList} from "@react-navigation/drawer";
-import {StatusBar} from "expo-status-bar";
-import React from 'react';
+import { createStackNavigator } from '@react-navigation/stack';
+import React, {useState} from 'react';
+import LandingPage from "@/app/auth/_layout";
+import SignIn from "@/app/auth/signIn";
+import SignUp from "@/app/auth/signUp";
 import Popular from "@/app/(tabs)/Popular";
 import Search from "@/app/(tabs)/Search";
 import Profile from "@/app/(tabs)/Profile";
@@ -14,37 +14,23 @@ import Program from "@/app/(tabs)/Program";
 import Activity from "@/app/(tabs)/Activity";
 import Settings from "@/app/(tabs)/Settings";
 import SignOut from "@/app/(tabs)/SignOut";
+import { StatusBar } from "expo-status-bar";
+import {Ionicons} from "@expo/vector-icons";
+import ProfileHeader from "@/components/ProfileHeader";
+import SearchButton from "@/components/SearchButton";
 import MovieDetails from "@/app/(tabs)/MovieDetails";
 import ReserveTicket from "@/app/(tabs)/ReserveTicket";
-import CustomHeader from '../components/CustomHeader';
-// @ts-ignore
-import SearchButton from "@/components/SearchButton";
+import {TouchableOpacity} from "react-native";
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-
-export default function RootLayout() {
-    const [loaded] = useFonts({
-        SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-        Satoshi: require('../assets/fonts/Satoshi-Variable.ttf')
-    });
-
-    const Drawer = createDrawerNavigator();
+const Stack = createStackNavigator();
+const Drawer = createDrawerNavigator();
 
 
-    // @ts-ignore
-    // @ts-ignore
+
+// Main App Drawer (after login)
+function MainApp() {
     return (
-
-        //Architecture
-        //Gesture Handler Root view :
-        //Status Bar
-        //-Drawer :
-        //
-
-        <>
-            <StatusBar style="light" backgroundColor='transparent'/>
-
-            <Drawer.Navigator
+        <Drawer.Navigator
             screenOptions={{
 
                 drawerContentStyle: {
@@ -59,7 +45,7 @@ export default function RootLayout() {
                     borderBottomRightRadius: 10,
                 },
                 drawerItemStyle:{
-                  borderRadius:6
+                    borderRadius:6
                 },
                 drawerActiveTintColor: Colors.theme.Activetint, // Active item text/icon color
                 drawerInactiveTintColor: Colors.theme.currentTab, // Inactive item text/icon color
@@ -230,26 +216,59 @@ export default function RootLayout() {
 
             />
 
-                <Drawer.Screen
-                    name='ReserveTicket'
-                    // @ts-ignore
-                    component={ReserveTicket}
-                    options={{
-                        drawerItemStyle: { display: 'none' },
-                        headerTitle: '',
-                        headerStyle: {
-                            height: 0, // Set the header height to 0
-                        },
-                        headerTransparent: true, // Makes header background transparent
+            <Drawer.Screen
+                name='ReserveTicket'
+                // @ts-ignore
+                component={ReserveTicket}
+                options={{
+                    drawerItemStyle: { display: 'none' },
+                    headerTitle: '',
+                    headerStyle: {
+                        height: 0, // Set the header height to 0
+                    },
+                    headerTransparent: true, // Makes header background transparent
 
-                        headerLeft: () => (null),
-                    }}
+                    headerLeft: () => (null),
+                }}
 
 
-                />
+            />
         </Drawer.Navigator>
+    );
+}
+
+// Auth Stack for Landing, SignIn, and SignUp
+function AuthStack() {
+    return (
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Landing" component={LandingPage} />
+            <Stack.Screen name="SignIn" component={SignIn} />
+            <Stack.Screen name="SignUp" component={SignUp} />
+            <Stack.Screen name='MainApp' component={MainApp} />
+        </Stack.Navigator>
+    );
+}
+
+// Root Layout Component
+export default function RootLayout() {
+    const [loaded] = useFonts({
+        SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+        Satoshi: require('../assets/fonts/Satoshi-Variable.ttf'),
+    });
+     const [isAuthenticated,setisAuthenticated] = useState(false);
+
+
+
+    if (!loaded) {
+        return null; // Render a loading screen while fonts are loading
+    }
+
+    // Render the app layout based on the auth state
+    return (
+        <>
+            <StatusBar style="light" backgroundColor="transparent" />
+
+            {isAuthenticated ? <MainApp /> : <AuthStack />}
         </>
-
-
     );
 }

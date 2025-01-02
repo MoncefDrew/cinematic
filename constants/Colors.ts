@@ -42,5 +42,12 @@ export const Colors = {
     error:'#FF3B30',
     accent:'#4caf50',
     cardBackground:'#0352a6',
+
+    textPrimary: '#FFFFFF',        // White text
+    textSecondary: '#CCCCCC',      // Light gray text
+    inputPlaceholder: '#888888',   // Dark gray placeholder text
+    buttonPrimary: '#0077FF',      // Bright blue for primary buttons
+    border: '#444444',             // Gray borders
+    link: '#00BFFF',               // Light blue links
   },
 };

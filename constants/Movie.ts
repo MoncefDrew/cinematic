@@ -1,8 +1,10 @@
-import {MovieVote} from "@/constants/MoviePoll";
 export type RootStackParamList = {
-    Popular: undefined; // Popular page does not require any parameters
-    MovieDetails: { movie: Movie }; // MovieDetails expects a `movie` parameter
+    Landing: undefined;
+    SignIn: undefined;
+    SignUp: undefined;
+    MainApp: undefined; // For the drawer navigator
 };
+
 
 export interface Movie {
     id: number;
