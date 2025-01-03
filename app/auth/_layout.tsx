@@ -81,6 +81,7 @@ export default function LandingPage() {
             .insert([
                 {
                     id: customId, // Insert the custom ID
+
                     email: clientData.email,
                     password:clientData.password,
                 },

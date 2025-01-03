@@ -29,6 +29,7 @@ type MovieDetailsProps = {
 
 const MovieDetails: React.FC<MovieDetailsProps> = ({ route }) => {
     const router = useRouter();
+    // @ts-ignore
     const { movie } = route.params;
     const navigation = useNavigation<NavigationProp>();
 
