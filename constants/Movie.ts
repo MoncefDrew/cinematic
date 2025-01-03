@@ -3,6 +3,8 @@ export type RootStackParamList = {
     SignIn: undefined;
     SignUp: undefined;
     MainApp: undefined; // For the drawer navigator
+    MovieDetails:undefined;
+    Popular:undefined;
 };
 
 

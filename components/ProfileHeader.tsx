@@ -7,7 +7,7 @@ const ProfileHeader = () => {
     const profilePic = require('../assets/images/alucard.jpg'); // Static profile picture
 
     return (
-        <View style={{  marginBottom: 30 ,padding:25}}>
+        <View >
             {/* Circle around the profile picture */}
             <View style={{ flexDirection: 'row',alignItems: 'center', }}>
                 <View

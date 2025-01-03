@@ -2,10 +2,9 @@ import { useFonts } from 'expo-font';
 import { Colors } from "@/constants/Colors";
 import {createDrawerNavigator, DrawerContentScrollView, DrawerItemList} from "@react-navigation/drawer";
 import { createStackNavigator } from '@react-navigation/stack';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import LandingPage from "@/app/auth/_layout";
-import SignIn from "@/app/auth/signIn";
-import SignUp from "@/app/auth/signUp";
+
 import Popular from "@/app/(tabs)/Popular";
 import Search from "@/app/(tabs)/Search";
 import Profile from "@/app/(tabs)/Profile";
@@ -13,14 +12,16 @@ import Watchlist from "@/app/(tabs)/Watchlist";
 import Program from "@/app/(tabs)/Program";
 import Activity from "@/app/(tabs)/Activity";
 import Settings from "@/app/(tabs)/Settings";
-import SignOut from "@/app/(tabs)/SignOut";
 import { StatusBar } from "expo-status-bar";
 import {Ionicons} from "@expo/vector-icons";
 import ProfileHeader from "@/components/ProfileHeader";
 import SearchButton from "@/components/SearchButton";
 import MovieDetails from "@/app/(tabs)/MovieDetails";
 import ReserveTicket from "@/app/(tabs)/ReserveTicket";
-import {TouchableOpacity} from "react-native";
+import {Alert, TouchableOpacity, View} from "react-native";
+import { Session } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
+import LogOut from "@/components/LogOut";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -28,7 +29,7 @@ const Drawer = createDrawerNavigator();
 
 
 // Main App Drawer (after login)
-function MainApp() {
+function MainApp(user: any) {
     return (
         <Drawer.Navigator
             screenOptions={{
@@ -75,11 +76,16 @@ function MainApp() {
                 <DrawerContentScrollView {...props}>
 
                     {/* Profile Header at the top of the Drawer */}
-                    <ProfileHeader/>
+                    <View style={{  marginBottom: 30 ,padding:25}}>
+                        <ProfileHeader />
+                    </View>
+
 
                     {/* Drawer Items */}
                     <DrawerItemList {...props} />
 
+                    {/* Logout Button */}
+                    <LogOut {...props}/>
 
                 </DrawerContentScrollView>
             )}>
@@ -185,18 +191,7 @@ function MainApp() {
                 }}
             />
 
-            <Drawer.Screen
-                name='SignOut'
-                component={SignOut}
 
-                options={{
-                    drawerLabel: 'Sign Out',
-                    headerTitle: 'SignOut',
-                    drawerIcon: ({size, color}) => (
-                        <Ionicons name="log-out" size={size} color={color} style={{marginRight: 25}}></Ionicons>
-                    )
-                }}
-            />
 
             <Drawer.Screen
                 name='MovieDetails'
@@ -239,11 +234,13 @@ function MainApp() {
 
 // Auth Stack for Landing, SignIn, and SignUp
 function AuthStack() {
+    // @ts-ignore
     return (
+
         <Stack.Navigator screenOptions={{ headerShown: false }}>
+
             <Stack.Screen name="Landing" component={LandingPage} />
-            <Stack.Screen name="SignIn" component={SignIn} />
-            <Stack.Screen name="SignUp" component={SignUp} />
+
             <Stack.Screen name='MainApp' component={MainApp} />
         </Stack.Navigator>
     );
@@ -251,11 +248,21 @@ function AuthStack() {
 
 // Root Layout Component
 export default function RootLayout() {
+    const [session, setSession] = useState<Session | null>(null)
+    useEffect(() => {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            setSession(session)
+        })
+
+        supabase.auth.onAuthStateChange((_event, session) => {
+            setSession(session)
+        })
+    }, [])
+
     const [loaded] = useFonts({
         SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
         Satoshi: require('../assets/fonts/Satoshi-Variable.ttf'),
     });
-     const [isAuthenticated,setisAuthenticated] = useState(false);
 
 
 
@@ -264,11 +271,11 @@ export default function RootLayout() {
     }
 
     // Render the app layout based on the auth state
+    // @ts-ignore
     return (
         <>
             <StatusBar style="light" backgroundColor="transparent" />
 
-            {isAuthenticated ? <MainApp /> : <AuthStack />}
-        </>
+            {session && session.user ? <MainApp /> : <LandingPage />}        </>
     );
 }
