@@ -17,6 +17,7 @@ import {RootStackParamList} from "@/constants/Movie";
 import {Colors} from "@/constants/Colors";
 import {router, useRouter} from "expo-router";
 import {Ionicons} from "@expo/vector-icons";
+import {Client} from "@/constants/Client";
 
 // Tells Supabase Auth to continuously refresh the session automatically if
 // the app is in the foreground. When this is added, you will continue to receive
@@ -62,11 +63,35 @@ export default function LandingPage() {
         })
 
         if (error) Alert.alert(error.message)
+        await addClient({email,password})
         if (!session) Alert.alert('Please check your inbox for email verification!')
         setLoading(false)
     }
 
+    const generateSimpleId = (): string => {
+        return `${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    };
 
+
+    const addClient = async (clientData:Client) => {
+        const customId = generateSimpleId();
+
+        const { data, error } = await supabase
+            .from('client')
+            .insert([
+                {
+                    id: customId, // Insert the custom ID
+                    email: clientData.email,
+                    password:clientData.password,
+                },
+            ]);
+
+        if (error) {
+            console.error('Error adding client:', error);
+        } else {
+            console.log('Client added:', data);
+        }
+    };
 
     return (
         <KeyboardAvoidingView

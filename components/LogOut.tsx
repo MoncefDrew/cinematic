@@ -21,7 +21,7 @@ export default function LogOut(props: any) {
             <View style={styles.buttonContent}>
                 {/* Icon Flex */}
                 <View style={styles.iconContainer}>
-                    <Ionicons name="exit" color="white" size={26} />
+                    <Ionicons name="exit" color="#FF3B30" size={26} />
                 </View>
                 {/* Text Flex */}
                 <View style={styles.textContainer}>
@@ -34,7 +34,7 @@ export default function LogOut(props: any) {
 
 const styles = StyleSheet.create({
     buttonContainer: {
-        backgroundColor: "#ff4d4d",
+        backgroundColor: "transparent",
         paddingVertical:11,
         paddingLeft:18,
         paddingRight:16,
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
         justifyContent: "flex-start", // Align text at the start
     },
     buttonText: {
-        color: "#fff",
+        color: "#FF3B30",
         fontSize: 15, // Optional: Adjust the title font size
         fontWeight: 'normal',
     },
