@@ -35,9 +35,11 @@ AppState.addEventListener('change', (state) => {
 export default function LandingPage() {
     const router = useRouter();
 
+    
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
+
 
     async function signInWithEmail() {
         setLoading(true)
@@ -49,7 +51,6 @@ export default function LandingPage() {
         if (error) Alert.alert(error.message)
         setLoading(false)
     }
-
 
 
     async function signUpWithEmail() {
