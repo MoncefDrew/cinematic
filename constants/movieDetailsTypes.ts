@@ -11,6 +11,8 @@ export type RootDrawerParamList = {
     '(tabs)/Settings': undefined;
     '(tabs)/SignOut': undefined;
     '(tabs)/MovieDetails': undefined;
+    'auth/sign-in': undefined;
+    'auth/sign-up': undefined;
 };
 
 export type MovieDetailsScreenNavigationProp = DrawerNavigationProp<

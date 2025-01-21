@@ -3,7 +3,7 @@ import { Colors } from "@/constants/Colors";
 import {createDrawerNavigator, DrawerContentScrollView, DrawerItemList} from "@react-navigation/drawer";
 import { createStackNavigator } from '@react-navigation/stack';
 import React, {useEffect, useState} from 'react';
-import LandingPage from "@/app/auth/_layout";
+import LandingPage from "@/app/auth";
 
 import Popular from "@/app/(tabs)/Popular";
 import Search from "@/app/(tabs)/Search";
@@ -22,6 +22,8 @@ import {Alert, TouchableOpacity, View} from "react-native";
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import LogOut from "@/components/LogOut";
+import SignUpPage from './auth/sign-up';
+import SignInPage from './auth/sign-in';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -225,22 +227,23 @@ function MainApp(user: any) {
 
                     headerLeft: () => (null),
                 }}
-
-
             />
+
+            
         </Drawer.Navigator>
     );
 }
 
 // Auth Stack for Landing, SignIn, and SignUp
-function AuthStack() {
+export function AuthStack() {
     // @ts-ignore
     return (
 
         <Stack.Navigator screenOptions={{ headerShown: false }}>
 
             <Stack.Screen name="Landing" component={LandingPage} />
-
+            <Stack.Screen name="SignIn" component={SignInPage}/>
+            <Stack.Screen name="SignUp" component={SignUpPage} />
             <Stack.Screen name='MainApp' component={MainApp} />
         </Stack.Navigator>
     );
@@ -276,6 +279,6 @@ export default function RootLayout() {
         <>
             <StatusBar style="light" backgroundColor="transparent" />
 
-            {session && session.user ? <MainApp /> : <LandingPage />}        </>
+            {session && session.user ? <MainApp /> : <SignUpPage />}        </>
     );
 }
