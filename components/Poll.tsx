@@ -1,71 +1,109 @@
 import React, { useState } from "react";
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, Image, Alert } from "react-native";
-import { Colors } from "@/constants/Colors";
-import { moviesVotes } from "../constants/Movie";
+import { StyleSheet, View, Text, TouchableOpacity, Alert, Animated } from "react-native";
 import ProfileHeader from "@/components/ProfileHeader";
 import { MoviePoll } from "@/constants/MoviePoll";
+import { moviesVotes } from "../constants/Movie";
+import { Colors } from "@/constants/Colors";
 
 export default function Poll() {
     const [poll, setPoll] = useState<MoviePoll>({
         id: 1,
         title: "Favorite Movie of All Time",
-        description: "Vote for your favorite movie from the list below!",
         dateCreated: new Date(),
         isActive: true,
         movies: moviesVotes,
     });
 
+    const [selectedMovie, setSelectedMovie] = useState<number | null>(null);
     const [hasVoted, setHasVoted] = useState(false);
+    const [barWidth] = useState(new Animated.Value(0));
 
-    const handleVote = (movieId: number) => {
+    const getTotalVotes = () => poll.movies.reduce((sum, movie) => sum + movie.votes, 0);
+
+    const getVotePercentage = (votes: number) => {
+        const total = getTotalVotes();
+        return total === 0 ? 0 : Math.round((votes / total) * 100);
+    };
+
+    const handleVote = () => {
+        if (!selectedMovie) return Alert.alert("Please select a movie!");
         if (hasVoted) return Alert.alert("You can only vote once!");
-        setPoll((prevPoll) => ({
+
+        setPoll(prevPoll => ({
             ...prevPoll,
-            movies: prevPoll.movies.map((movie) =>
-                movie.id === movieId ? { ...movie, votes: movie.votes + 1 } : movie
+            movies: prevPoll.movies.map(movie =>
+                movie.id === selectedMovie ? { ...movie, votes: movie.votes + 1 } : movie
             ),
         }));
         setHasVoted(true);
+
+        Animated.timing(barWidth, {
+            toValue: 1,
+            duration: 500,
+            useNativeDriver: false,
+        }).start();
     };
 
     return (
         <View style={styles.container}>
-            {/* Poll Details */}
             <View style={styles.pollCard}>
-                {/* Admin Information */}
-                <View style={styles.adminContainer}>
-                    <ProfileHeader />
-                </View>
+                <ProfileHeader />
                 <Text style={styles.title}>{poll.title}</Text>
-                <Text style={styles.description}>{poll.description}</Text>
-                <Text style={styles.date}>Created: {poll.dateCreated.toDateString()}</Text>
 
-                {/* Movies List */}
-                <FlatList
-                    data={poll.movies}
-                    keyExtractor={(item) => item.id.toString()}
-                    horizontal
-                    contentContainerStyle={styles.moviesWrapper}
-                    showsHorizontalScrollIndicator={false}
-                    renderItem={({ item }) => (
-                        <View style={styles.movieCard}>
-                            <Image source={{ uri: item.poster }} style={styles.moviePoster} />
-                            <Text style={styles.movieVotes}>Votes: {item.votes}</Text>
+                <View style={styles.optionsContainer}>
+                    {poll.movies.map((movie) => {
+                        const percentage = getVotePercentage(movie.votes);
+                        const width = barWidth.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: ['0%', `${percentage}%`],
+                        });
+
+                        return (
                             <TouchableOpacity
+                                key={movie.id}
                                 style={[
-                                    styles.voteButton,
-                                    hasVoted && styles.disabledButton,
+                                    styles.optionButton,
+                                    selectedMovie === movie.id && !hasVoted && styles.selectedOption,
                                 ]}
+                                onPress={() => !hasVoted && setSelectedMovie(movie.id)}
                                 disabled={hasVoted}
-                                onPress={() => handleVote(item.id)}
                             >
-                                <Text style={styles.voteButtonText}>
-                                    {hasVoted ? "Voted" : "Vote"}
-                                </Text>
+                                <View style={styles.optionContent}>
+                                    {hasVoted && (
+                                        <Animated.View
+                                            style={[
+                                                styles.progressBar,
+                                                { width },
+                                            ]}
+                                        />
+                                    )}
+                                    <View style={styles.labelContainer}>
+                                        <Text style={styles.optionText}>{movie.title}</Text>
+                                        {hasVoted && (
+                                            <Text style={styles.percentageText}>{percentage}%</Text>
+                                        )}
+                                    </View>
+                                </View>
                             </TouchableOpacity>
-                        </View>
-                    )}
-                />
+                        );
+                    })}
+                </View>
+
+                {!hasVoted && (
+                    <TouchableOpacity
+                        style={[styles.voteButton, !selectedMovie && styles.disabledButton]}
+                        onPress={handleVote}
+                        disabled={!selectedMovie}
+                    >
+                        <Text style={styles.voteButtonText}>Vote</Text>
+                    </TouchableOpacity>
+                )}
+
+                {hasVoted && (
+                    <Text style={styles.totalVotes}>
+                        {getTotalVotes()} votes
+                    </Text>
+                )}
             </View>
         </View>
     );
@@ -74,83 +112,81 @@ export default function Poll() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#121212",
         padding: 16,
     },
     pollCard: {
         backgroundColor: "#1c1c1e",
         borderRadius: 12,
         padding: 16,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-    },
-    adminContainer: {
-        marginBottom: 10,
-
+        borderWidth: 0.1,
+        borderColor: "#373738",
     },
     title: {
-        fontSize: 22,
+        fontSize: 18,
         fontWeight: "bold",
         color: "#ffffff",
-        marginBottom: 8,
+        marginBottom: 16,
+        marginTop: 16,
     },
-    description: {
+    optionsContainer: {
+        gap: 8,
+        marginBottom: 16,
+    },
+    optionButton: {
+        borderWidth: 1,
+        borderColor: "#333333",
+        borderRadius: 4,
+        overflow: 'hidden',
+    },
+    selectedOption: {
+        backgroundColor: "rgba(128, 128, 128, 0.2)",
+        borderColor: "#666666",
+    },
+    optionContent: {
+        position: 'relative',
+        minHeight: 44,
+    },
+    labelContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 12,
+        zIndex: 1,
+    },
+    optionText: {
+        color: "#ffffff",
         fontSize: 16,
-        color: "#d1d1d1",
-        marginBottom: 16,
     },
-    date: {
-        fontSize: 14,
-        color: "#8e8e93",
-        marginBottom: 16,
+    progressBar: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        height: '100%',
+        backgroundColor: "rgba(128, 128, 128, 0.3)",
     },
-    moviesWrapper: {
-        paddingVertical: 16,
-        flexDirection: "row",
-    },
-    movieCard: {
-        width: 150,
-        backgroundColor: "#2c2c2e",
-        borderRadius: 12,
-        padding: 8,
-        marginRight: 16,
-        alignItems: "center",
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        elevation: 3,
-    },
-    moviePoster: {
-        width: "100%",
-        height: 200,
-        borderRadius: 8,
-        marginBottom: 8,
-    },
-    movieVotes: {
-        fontSize: 14,
-        color: "#d1d1d1",
-        marginBottom: 8,
-        textAlign: "center",
+    percentageText: {
+        color: "#ffffff",
+        fontSize: 16,
+        marginLeft: 8,
     },
     voteButton: {
-        backgroundColor: "#4caf50",
-        borderRadius: 8,
-        paddingVertical: 8,
-        paddingHorizontal: 16,
+        backgroundColor: "#666666",
+        borderRadius: 4,
+        padding: 12,
         alignItems: "center",
-        justifyContent: "center",
-        width: "100%",
     },
     disabledButton: {
-        backgroundColor: "#555555",
+        backgroundColor: "#333333",
     },
     voteButtonText: {
         fontSize: 16,
         color: "#ffffff",
         fontWeight: "bold",
+    },
+    totalVotes: {
+        color: "#8e8e93",
+        fontSize: 14,
+        textAlign: "center",
+        marginTop: 8,
     },
 });

@@ -7,7 +7,6 @@ export interface MovieVote extends Movie {
 export type MoviePoll = {
     id: number;
     title: string;
-    description: string;
     dateCreated: Date;
     isActive: boolean;
     movies: MovieVote[];

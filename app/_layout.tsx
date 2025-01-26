@@ -279,6 +279,6 @@ export default function RootLayout() {
         <>
             <StatusBar style="light" backgroundColor="transparent" />
 
-            {session && session.user ? <MainApp /> : <SignUpPage />}        </>
+            {session && session.user ? <MainApp /> : <SignInPage />}        </>
     );
 }
