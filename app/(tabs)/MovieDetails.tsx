@@ -74,7 +74,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ route }) => {
 
             {/* Cover with Gradient */}
             <View style={styles.coverContainer}>
-                <Image source={{ uri: movie.cover }} style={styles.cover} />
+                <Image source={{ uri: movie.cover_url }} style={styles.cover} />
                 <LinearGradient
                     colors={["transparent", Colors.theme.background]}
                     style={styles.lineargrad}
@@ -106,7 +106,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ route }) => {
             {/* Description */}
             <View style={styles.disContainer}>
                 <Text style={styles.titleDescription}>DESCRIPTION</Text>
-                <Text style={styles.description}>{movie.Description}</Text>
+                <Text style={styles.description}>{movie.description}</Text>
             </View>
 
             <View style={styles.separator} />
@@ -194,7 +194,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ route }) => {
                                 toggleModal(); // Close the modal
                                 //@ts-ignore
                                 navigation.navigate("ReserveTicket", {movie})}}
-                                style={styles.reserveTicket}>
+                                              style={styles.reserveTicket}>
                                 <Ionicons name='ticket' size={25} color='white'/>
                                 <Text style={styles.modalButtonText}>Reserve Ticket</Text>
                             </TouchableOpacity>

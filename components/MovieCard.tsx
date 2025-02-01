@@ -20,12 +20,13 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
     const navigation = useNavigation<NavigationProp>();
 
     const handlePress = () => {
+        // @ts-ignore
         navigation.navigate('MovieDetails', { movie });
     };
 
     return (
         <TouchableOpacity style={styles.card} onPress={handlePress}>
-            <Image source={{ uri: movie.poster }} style={styles.image} />
+            <Image source={{ uri: movie.poster_url }} style={styles.image} />
         </TouchableOpacity>
     );
 };

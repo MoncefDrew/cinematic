@@ -175,7 +175,7 @@ const ReserveTicket: React.FC<MovieDetailsProps> = (movie) => {
             </TouchableOpacity>
             {/* Movie Cover Image */}
             <View style={styles.coverContainer}>
-                <Image source={{ uri: Movie.movie.poster }} style={styles.coverImage} />
+                <Image source={{ uri: Movie.movie.cover_url }} style={styles.coverImage} />
             </View>
             {/* Movie Information */}
             <View style={styles.detailsContainer}>

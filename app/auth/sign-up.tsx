@@ -1,202 +1,276 @@
-import { supabase } from "@/lib/supabase"
-import { Ionicons } from "@expo/vector-icons"
-import { useState } from "react"
-import { Alert, KeyboardAvoidingView, StyleSheet, TextInput, TouchableOpacity, View,Text, Platform } from "react-native"
-import {Colors} from "@/constants/Colors";
-import {Client} from "@/constants/Client";
-import { router, useNavigation, useRouter } from "expo-router";
+import { supabase } from "@/lib/supabase";
+import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
+import {
+    Alert,
+    KeyboardAvoidingView,
+    StyleSheet,
+    TextInput,
+    TouchableOpacity,
+    View,
+    Text,
+    Platform,
+    Animated,
+} from "react-native";
+import { router } from "expo-router";
+
+// Letterboxd-inspired color scheme
+const Colors = {
+    background: "#121212", // Dark background
+    cardBackground: "#1E1E1E", // Slightly lighter card background
+    textPrimary: "#FFFFFF", // White text
+    textSecondary: "#B0B0B0", // Light gray text
+    buttonPrimary: "#2ECC71", // Letterboxd green
+    border: "#333333", // Dark border
+    link: "#2ECC71", // Green for links
+    inputPlaceholder: "#666666", // Gray placeholder text
+};
 
 export default function SignUpPage() {
-    const router = useRouter();
-    const [loading, setLoading] = useState(false)
-    
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [username, setUsername] = useState('')
+    const [loading, setLoading] = useState(false);
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [username, setUsername] = useState("");
+    const buttonScale = new Animated.Value(1); // For button animation
 
-    
-        async function signUpWithEmail() {
-            setLoading(true)
-            const {
-                data: { session },
-                error,
-            } = await supabase.auth.signUp({
-                email: email,
-                password: password,
-            })
-            if (error) Alert.alert(error.message)
-            await addClient({username,email,password})
-            
-            if (!session) Alert.alert('Please check your inbox for email verification!')
-            setLoading(false)
-        }
-    
-        const generateSimpleId = (): string => {
-            return `${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-        };
-    
-    
-        const addClient = async (clientData:Client) => {
-            const customId = generateSimpleId();
-    
-            const { data, error } = await supabase
-                .from('client')
-                .insert([
-                    {
-                        email: clientData.email,
-                        username:clientData.username,
-                        password: clientData.password,
-                    },
-                ]);
-    
-            if (error) {
-                console.error('Error adding client:', error);
-            } else {
-                console.log('Client added:', data);
-            }
-        };
-    
-        return (
-            <KeyboardAvoidingView
-                style={styles.container}
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-    
-                <Text style={styles.title}>Sign Up</Text>
-    
-                <View style={styles.inputContainer}>
-                <TextInput
-                        style={styles.input}
-                        placeholder="Username"
-                        placeholderTextColor={Colors.theme.inputPlaceholder}
-                        value={username}
-                        onChangeText={setUsername}
-                    />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Email"
-                        placeholderTextColor={Colors.theme.inputPlaceholder}
-                        value={email}
-                        onChangeText={setEmail}
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                    />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Password"
-                        placeholderTextColor={Colors.theme.inputPlaceholder}
-                        value={password}
-                        onChangeText={setPassword}
-                        secureTextEntry
-                    />
-                </View>
-                
-        
-                <TouchableOpacity
-                    style={styles.joinButton}
-                    onPress={signUpWithEmail}
-                >
-                    <Text style={styles.joinButtonText}>Join Letterboxd</Text>
-                </TouchableOpacity>
+    async function signUpWithEmail() {
+        setLoading(true);
+        const {
+            data: { session },
+            error,
+        } = await supabase.auth.signUp({
+            email: email,
+            password: password,
+        });
+        if (error) Alert.alert(error.message);
+        await addClient({ username, email, password });
 
-                
-                <TouchableOpacity onPress={() => console.log('Forgot password pressed')}>
-                    <Text style={styles.forgotPasswordText}>Forgot your password?</Text>
-                </TouchableOpacity>
-    
-                <View style={styles.dividerContainer}>
-                    <View style={styles.dividerLine}/>
-                    <Text style={styles.dividerText}>OR</Text>
-                    <View style={styles.dividerLine}/>
-                </View>
-
-    
-                <TouchableOpacity
-                    style={[styles.joinButton,{flexDirection:'row',alignItems: 'center',justifyContent: 'center'}]}
-                    onPress={() => router.back()}
-                >
-                    <Ionicons name='arrow-back-outline' size={23} color='white' style={{marginHorizontal:10}}/>
-                    <Text style={styles.joinButtonText}>Go Back</Text>
-                </TouchableOpacity>
-    
-            </KeyboardAvoidingView>
-    
-        )
+        if (!session) Alert.alert("Please check your inbox for email verification!");
+        setLoading(false);
     }
-    
+
+    const generateSimpleId = (): string => {
+        return `${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    };
+
+    const addClient = async (clientData: { username: any; email: any; password: any; }) => {
+        const customId = generateSimpleId();
+
+        const { data, error } = await supabase.from("client").insert([
+            {
+                username: clientData.username,
+                email: clientData.email,
+                password: clientData.password,
+            },
+        ]);
+
+        if (error) {
+            console.error("Error adding client:", error);
+        } else {
+            console.log("Client added:", data);
+        }
+    };
+
+    // Button press animation
+    const animateButton = () => {
+        Animated.sequence([
+            Animated.timing(buttonScale, {
+                toValue: 0.95,
+                duration: 100,
+                useNativeDriver: true,
+            }),
+            Animated.timing(buttonScale, {
+                toValue: 1,
+                duration: 100,
+                useNativeDriver: true,
+            }),
+        ]).start();
+    };
+
+    return (
+        <KeyboardAvoidingView
+            style={styles.container}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
+            {/* Title */}
+            <Text style={styles.title}>Join Letterboxd</Text>
+            <Text style={styles.subtitle}>Create your account to get started</Text>
+
+            {/* Username Input */}
+            <View style={styles.inputContainer}>
+                <Ionicons
+                    name="person-outline"
+                    size={20}
+                    color={Colors.textSecondary}
+                    style={styles.inputIcon}
+                />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Username"
+                    placeholderTextColor={Colors.inputPlaceholder}
+                    value={username}
+                    onChangeText={setUsername}
+                />
+            </View>
+
+            {/* Email Input */}
+            <View style={styles.inputContainer}>
+                <Ionicons
+                    name="mail-outline"
+                    size={20}
+                    color={Colors.textSecondary}
+                    style={styles.inputIcon}
+                />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Email"
+                    placeholderTextColor={Colors.inputPlaceholder}
+                    value={email}
+                    onChangeText={setEmail}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                />
+            </View>
+
+            {/* Password Input */}
+            <View style={styles.inputContainer}>
+                <Ionicons
+                    name="lock-closed-outline"
+                    size={20}
+                    color={Colors.textSecondary}
+                    style={styles.inputIcon}
+                />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Password"
+                    placeholderTextColor={Colors.inputPlaceholder}
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry
+                />
+            </View>
+
+            {/* Join Button */}
+            <TouchableOpacity
+                style={styles.joinButton}
+                onPress={() => {
+                    animateButton();
+                    signUpWithEmail();
+                }}
+                disabled={loading}
+            >
+                <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
+                    <Text style={styles.joinButtonText}>
+                        {loading ? "Creating Account..." : "Join Letterboxd"}
+                    </Text>
+                </Animated.View>
+            </TouchableOpacity>
+
+            {/* Divider */}
+            <View style={styles.dividerContainer}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>OR</Text>
+                <View style={styles.dividerLine} />
+            </View>
+
+            {/* Go Back Button */}
+            <TouchableOpacity
+                style={styles.goBackButton}
+                onPress={() => router.back()}
+            >
+                <Ionicons
+                    name="arrow-back-outline"
+                    size={20}
+                    color={Colors.textPrimary}
+                />
+                <Text style={styles.goBackButtonText}>Go Back</Text>
+            </TouchableOpacity>
+        </KeyboardAvoidingView>
+    );
+}
+
 const styles = StyleSheet.create({
-        container: {
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: Colors.theme.background,
-            paddingHorizontal: 20,
-        },
-        title: {
-            fontSize: 28,
-            fontWeight: 'bold',
-            color: Colors.theme.BigTitle,
-            marginBottom: 30,
-        },
-        inputContainer: {
-            width: '100%',
-        },
-        input: {
-            backgroundColor: Colors.theme.backgroundCard,
-            color: Colors.theme.textPrimary,
-            fontSize: 16,
-            padding: 15,
-            borderRadius: 8,
-            marginBottom: 15,
-            borderWidth: 1,
-            borderColor: Colors.theme.border,
-        },
-        signInButton: {
-            backgroundColor: Colors.theme.buttonPrimary,
-            padding: 15,
-            borderRadius: 8,
-            width: '100%',
-            alignItems: 'center',
-            marginTop: 10,
-        },
-        signInButtonText: {
-            color: 'white',
-            fontSize: 16,
-            fontWeight: 'bold',
-        },
-        forgotPasswordText: {
-            color: Colors.theme.link,
-            fontSize: 14,
-            marginTop: 15,
-            textDecorationLine: 'underline',
-        },
-        dividerContainer: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            marginVertical: 20,
-        },
-        dividerLine: {
-            flex: 1,
-            height: 1,
-            backgroundColor: Colors.theme.border,
-        },
-        dividerText: {
-            marginHorizontal: 10,
-            color: Colors.theme.textSecondary,
-            fontSize: 14,
-        },
-        joinButton: {
-            margin:10,
-            backgroundColor: 'transparent',
-            padding: 15,
-            borderRadius: 8,
-            width: '100%',
-            alignItems: 'center',
-            borderWidth: 1,
-            borderColor: Colors.theme.border,
-        },
-        joinButtonText: {
-            color: Colors.theme.textPrimary,
-            fontSize: 16,
-            fontWeight: 'bold',
-        },
-    })
+    container: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: Colors.background,
+        paddingHorizontal: 20,
+    },
+    title: {
+        fontSize: 32,
+        fontWeight: "bold",
+        color: Colors.textPrimary,
+        marginBottom: 10,
+    },
+    subtitle: {
+        fontSize: 16,
+        color: Colors.textSecondary,
+        marginBottom: 30,
+    },
+    inputContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        width: "100%",
+        marginBottom: 15,
+        backgroundColor: Colors.cardBackground,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: Colors.border,
+        paddingHorizontal: 15,
+        paddingVertical: 10,
+    },
+    inputIcon: {
+        marginRight: 10,
+    },
+    input: {
+        flex: 1,
+        color: Colors.textPrimary,
+        fontSize: 16,
+    },
+    joinButton: {
+        backgroundColor: Colors.buttonPrimary,
+        padding: 15,
+        borderRadius: 10,
+        width: "100%",
+        alignItems: "center",
+        marginTop: 10,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    joinButtonText: {
+        color: "white",
+        fontSize: 16,
+        fontWeight: "bold",
+    },
+    dividerContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginVertical: 20,
+        width: "100%",
+    },
+    dividerLine: {
+        flex: 1,
+        height: 1,
+        backgroundColor: Colors.border,
+    },
+    dividerText: {
+        marginHorizontal: 10,
+        color: Colors.textSecondary,
+        fontSize: 14,
+    },
+    goBackButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginTop: 20,
+    },
+    goBackButtonText: {
+        color: Colors.textPrimary,
+        fontSize: 16,
+        fontWeight: "bold",
+        marginLeft: 5,
+    },
+});
