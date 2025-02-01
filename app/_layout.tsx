@@ -45,6 +45,7 @@ export default function RootLayout() {
         });
     }, []);
 
+
     if (!loaded) {
         return null; // Render a loading screen while fonts are loading
     }
