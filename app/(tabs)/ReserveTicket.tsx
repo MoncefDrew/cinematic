@@ -7,7 +7,7 @@ import {
     TouchableOpacity,
     ScrollView,
     Alert,
-    Modal  // Add this import
+    Modal 
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Colors } from "@/constants/Colors";
