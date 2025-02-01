@@ -1,5 +1,14 @@
 import React, { useState } from "react";
-import {View,Text,Image,StyleSheet,TouchableOpacity,ScrollView,Alert,} from "react-native";
+import {
+    View,
+    Text,
+    Image,
+    StyleSheet,
+    TouchableOpacity,
+    ScrollView,
+    Alert,
+    Modal  // Add this import
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Colors } from "@/constants/Colors";
 import { RootStackParamList } from "@/constants/Movie";
@@ -29,12 +38,10 @@ const TICKET_PRICE = 12.99;
  * @returns {JSX.Element} The rendered ReserveTicket component
  */
 const ReserveTicket: React.FC<MovieDetailsProps> = (movie) => {
-    // Extract movie details from route params
     const Movie = movie.route.params;
-    // State management for seat selection
     const [selectedSeat, setSelectedSeat] = useState<string | null>(null);
-    // Predefined taken seats (would typically come from an API)
     const [takenSeats] = useState<string[]>(['A3', 'B5', 'C7', 'D4', 'E2', 'F6']);
+    const [showTicket, setShowTicket] = useState(false);
     /**
      * Handles the selection and deselection of a seat
      *
@@ -53,24 +60,72 @@ const ReserveTicket: React.FC<MovieDetailsProps> = (movie) => {
             Alert.alert("Select a Seat", "Please select a seat to continue.");
             return;
         }
-        Alert.alert(
-            "Confirm Reservation",
-            `Total: $${TICKET_PRICE.toFixed(2)}\nSeat: ${selectedSeat}`,
-            [
-                {
-                    text: "Cancel",
-                    style: "cancel",
-                },
-                {
-                    text: "Confirm",
-                    onPress: () => {
-                        Alert.alert("Success", `Successfully reserved seat: ${selectedSeat}`);
-                        setSelectedSeat(null);
-                    },
-                },
-            ]
-        );
+        
+        // Directly show the ticket modal without Alert
+        setShowTicket(true);
     };
+
+    // Add Ticket Modal Component inline
+    const TicketModal = () => (
+        <Modal
+            animationType="slide"
+            transparent={true}
+            visible={showTicket}
+            onRequestClose={() => setShowTicket(false)}
+        >
+            <View style={styles.modalContainer}>
+                <View style={styles.ticketContainer}>
+                    {/* Close Button */}
+                    <TouchableOpacity 
+                        style={styles.closeButton}
+                        onPress={() => setShowTicket(false)}
+                    >
+                        <Ionicons name="close" size={24} color={Colors.theme.textColorSmall} />
+                    </TouchableOpacity>
+    
+                    {/* Ticket Content */}
+                    <LinearGradient
+                        colors={['#6a11cb', '#2575fc']}
+                        style={styles.ticketContent}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                    >
+                        {/* Movie Poster */}
+                        <Image 
+                            source={{ uri: Movie.movie.poster }} 
+                            style={styles.ticketPoster}
+                        />
+    
+                        {/* Movie Title and Date */}
+                        <Text style={styles.ticketTitle}>{Movie.movie.title}</Text>
+                        <Text style={styles.ticketDate}>{Movie.movie.projectionDate}</Text>
+    
+                        {/* Seat and Price Details */}
+                        <View style={styles.ticketDetails}>
+                            <View style={styles.detailItem}>
+                                <Text style={styles.ticketLabel}>Seat</Text>
+                                <Text style={styles.ticketValue}>{selectedSeat}</Text>
+                            </View>
+                            <View style={styles.detailItem}>
+                                <Text style={styles.ticketLabel}>Price</Text>
+                                <Text style={styles.ticketValue}>${TICKET_PRICE}</Text>
+                            </View>
+                        </View>
+    
+                        {/* QR Code Placeholder */}
+                        <View style={styles.qrCodePlaceholder}>
+                            <Text style={styles.qrCodeText}>QR Code Placeholder</Text>
+                        </View>
+    
+                        {/* Ticket ID */}
+                        <Text style={styles.ticketId}>
+                            ID: {Math.random().toString(36).substring(2, 10).toUpperCase()}
+                        </Text>
+                    </LinearGradient>
+                </View>
+            </View>
+        </Modal>
+    );
     /**
      * Renders an individual seat component
      *
@@ -199,6 +254,8 @@ const ReserveTicket: React.FC<MovieDetailsProps> = (movie) => {
             >
                 <Text style={styles.reserveButtonText}>Reserve</Text>
             </TouchableOpacity>
+
+            <TicketModal />
         </ScrollView>
     );
 };
@@ -232,5 +289,93 @@ const styles = StyleSheet.create({
     reserveButton: {backgroundColor: Colors.theme.button,margin: 20,padding: 15,borderRadius: 10,alignItems: 'center',},
     disabledButton: {backgroundColor: Colors.theme.button,opacity: 0.6,},
     reserveButtonText: {color:'#FFFFFF', fontSize: 18, fontWeight:'500',},
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    },
+    ticketContainer: {
+        width: '90%',
+        backgroundColor: Colors.theme.cardBackground,
+        borderRadius: 15,
+        overflow: 'hidden',
+    },
+    closeButton: {
+        alignSelf: 'flex-end',
+        padding: 10,
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        zIndex: 1,
+    },
+    ticketContent: {
+        alignItems: 'center',
+        padding: 20,
+    },
+    ticketPoster: {
+        width: 150,
+        height: 225,
+        borderRadius: 10,
+        marginBottom: 15,
+    },
+    ticketTitle: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#FFFFFF',
+        textAlign: 'center',
+        marginBottom: 5,
+    },
+    ticketDate: {
+        fontSize: 16,
+        color: '#FFFFFF',
+        opacity: 0.8,
+        marginBottom: 15,
+    },
+    ticketDetails: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        width: '100%',
+        paddingVertical: 15,
+        borderTopWidth: 1,
+        borderBottomWidth: 1,
+        borderStyle: 'dashed',
+        borderColor: 'rgba(255, 255, 255, 0.3)',
+        marginBottom: 15,
+    },
+    detailItem: {
+        alignItems: 'center',
+    },
+    ticketLabel: {
+        fontSize: 14,
+        color: '#FFFFFF',
+        opacity: 0.8,
+        marginBottom: 5,
+    },
+    ticketValue: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#FFFFFF',
+    },
+    qrCodePlaceholder: {
+        width: 150,
+        height: 150,
+        backgroundColor: '#FFFFFF',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 10,
+        marginBottom: 15,
+    },
+    qrCodeText: {
+        fontSize: 14,
+        color: '#6a11cb',
+        fontWeight: 'bold',
+    },
+    ticketId: {
+        fontSize: 12,
+        color: '#FFFFFF',
+        opacity: 0.8,
+        fontFamily: 'SpaceMono',
+    },
 });
 export default ReserveTicket;
