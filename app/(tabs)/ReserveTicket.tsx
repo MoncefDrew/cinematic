@@ -22,6 +22,7 @@ import AppHeader from '@/components/AppHeader';
 import CustomIcon from '@/components/CustomIcon';
 import {Ionicons} from "@expo/vector-icons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import {useFonts} from "expo-font";
 
 const time ='19:00' ;
 
@@ -75,7 +76,16 @@ export default function ReserveTicket ({navigation, route}: any){
     const [price, setPrice] = useState<number>(0);
     const [twoDSeatArray, setTwoDSeatArray] = useState<any[][]>(generateSeats());
     const [selectedSeatArray, setSelectedSeatArray] = useState([]);
+    const [fontsLoaded] = useFonts({
+        "Poppins-Regular": require("../../assets/fonts/Poppins-Regular.ttf"),
+        "Poppins-Medium": require("../../assets/fonts/Poppins-Medium.ttf"),
+        "Poppins-Bold": require("../../assets/fonts/Poppins-Bold.ttf"),
+        "Poppins-SemiBold": require("../../assets/fonts/Poppins-SemiBold.ttf"),
+    });
 
+    if (!fontsLoaded) {
+        return null; // or return a loading indicator
+    }
     console.log(route);
 
     const selectSeat = (index: number, subindex: number, num: number) => {
@@ -199,26 +209,27 @@ export default function ReserveTicket ({navigation, route}: any){
     );
 };
 
+
 const styles = StyleSheet.create({
     container: {
-        display: 'flex',
+        display: "flex",
         flex: 1,
         backgroundColor: COLORS.Black,
     },
     ImageBG: {
-        width: '100%',
+        width: "100%",
         aspectRatio: 3072 / 1727,
     },
     linearGradient: {
-        height: '100%',
+        height: "100%",
     },
     appHeaderContainer: {
         marginHorizontal: SPACING.space_36,
         marginTop: SPACING.space_20 * 2,
     },
     screenText: {
-        textAlign: 'center',
-        fontFamily: FONTFAMILY.poppins_regular,
+        textAlign: "center",
+        fontFamily: "Poppins-Regular", // Updated to Poppins-Regular
         fontSize: FONTSIZE.size_10,
         color: COLORS.WhiteRGBA15,
     },
@@ -229,32 +240,32 @@ const styles = StyleSheet.create({
         gap: SPACING.space_20,
     },
     seatRow: {
-        flexDirection: 'row',
+        flexDirection: "row",
         gap: SPACING.space_20,
-        justifyContent: 'center',
+        justifyContent: "center",
     },
     seatIcon: {
         fontSize: FONTSIZE.size_24,
         color: COLORS.White,
     },
     seatRadioContainer: {
-        flexDirection: 'row',
+        flexDirection: "row",
         marginTop: SPACING.space_36,
         marginBottom: SPACING.space_10,
-        alignItems: 'center',
-        justifyContent: 'space-evenly',
+        alignItems: "center",
+        justifyContent: "space-evenly",
     },
     radioContainer: {
-        flexDirection: 'row',
+        flexDirection: "row",
         gap: SPACING.space_10,
-        alignItems: 'center',
+        alignItems: "center",
     },
     radioIcon: {
         fontSize: FONTSIZE.size_20,
         color: COLORS.White,
     },
     radioText: {
-        fontFamily: FONTFAMILY.poppins_medium,
+        fontFamily: "Poppins-Medium", // Updated to Poppins-Medium
         fontSize: FONTSIZE.size_12,
         color: COLORS.White,
     },
@@ -266,16 +277,16 @@ const styles = StyleSheet.create({
         height: SPACING.space_10 * 10,
         borderRadius: SPACING.space_10 * 10,
         backgroundColor: COLORS.DarkGrey,
-        alignItems: 'center',
-        justifyContent: 'center',
+        alignItems: "center",
+        justifyContent: "center",
     },
     dateText: {
-        fontFamily: FONTFAMILY.poppins_medium,
+        fontFamily: "Poppins-Medium", // Updated to Poppins-Medium
         fontSize: FONTSIZE.size_24,
         color: COLORS.White,
     },
     dayText: {
-        fontFamily: FONTFAMILY.poppins_regular,
+        fontFamily: "Poppins-Regular", // Updated to Poppins-Regular
         fontSize: FONTSIZE.size_12,
         color: COLORS.White,
     },
@@ -289,31 +300,31 @@ const styles = StyleSheet.create({
         paddingHorizontal: SPACING.space_20,
         borderRadius: BORDERRADIUS.radius_25,
         backgroundColor: COLORS.DarkGrey,
-        alignItems: 'center',
-        justifyContent: 'center',
+        alignItems: "center",
+        justifyContent: "center",
     },
     timeText: {
-        fontFamily: FONTFAMILY.poppins_regular,
+        fontFamily: "Poppins-Regular", // Updated to Poppins-Regular
         fontSize: FONTSIZE.size_14,
         color: COLORS.White,
     },
     buttonPriceContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
         paddingHorizontal: 60,
         paddingBottom: SPACING.space_24,
     },
     priceContainer: {
-        alignItems: 'center',
+        alignItems: "center",
     },
     totalPriceText: {
-        fontFamily: FONTFAMILY.poppins_regular,
+        fontFamily: "Poppins-Regular", // Updated to Poppins-Regular
         fontSize: FONTSIZE.size_14,
         color: COLORS.Grey,
     },
     price: {
-        fontFamily: FONTFAMILY.poppins_medium,
+        fontFamily: "Poppins-Medium", // Updated to Poppins-Medium
         fontSize: FONTSIZE.size_24,
         color: COLORS.White,
     },
@@ -321,7 +332,7 @@ const styles = StyleSheet.create({
         borderRadius: BORDERRADIUS.radius_25,
         paddingHorizontal: SPACING.space_24,
         paddingVertical: SPACING.space_10,
-        fontFamily: FONTFAMILY.poppins_semibold,
+        fontFamily: "Poppins-SemiBold", // Updated to Poppins-SemiBold
         fontSize: FONTSIZE.size_16,
         color: COLORS.White,
         backgroundColor: COLORS.Orange,

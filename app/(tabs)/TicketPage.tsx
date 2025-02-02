@@ -5,7 +5,7 @@ import {
     StyleSheet,
     StatusBar,
     ImageBackground,
-    Image,
+    Image, TouchableOpacity, Alert,
 } from 'react-native';
 import AppHeader from '@/components/AppHeader';
 import {
@@ -18,6 +18,7 @@ import {
 import {LinearGradient} from "expo-linear-gradient";
 import CustomIcon from '@/components/CustomIcon';
 import {Ionicons} from "@expo/vector-icons";
+import {useFonts} from "expo-font";
 
 export default function TicketPage({navigation, route}: any){
     const [ticketData, setTicketData] = useState<any>(route.params);
@@ -25,6 +26,15 @@ export default function TicketPage({navigation, route}: any){
         setTicketData(route.params);
     }
 
+    const [fontsLoaded] = useFonts({
+        "Poppins-Regular": require("../../assets/fonts/Poppins-Regular.ttf"),
+        "Poppins-Medium": require("../../assets/fonts/Poppins-Medium.ttf"),
+        "Poppins-Bold": require("../../assets/fonts/Poppins-Bold.ttf"),
+    });
+
+    if (!fontsLoaded) {
+        return null; // or return a loading indicator
+    }
     if (ticketData == undefined || ticketData == null) {
         return (
             <View style={styles.container}>
@@ -116,13 +126,38 @@ export default function TicketPage({navigation, route}: any){
 
                 </View>
             </View>
+
+            <TouchableOpacity
+                style={styles.button}
+                onPress={() => Alert.alert('Cinematic Red Button Clicked!')}
+            >
+                <Text style={styles.buttonText}>Buy the Ticket</Text>
+            </TouchableOpacity>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
+    button: {
+        marginHorizontal:80,
+        marginBottom:40,
+        backgroundColor: COLORS.Orange,
+        paddingVertical: 12,
+        borderRadius: 8,
+        alignItems: 'center',
+    },
+    buttonText: {
+        borderRadius: BORDERRADIUS.radius_25,
+        paddingHorizontal: SPACING.space_24,
+        paddingVertical: SPACING.space_10,
+        fontFamily: "Poppins-SemiBold", // Updated to Poppins-SemiBold
+        fontSize: FONTSIZE.size_16,
+        color: COLORS.White,
+        backgroundColor: COLORS.Orange,
+    },
+
     container: {
-        display: 'flex',
+        display: "flex",
         flex: 1,
         backgroundColor: COLORS.Black,
     },
@@ -132,68 +167,69 @@ const styles = StyleSheet.create({
     },
     ticketContainer: {
         flex: 1,
-        justifyContent: 'center',
+        justifyContent: "center",
+
     },
     ticketBGImage: {
-        alignSelf: 'center',
+        alignSelf: "center",
         width: 300,
         aspectRatio: 200 / 300,
         borderTopLeftRadius: BORDERRADIUS.radius_25,
         borderTopRightRadius: BORDERRADIUS.radius_25,
-        overflow: 'hidden',
-        justifyContent: 'flex-end',
+        overflow: "hidden",
+        justifyContent: "flex-end",
     },
     linearGradient: {
-        height: '70%',
+        height: "50%",
     },
     linear: {
         borderTopColor: COLORS.Black,
         borderTopWidth: 3,
         width: 300,
-        alignSelf: 'center',
+        alignSelf: "center",
         backgroundColor: COLORS.Orange,
-        borderStyle: 'dashed',
+        borderStyle: "dashed",
     },
     ticketFooter: {
         backgroundColor: COLORS.Orange,
         width: 300,
-        alignItems: 'center',
+        alignItems: "center",
         paddingBottom: SPACING.space_36,
-        alignSelf: 'center',
+        alignSelf: "center",
         borderBottomLeftRadius: BORDERRADIUS.radius_25,
         borderBottomRightRadius: BORDERRADIUS.radius_25,
     },
     ticketDateContainer: {
-        flexDirection: 'row',
+        flexDirection: "row",
         gap: SPACING.space_36,
-        alignItems: 'center',
-        justifyContent: 'center',
+        alignItems: "center",
+        justifyContent: "center",
         marginVertical: SPACING.space_10,
     },
     ticketSeatContainer: {
-        flexDirection: 'row',
+        flexDirection: "row",
         gap: SPACING.space_36,
-        alignItems: 'center',
-        justifyContent: 'center',
+        alignItems: "center",
+        justifyContent: "center",
         marginVertical: SPACING.space_10,
     },
     dateTitle: {
-        fontFamily: FONTFAMILY.poppins_medium,
+        fontFamily: "Poppins-Medium", // Updated to Poppins-Medium
         fontSize: FONTSIZE.size_24,
         color: COLORS.White,
     },
     subtitle: {
-        fontFamily: FONTFAMILY.poppins_regular,
+        fontFamily: "Poppins-Regular", // Updated to Poppins-Regular
         fontSize: FONTSIZE.size_14,
         color: COLORS.White,
     },
     subheading: {
-        fontFamily: FONTFAMILY.poppins_medium,
+        fontFamily: "Poppins-Medium", // Updated to Poppins-Medium
         fontSize: FONTSIZE.size_18,
         color: COLORS.White,
     },
     subtitleContainer: {
-        alignItems: 'center',
+        alignItems: "center",
     },
     clockIcon: {
         fontSize: FONTSIZE.size_24,
