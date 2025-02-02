@@ -1,352 +1,330 @@
-import React, { useState } from "react";
+import React, {useState} from 'react';
 import {
-    View,
     Text,
-    Image,
+    View,
     StyleSheet,
-    TouchableOpacity,
     ScrollView,
-    Alert,
-    Modal ,
-    Animated,
+    StatusBar,
     ImageBackground,
-} from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { Colors } from "@/constants/Colors";
-import { RootStackParamList } from "@/constants/Movie";
-import { RouteProp} from "@react-navigation/native";
-import {router, useNavigation, useRouter} from "expo-router";
-import {StatusBar} from "expo-status-bar";
-import {StackNavigationProp} from "@react-navigation/stack";
-import {COLORS} from "@/theme/theme";
-import AppHeader from "@/components/AppHeader";
-// Type definition for the route parameters expected by the MovieDetails screen
-type MovieDetailsRouteProp = RouteProp<RootStackParamList, "MovieDetails">;
-// Props interface for the ReserveTicket component
-type MovieDetailsProps = {
-    route: MovieDetailsRouteProp;
+    TouchableOpacity,
+    FlatList,
+    ToastAndroid,
+} from 'react-native';
+import {
+    BORDERRADIUS,
+    COLORS,
+    FONTFAMILY,
+    FONTSIZE,
+    SPACING,
+} from '@/theme/theme';
+import {LinearGradient} from "expo-linear-gradient";
+import AppHeader from '@/components/AppHeader';
+import CustomIcon from '@/components/CustomIcon';
+import {Ionicons} from "@expo/vector-icons";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+
+const time ='19:00' ;
+
+const generateDate = () => {
+    const date = new Date();
+    let weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    let weekdays = [];
+    for (let i = 0; i < 7; i++) {
+        let tempDate = {
+            date: new Date(date.getTime() + i * 24 * 60 * 60 * 1000).getDate(),
+            day: weekday[new Date(date.getTime() + i * 24 * 60 * 60 * 1000).getDay()],
+        };
+        weekdays.push(tempDate);
+    }
+    return weekdays;
 };
 
-/**
- * ReserveTicket Component
- *
- * A comprehensive movie ticket reservation system that allows users to:
- * - View movie details
- * - Select a single seat from an interactive seating chart
- * - View pricing information
- * - Complete the reservation process
- *
- * @param {MovieDetailsProps} movie - Contains route parameters with movie details
- * @returns {JSX.Element} The rendered ReserveTicket component
- */
+const generateSeats = () => {
+    let numRow = 8;
+    let numColumn = 3;
+    let rowArray = [];
+    let start = 1;
+    let reachnine = false;
 
-
-// Constants
-const ROWS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-const SEATS_PER_ROW = 8;
-const TICKET_PRICE = 12.99;
-
-type NavigationProp = StackNavigationProp<RootStackParamList, 'MovieDetails'>;
-
-
-const ReserveTicket: React.FC<MovieDetailsProps> = (movie) => {
-    const navigation = useNavigation<NavigationProp>();
-
-    const Movie  = movie.route.params;
-    const [selectedSeat, setSelectedSeat] = useState<string | null>(null);
-    const [takenSeats] = useState<string[]>(['A3', 'B5', 'C7', 'D4', 'E2', 'F6']);
-    const [showTicket, setShowTicket] = useState(false);
-    const fadeAnim = useState(new Animated.Value(0))[0];
-
-    const handleSeatSelection = (seatId: string) => {
-        if (takenSeats.includes(seatId)) return;
-        setSelectedSeat((prev) => (prev === seatId ? null : seatId));
-    };
-
-
-
-    const router = useRouter();
-    const handleReservation = () => {
-        if (!selectedSeat) {
-            Alert.alert("Select a Seat", "Please select a seat to continue.");
-
+    for (let i = 0; i < numRow; i++) {
+        let columnArray = [];
+        for (let j = 0; j < numColumn; j++) {
+            let seatObject = {
+                number: start,
+                taken: Boolean(Math.round(Math.random())),
+                selected: false,
+            };
+            columnArray.push(seatObject);
+            start++;
         }
-
-    };
-
-    const renderSeat = (row: string, seatNumber: number) => {
-        const seatId = `${row}${seatNumber}`;
-        const isSelected = selectedSeat === seatId;
-        const isTaken = takenSeats.includes(seatId);
-
-        return (
-            <TouchableOpacity
-                key={seatId}
-                onPress={() => handleSeatSelection(seatId)}
-                disabled={isTaken}
-                style={[
-                    styles.seat,
-                    isSelected && styles.selectedSeat,
-                    isTaken && styles.takenSeat,
-                ]}
-            >
-                <Text style={[
-                    styles.seatText,
-                    isSelected && styles.selectedSeatText,
-                    isTaken && styles.takenSeatText,
-                ]}>
-                    {seatNumber}
-                </Text>
-            </TouchableOpacity>
-        );
-    };
-
-    const TicketInfos = {
-
+        if (i == 3) {
+            numColumn += 2;
+        }
+        if (numColumn < 9 && !reachnine) {
+            numColumn += 2;
+        } else {
+            reachnine = true;
+            numColumn -= 2;
+        }
+        rowArray.push(columnArray);
     }
+    return rowArray;
+};
 
-    // @ts-ignore
+export default function ReserveTicket ({navigation, route}: any){
+    const [price, setPrice] = useState<number>(0);
+    const [twoDSeatArray, setTwoDSeatArray] = useState<any[][]>(generateSeats());
+    const [selectedSeatArray, setSelectedSeatArray] = useState([]);
+
+    console.log(route);
+
+    const selectSeat = (index: number, subindex: number, num: number) => {
+        if (!twoDSeatArray[index][subindex].taken) {
+            let array: any = [...selectedSeatArray];
+            let temp = [...twoDSeatArray];
+            temp[index][subindex].selected = !temp[index][subindex].selected;
+            if (!array.includes(num)) {
+                array.push(num);
+                setSelectedSeatArray(array);
+            } else {
+                const tempindex = array.indexOf(num);
+                if (tempindex > -1) {
+                    array.splice(tempindex, 1);
+                    setSelectedSeatArray(array);
+                }
+            }
+            setPrice(array.length * 5.0);
+            setTwoDSeatArray(temp);
+        }
+    };
+
+    const BookSeats = async () => {
+
+            navigation.navigate('TicketPage', {
+                seatArray: selectedSeatArray,
+                ticketImage: route.params.movie.poster_url,
+            });
+    };
+
     return (
-        <View style={styles.container}>
-            <StatusBar style="light" />
-                <View style={styles.header}>
-                    <ImageBackground
-                        style={styles.coverImage}
-                        source={{ uri: Movie.movie.cover_url }}
-                    >
-                        <LinearGradient
-                            colors={['transparent', '#121212']}
-                            style={styles.linearGradient}
-                        >
-                            <View style={styles.infoContainer}>
-                                <Text style={styles.title}>{Movie.movie.title}</Text>
-                                <Text style={styles.subtitle}>
-                                    {Movie.movie.duration} • {Movie.movie.dateReleased}
-                                </Text>
-                            </View>
-                        </LinearGradient>
-                    </ImageBackground>
-                </View>
-            <ScrollView contentContainerStyle={styles.scrollContent}>
-
-
-                <View style={styles.screenContainer}>
-                    <View style={styles.screen} />
-                </View>
-
-                <View style={styles.seatsContainer}>
-                    {ROWS.map((row) => (
-                        <View key={row} style={styles.row}>
-                            {Array.from({ length: SEATS_PER_ROW }, (_, i) => renderSeat(row, i + 1))}
+        <ScrollView
+            style={styles.container}
+            bounces={false}
+            showsVerticalScrollIndicator={false}>
+            <StatusBar hidden />
+            <View>
+                <ImageBackground
+                    source={{uri: route.params?.movie.cover_url}}
+                    style={styles.ImageBG}>
+                    <LinearGradient
+                        colors={[COLORS.BlackRGB10, COLORS.Black]}
+                        style={styles.linearGradient}>
+                        <View style={styles.appHeaderContainer}>
+                            <AppHeader
+                                name="close"
+                                header={''}
+                                action={() => navigation.goBack()}
+                            />
                         </View>
-                    ))}
+                    </LinearGradient>
+                </ImageBackground>
+                <Text style={styles.screenText}>Screen this side</Text>
+            </View>
+
+            <View style={styles.seatContainer}>
+                <View style={styles.containerGap20}>
+                    {twoDSeatArray?.map((item, index) => {
+                        return (
+                            <View key={index} style={styles.seatRow}>
+                                {item?.map((subitem, subindex) => {
+                                    return (
+                                        <TouchableOpacity
+                                            key={subitem.number}
+                                            onPress={() => {
+                                                selectSeat(index, subindex, subitem.number);
+                                            }}>
+                                            <MaterialIcons
+                                                name="chair"
+                                                style={[
+                                                    styles.seatIcon,
+                                                    subitem.taken ? {color: COLORS.Grey} : {},
+                                                    subitem.selected ? {color: COLORS.Orange} : {},
+                                                ]}
+                                            />
+                                        </TouchableOpacity>
+                                    );
+                                })}
+                            </View>
+                        );
+                    })}
                 </View>
-
-                <View style={styles.legend}>
-                    <View style={styles.legendItem}>
-                        <View style={[styles.legendSeat]} />
-                        <Text style={styles.legendText}>Available</Text>
+                <View style={styles.seatRadioContainer}>
+                    <View style={styles.radioContainer}>
+                        <MaterialIcons name="chair" style={styles.radioIcon} />
+                        <Text style={styles.radioText}>Available</Text>
                     </View>
-                    <View style={styles.legendItem}>
-                        <View style={[styles.legendSeat, styles.selectedSeat]} />
-                        <Text style={styles.legendText}>Selected</Text>
+                    <View style={styles.radioContainer}>
+                        <MaterialIcons
+                            name="chair"
+                            style={[styles.radioIcon, {color: COLORS.Grey}]}
+                        />
+                        <Text style={styles.radioText}>Taken</Text>
                     </View>
-                    <View style={styles.legendItem}>
-                        <View style={[styles.legendSeat, styles.takenSeat]} />
-                        <Text style={styles.legendText}>Taken</Text>
+                    <View style={styles.radioContainer}>
+                        <MaterialIcons
+                            name="chair"
+                            style={[styles.radioIcon, {color: COLORS.Orange}]}
+                        />
+                        <Text style={styles.radioText}>Selected</Text>
                     </View>
                 </View>
+            </View>
 
-                {selectedSeat && (
-                    <View style={styles.summary}>
-                        <Text style={styles.summaryText}>
-                            Selected Seat: {selectedSeat}
-                        </Text>
-                        <Text style={styles.summaryText}>
-                            Price: ${TICKET_PRICE.toFixed(2)}
-                        </Text>
-                    </View>
-                )}
+            <View>
 
-                <TouchableOpacity
-                    style={[styles.reserveButton, !selectedSeat && styles.disabledButton]}
-                    onPress={()=>{navigation.navigate("TicketPage",Movie)}}
-                    disabled={!selectedSeat}
-                >
-                    <Text style={styles.reserveButtonText}>
-                        Reserve Ticket
-                    </Text>
+            </View>
+
+
+
+            <View style={styles.buttonPriceContainer}>
+                <View style={styles.priceContainer}>
+                    <Text style={styles.totalPriceText}>Total Price</Text>
+                    <Text style={styles.price}>$ {price}.00</Text>
+                </View>
+                <TouchableOpacity onPress={BookSeats}>
+                    <Text style={styles.buttonText}>Buy Tickets</Text>
                 </TouchableOpacity>
-
-
-            </ScrollView>
-        </View>
+            </View>
+        </ScrollView>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
+        display: 'flex',
         flex: 1,
-        backgroundColor: '#121212',
+        backgroundColor: COLORS.Black,
     },
-    scrollContent: {
-        padding: 20,
-    },
-    header: {
+    ImageBG: {
         width: '100%',
-    },
-    coverImage: {
-        width: '100%',
-        height: 200,
-        borderRadius:12,
+        aspectRatio: 3072 / 1727,
     },
     linearGradient: {
-        flex: 1,
-        justifyContent: 'flex-end',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
+        height: '100%',
     },
-    infoContainer: {
-        backgroundColor: 'transparent',
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: 'white',
-    },
-    subtitle: {
-        fontSize: 14,
-        color: 'lightgrey',
-        marginTop: 4,
-    },
-    screenContainer: {
-        alignItems: 'center',
-        marginBottom: 30,
-    },
-    screen: {
-        width: '90%',
-        height: 10,
-        backgroundColor: '#444444',
-        borderRadius: 5,
-        transform: [{ perspective: 100 }, { rotateX: '-10deg' }],
+    appHeaderContainer: {
+        marginHorizontal: SPACING.space_36,
+        marginTop: SPACING.space_20 * 2,
     },
     screenText: {
-        color: '#888888',
-        marginTop: 10,
-        fontSize: 12,
+        textAlign: 'center',
+        fontFamily: FONTFAMILY.poppins_regular,
+        fontSize: FONTSIZE.size_10,
+        color: COLORS.WhiteRGBA15,
     },
-    seatsContainer: {
-        alignItems: 'center',
+    seatContainer: {
+        marginVertical: SPACING.space_20,
     },
-    row: {
+    containerGap20: {
+        gap: SPACING.space_20,
+    },
+    seatRow: {
         flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 10,
-    },
-    rowLabel: {
-        color: '#888888',
-        width: 30,
-        textAlign: 'center',},
-    seat: {
-        width: 35,
-        height: 35,
-        margin: 3,
-        borderRadius: 8,
-        backgroundColor: '#2d2d2d',
+        gap: SPACING.space_20,
         justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#3d3d3d',
     },
-    selectedSeat: {
-        backgroundColor: '#0066cc',
-        borderColor: '#0077ee',
+    seatIcon: {
+        fontSize: FONTSIZE.size_24,
+        color: COLORS.White,
     },
-    takenSeat: {
-        backgroundColor: '#444444',
-        borderColor: '#555555',
-    },
-    seatText: {
-        color: '#ffffff',
-        fontSize: 12,
-    },
-    selectedSeatText: {
-        color: '#ffffff',
-    },
-    takenSeatText: {
-        color: '#666666',
-    },
-    legend: {
+    seatRadioContainer: {
         flexDirection: 'row',
+        marginTop: SPACING.space_36,
+        marginBottom: SPACING.space_10,
+        alignItems: 'center',
+        justifyContent: 'space-evenly',
+    },
+    radioContainer: {
+        flexDirection: 'row',
+        gap: SPACING.space_10,
+        alignItems: 'center',
+    },
+    radioIcon: {
+        fontSize: FONTSIZE.size_20,
+        color: COLORS.White,
+    },
+    radioText: {
+        fontFamily: FONTFAMILY.poppins_medium,
+        fontSize: FONTSIZE.size_12,
+        color: COLORS.White,
+    },
+    containerGap24: {
+        gap: SPACING.space_24,
+    },
+    dateContainer: {
+        width: SPACING.space_10 * 7,
+        height: SPACING.space_10 * 10,
+        borderRadius: SPACING.space_10 * 10,
+        backgroundColor: COLORS.DarkGrey,
+        alignItems: 'center',
         justifyContent: 'center',
-        marginTop: 30,
-        marginBottom: 20,
     },
-    legendItem: {
+    dateText: {
+        fontFamily: FONTFAMILY.poppins_medium,
+        fontSize: FONTSIZE.size_24,
+        color: COLORS.White,
+    },
+    dayText: {
+        fontFamily: FONTFAMILY.poppins_regular,
+        fontSize: FONTSIZE.size_12,
+        color: COLORS.White,
+    },
+    OutterContainer: {
+        marginVertical: SPACING.space_24,
+    },
+    timeContainer: {
+        paddingVertical: SPACING.space_10,
+        borderWidth: 1,
+        borderColor: COLORS.WhiteRGBA50,
+        paddingHorizontal: SPACING.space_20,
+        borderRadius: BORDERRADIUS.radius_25,
+        backgroundColor: COLORS.DarkGrey,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    timeText: {
+        fontFamily: FONTFAMILY.poppins_regular,
+        fontSize: FONTSIZE.size_14,
+        color: COLORS.White,
+    },
+    buttonPriceContainer: {
         flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        marginHorizontal: 10,
+        paddingHorizontal: 60,
+        paddingBottom: SPACING.space_24,
     },
-    legendSeat: {
-        width: 20,
-        height: 20,
-        borderRadius: 4,
-        backgroundColor: '#2d2d2d',
-        marginRight: 5,
-        borderWidth: 1,
-        borderColor: '#3d3d3d',
-    },
-    legendText: {
-        color: '#888888',
-        fontSize: 12,
-    },
-    summary: {
-        marginTop: 20,
-        padding: 15,
-        backgroundColor: '#1d1d1d',
-        borderRadius: 10,
+    priceContainer: {
         alignItems: 'center',
     },
-    summaryText: {
-        color: '#ffffff',
-        fontSize: 16,
-        marginBottom: 5,
+    totalPriceText: {
+        fontFamily: FONTFAMILY.poppins_regular,
+        fontSize: FONTSIZE.size_14,
+        color: COLORS.Grey,
     },
-    reserveButton: {
-        backgroundColor: '#0066cc',
-        padding: 15,
-        borderRadius: 10,
-        alignItems: 'center',
-        marginTop: 20,
+    price: {
+        fontFamily: FONTFAMILY.poppins_medium,
+        fontSize: FONTSIZE.size_24,
+        color: COLORS.White,
     },
-    disabledButton: {
-        backgroundColor: '#333333',
-    },
-    reserveButtonText: {
-        color: '#ffffff',
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    ticket: {
-        marginTop: 20,
-        padding: 20,
-        backgroundColor: '#1d1d1d',
-        borderRadius: 15,
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#0066cc',
-    },
-    ticketTitle: {
-        color: '#ffffff',
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 10,
-    },
-    ticketText: {
-        color: '#ffffff',
-        fontSize: 16,
-        marginBottom: 5,
+    buttonText: {
+        borderRadius: BORDERRADIUS.radius_25,
+        paddingHorizontal: SPACING.space_24,
+        paddingVertical: SPACING.space_10,
+        fontFamily: FONTFAMILY.poppins_semibold,
+        fontSize: FONTSIZE.size_16,
+        color: COLORS.White,
+        backgroundColor: COLORS.Orange,
     },
 });
 
-export default ReserveTicket;

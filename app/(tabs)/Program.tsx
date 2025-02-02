@@ -3,24 +3,23 @@ import { View, Text, Image, StyleSheet, ScrollView, FlatList, TouchableOpacity, 
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFonts } from 'expo-font';
 import { Ionicons } from '@expo/vector-icons';
+import {RouteProp, useNavigation} from "@react-navigation/native";
+import {StackNavigationProp} from "@react-navigation/stack";
+import {Movie, RootStackParamList} from "@/constants/Movie";
 
-interface Movie {
-    id: number;
-    title: string;
-    description: string;
-    poster: string;
-    projectionDate: string;
-    projectionTime: string;
-    genre: string[];
-    duration: string;
-    rating: string;
-    price: number;
-}
+
+type MovieDetailsRouteProp = RouteProp<RootStackParamList, "MovieDetails">;
+type NavigationProp = StackNavigationProp<RootStackParamList, 'Program'>;
+
+type MovieDetailsProps = {
+    route: MovieDetailsRouteProp;
+};
 
 const WeeklyMovieSchedule = () => {
     const [loaded] = useFonts({
         Satoshi: require('../../assets/fonts/Satoshi-Variable.ttf'),
     });
+    const navigation = useNavigation<NavigationProp>();
 
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
@@ -30,12 +29,12 @@ const WeeklyMovieSchedule = () => {
 
     if (!loaded) return null;
 
-    const movies: Movie[] = [
+    const movies = [
         {
             id: 1,
             title: 'Inception',
             description: 'Dream state secrets extraction thriller.',
-            poster: 'https://a.ltrbxd.com/resized/sm/upload/sv/95/s9/4j/inception-0-2000-0-3000-crop.jpg?v=30d7224316',
+            poster_url: 'https://a.ltrbxd.com/resized/sm/upload/sv/95/s9/4j/inception-0-2000-0-3000-crop.jpg?v=30d7224316',
             projectionDate: '2025-02-02',
             projectionTime: '20:00',
             genre: ['Sci-Fi', 'Action'],
@@ -47,8 +46,9 @@ const WeeklyMovieSchedule = () => {
             id: 2,
             title: 'The Dark Knight',
             description: 'Batman faces chaos unleashed by the Joker.',
-            poster: 'https://a.ltrbxd.com/resized/sm/upload/78/y5/zg/ej/oefdD26aey8GPdx7Rm45PNncJdU-0-2000-0-3000-crop.jpg?v=2d0ce4be25',
+            poster_url: 'https://a.ltrbxd.com/resized/sm/upload/78/y5/zg/ej/oefdD26aey8GPdx7Rm45PNncJdU-0-2000-0-3000-crop.jpg?v=2d0ce4be25',
             projectionDate: '2025-02-03',
+            cover_url:'https://image.tmdb.org/t/p/w500/1gKDAWgzHTbBM5OcWzhVBw4H3wt.jpg',
             projectionTime: '19:30',
             genre: ['Action', 'Drama'],
             duration: '2h 32min',
@@ -59,8 +59,9 @@ const WeeklyMovieSchedule = () => {
             id: 3,
             title: 'Interstellar',
             description: 'Explorers travel through a wormhole for humanity.',
-            poster: 'https://a.ltrbxd.com/resized/film-poster/1/1/7/6/2/1/117621-interstellar-0-2000-0-3000-crop.jpg?v=7ad89e6666',
+            poster_url: 'https://a.ltrbxd.com/resized/film-poster/1/1/7/6/2/1/117621-interstellar-0-2000-0-3000-crop.jpg?v=7ad89e6666',
             projectionDate: '2025-02-03',
+            cover_url:'https://image.tmdb.org/t/p/w500/1gKDAWgzHTbBM5OcWzhVBw4H3wt.jpg',
             projectionTime: '21:00',
             genre: ['Sci-Fi', 'Drama'],
             duration: '2h 49min',
@@ -70,7 +71,6 @@ const WeeklyMovieSchedule = () => {
     ];
 
     const genres = Array.from(new Set(movies.flatMap(movie => movie.genre)));
-
     const getNextWeekDates = () => {
         const today = new Date();
         return Array.from({ length: 7 }).map((_, index) => {
@@ -91,79 +91,6 @@ const WeeklyMovieSchedule = () => {
     const getMoviesForDay = (day: string) =>
         filteredMovies.filter((movie) => movie.projectionDate === day);
 
-    const handleBooking = (movie: Movie) => {
-        setSelectedMovie(movie);
-        setSelectedSeats([]);
-        setShowBookingModal(true);
-    };
-
-    const toggleSeat = (seatNumber: number) => {
-        setSelectedSeats(prev =>
-            prev.includes(seatNumber)
-                ? prev.filter(seat => seat !== seatNumber)
-                : [...prev, seatNumber]
-        );
-    };
-
-    const BookingModal = () => (
-        <Modal
-            animationType="slide"
-            transparent={true}
-            visible={showBookingModal}
-            onRequestClose={() => setShowBookingModal(false)}
-        >
-            <View style={styles.modalContainer}>
-                <View style={styles.modalContent}>
-                    <TouchableOpacity
-                        style={styles.closeButton}
-                        onPress={() => setShowBookingModal(false)}
-                    >
-                        <Ionicons name="close" size={24} color="#fff" />
-                    </TouchableOpacity>
-
-                    {selectedMovie && (
-                        <>
-                            <Text style={styles.modalTitle}>{selectedMovie.title}</Text>
-                            <Text style={styles.modalInfo}>
-                                {selectedMovie.projectionDate} at {selectedMovie.projectionTime}
-                            </Text>
-
-                            <View style={styles.seatsContainer}>
-                                {Array.from({ length: 30 }).map((_, index) => (
-                                    <TouchableOpacity
-                                        key={index}
-                                        style={[
-                                            styles.seat,
-                                            selectedSeats.includes(index + 1) && styles.selectedSeat
-                                        ]}
-                                        onPress={() => toggleSeat(index + 1)}
-                                    >
-                                        <Text style={styles.seatText}>{index + 1}</Text>
-                                    </TouchableOpacity>
-                                ))}
-                            </View>
-
-                            <View style={styles.bookingSummary}>
-                                <Text style={styles.summaryText}>
-                                    Selected seats: {selectedSeats.join(', ')}
-                                </Text>
-                                <Text style={styles.summaryText}>
-                                    Total: ${(selectedSeats.length * selectedMovie.price).toFixed(2)}
-                                </Text>
-                            </View>
-
-                            <TouchableOpacity
-                                style={styles.bookButton}
-                                onPress={() => setShowBookingModal(false)}
-                            >
-                                <Text style={styles.bookButtonText}>Confirm Booking</Text>
-                            </TouchableOpacity>
-                        </>
-                    )}
-                </View>
-            </View>
-        </Modal>
-    );
 
     return (
         <View style={styles.container}>
@@ -219,14 +146,14 @@ const WeeklyMovieSchedule = () => {
                                     data={dayMovies}
                                     keyExtractor={(item) => item.id.toString()}
                                     renderItem={({ item }) => (
-                                        <TouchableOpacity onPress={() => handleBooking(item)}>
+                                        <TouchableOpacity >
                                             <LinearGradient
                                                 colors={["#1C1C1C", "#121212"]}
                                                 start={{ x: 0, y: 0 }}
                                                 end={{ x: 1, y: 1 }}
                                                 style={styles.movieBox}
                                             >
-                                                <Image source={{ uri: item.poster }} style={styles.poster} />
+                                                <Image source={{ uri: item.poster_url }} style={styles.poster} />
                                                 <View style={styles.movieInfo}>
                                                     <Text style={styles.movieTitle}>{item.title}</Text>
                                                     <Text style={styles.movieDescription}>{item.description}</Text>
@@ -259,7 +186,6 @@ const WeeklyMovieSchedule = () => {
                 })}
             </ScrollView>
 
-            <BookingModal />
         </View>
     );
 };
@@ -278,7 +204,6 @@ const styles = StyleSheet.create({
         fontFamily: 'Satoshi',
         fontWeight: '700',
         marginBottom: 16,
-        textShadow: '0px 2px 4px rgba(0, 0, 0, 0.5)',
     },
     filterContainer: {
         marginBottom: 20,

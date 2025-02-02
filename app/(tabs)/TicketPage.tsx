@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
     Text,
     View,
@@ -8,65 +8,89 @@ import {
     Image,
 } from 'react-native';
 import AppHeader from '@/components/AppHeader';
-import { BORDERRADIUS, COLORS, FONTFAMILY, FONTSIZE, SPACING } from '@/theme/theme';
-import CustomIcon from '@/components/CustomIcon';
-import {useNavigation, useRouter} from "expo-router";
+import {
+    BORDERRADIUS,
+    COLORS,
+    FONTFAMILY,
+    FONTSIZE,
+    SPACING,
+} from '@/theme/theme';
 import {LinearGradient} from "expo-linear-gradient";
+import CustomIcon from '@/components/CustomIcon';
 import {Ionicons} from "@expo/vector-icons";
-import {StackNavigationProp} from "@react-navigation/stack";
-import {Movie, RootStackParamList} from "@/constants/Movie";
-import MovieDetails from "@/app/(tabs)/MovieDetails";
-import {RouteProp} from "@react-navigation/native";
 
-type NavigationProp = StackNavigationProp<RootStackParamList, 'ReserveTicket'>;
-type MovieDetailsRouteProp = RouteProp<RootStackParamList, "MovieDetails">;
-// Props interface for the ReserveTicket component
-type MovieDetailsProps = {
-    route: MovieDetailsRouteProp;
-};
+export default function TicketPage({navigation, route}: any){
+    const [ticketData, setTicketData] = useState<any>(route.params);
+    if (ticketData !== route.params && route.params != undefined) {
+        setTicketData(route.params);
+    }
 
-export default function TicketPage(Movie:MovieDetailsProps) {
+    if (ticketData == undefined || ticketData == null) {
+        return (
+            <View style={styles.container}>
+                <StatusBar hidden />
+                <View style={styles.appHeaderContainer}>
+                    <AppHeader
+                        name="close"
+                        header={'My Tickets'}
+                        action={() => navigation.goBack()}
+                    />
+                </View>
+            </View>
+        );
 
-    const navigation = useNavigation<NavigationProp>();
-    const movieDetails = Movie.route.params;
-
-    // Dynamic ticket data
-    const ticketData = {
-        ticketImage: movieDetails.movie.poster_url,
-        //Projection date
-        date: { date: '22 Jan 2025', day: 'Wednesday' },
-        time: '7:30 PM',
-        //seat number
-        seat: 'A1',
-    };
-    const router = useRouter()
+    }
     return (
         <View style={styles.container}>
             <StatusBar hidden />
             <View style={styles.appHeaderContainer}>
-                <AppHeader name="arrow-back-outline" header={'Ticket'} action={() => navigation.navigate("ReserveTicket",Movie)} />
+                <AppHeader
+                    name="close"
+                    header={'My Tickets'}
+                    action={() => navigation.goBack()}
+                />
             </View>
 
             <View style={styles.ticketContainer}>
-                <ImageBackground source={{ uri: ticketData.ticketImage }} style={styles.ticketBGImage}>
-                    <LinearGradient colors={[COLORS.OrangeRGBA0, '#E31837']} style={styles.linearGradient}>
-                        <View style={[styles.blackCircle, { position: 'absolute', bottom: -40, left: -40 }]} />
-                        <View style={[styles.blackCircle, { position: 'absolute', bottom: -40, right: -40 }]} />
+                <ImageBackground
+                    source={{uri: ticketData?.ticketImage}}
+                    style={styles.ticketBGImage}>
+                    <LinearGradient
+                        colors={[COLORS.OrangeRGBA0, COLORS.Orange]}
+                        style={styles.linearGradient}>
+                        <View
+                            style={[
+                                styles.blackCircle,
+                                {position: 'absolute', bottom: -40, left: -40},
+                            ]}></View>
+                        <View
+                            style={[
+                                styles.blackCircle,
+                                {position: 'absolute', bottom: -40, right: -40},
+                            ]}></View>
                     </LinearGradient>
                 </ImageBackground>
                 <View style={styles.linear}></View>
 
                 <View style={styles.ticketFooter}>
-                    <View style={[styles.blackCircle, { position: 'absolute', top: -40, left: -40 }]} />
-                    <View style={[styles.blackCircle, { position: 'absolute', top: -40, right: -40 }]} />
+                    <View
+                        style={[
+                            styles.blackCircle,
+                            {position: 'absolute', top: -40, left: -40},
+                        ]}></View>
+                    <View
+                        style={[
+                            styles.blackCircle,
+                            {position: 'absolute', top: -40, right: -40},
+                        ]}></View>
                     <View style={styles.ticketDateContainer}>
                         <View style={styles.subtitleContainer}>
-                            <Text style={styles.dateTitle}>{ticketData.date.date}</Text>
-                            <Text style={styles.subtitle}>{ticketData.date.day}</Text>
+                            <Text style={styles.dateTitle}>11 feb</Text>
+                            <Text style={styles.subtitle}>saturday</Text>
                         </View>
                         <View style={styles.subtitleContainer}>
-                            <Ionicons name="time-outline" size={20} color="white" style={styles.clockIcon} />
-                            <Text style={styles.subtitle}>{ticketData.time}</Text>
+                            <Ionicons name="time-outline" style={styles.clockIcon} />
+                            <Text style={styles.subtitle}>9:00 PM</Text>
                         </View>
                     </View>
                     <View style={styles.ticketSeatContainer}>
@@ -81,10 +105,15 @@ export default function TicketPage(Movie:MovieDetailsProps) {
                         <View style={styles.subtitleContainer}>
                             <Text style={styles.subheading}>Seats</Text>
                             <Text style={styles.subtitle}>
-                                {ticketData.seat}
+                                {ticketData?.seatArray
+                                    .slice(0, 3)
+                                    .map((item: any, index: number, arr: any) => {
+                                        return item + (index == arr.length - 1 ? '' : ', ');
+                                    })}
                             </Text>
                         </View>
                     </View>
+
                 </View>
             </View>
         </View>
@@ -122,11 +151,11 @@ const styles = StyleSheet.create({
         borderTopWidth: 3,
         width: 300,
         alignSelf: 'center',
-        backgroundColor: '#181b20',
+        backgroundColor: COLORS.Orange,
         borderStyle: 'dashed',
     },
     ticketFooter: {
-        backgroundColor: '#E31837',
+        backgroundColor: COLORS.Orange,
         width: 300,
         alignItems: 'center',
         paddingBottom: SPACING.space_36,

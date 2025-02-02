@@ -11,14 +11,14 @@ import {
     KeyboardAvoidingView,
 } from "react-native";
 import { Colors } from "@/constants/Colors";
-import {useNavigation, useRouter} from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
 import MovieCard from "@/components/MovieCard";
 import { Ionicons } from "@expo/vector-icons";
-import { RouteProp} from "@react-navigation/native";
+import { RouteProp } from "@react-navigation/native";
 import { RootStackParamList, Movie } from "@/constants/Movie";
 import { LinearGradient } from "expo-linear-gradient";
 import ProfilePic from "@/components/ProfilePic";
-import {StackNavigationProp} from "@react-navigation/stack";
+import { StackNavigationProp } from "@react-navigation/stack";
 
 type MovieDetailsRouteProp = RouteProp<RootStackParamList, "MovieDetails">;
 type NavigationProp = StackNavigationProp<RootStackParamList, 'Popular'>;
@@ -27,7 +27,7 @@ type MovieDetailsProps = {
     route: MovieDetailsRouteProp;
 };
 
-const MovieDetails: React.FC<MovieDetailsProps> = ({ route }) => {
+export default function MovieDetails ({ route }:any) {
     const router = useRouter();
     // @ts-ignore
     const { movie } = route.params;
@@ -48,7 +48,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ route }) => {
                 <Ionicons
                     name={index < rating ? "star" : "star-outline"}
                     size={30}
-                    color={Colors.theme.starColor}
+                    color="#FFD700" // Gold color for stars
                 />
             </TouchableOpacity>
         ));
@@ -68,7 +68,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ route }) => {
                 <Ionicons
                     name="arrow-back"
                     size={30}
-                    color={Colors.theme.textColorSmall}
+                    color="#FFFFFF" // White color for back button
                 />
             </TouchableOpacity>
 
@@ -76,7 +76,7 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ route }) => {
             <View style={styles.coverContainer}>
                 <Image source={{ uri: movie.cover_url }} style={styles.cover} />
                 <LinearGradient
-                    colors={["transparent", Colors.theme.background]}
+                    colors={["transparent", "#0A0A0A"]} // Dark gradient
                     style={styles.lineargrad}
                 />
             </View>
@@ -131,16 +131,14 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ route }) => {
             <View style={styles.ratingSection}>
                 <Text style={styles.ratingTitle}>Ratings</Text>
                 <View style={styles.starsContainer}>
-                    <Ionicons name="star" size={15} color={Colors.theme.starColor} />
-                    <Ionicons name="star" size={15} color={Colors.theme.starColor} />
-                    <Ionicons name="star" size={15} color={Colors.theme.starColor} />
+                    <Ionicons name="star" size={15} color="#FFD700" />
+                    <Ionicons name="star" size={15} color="#FFD700" />
+                    <Ionicons name="star" size={15} color="#FFD700" />
                 </View>
                 <Text style={styles.ratingTitle}>{movie.Evaluation}</Text>
             </View>
 
             <View style={styles.separator} />
-
-
 
             {/* Rate, log, and review action */}
             <TouchableOpacity onPress={toggleModal}>
@@ -156,17 +154,12 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ route }) => {
             </TouchableOpacity>
             <View style={styles.separator} />
 
-
-
             {/* Go Back Button */}
             <TouchableOpacity onPress={() => router.back()}>
                 <View style={styles.rate}>
                     <Text style={{ color: "white" }}>Go Back to Popular</Text>
                 </View>
             </TouchableOpacity>
-
-
-
 
             {/* Modal */}
             <Modal
@@ -190,12 +183,15 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ route }) => {
                             </View>
 
                             {/* Options List */}
-                            <TouchableOpacity onPress={() => {
-                                toggleModal(); // Close the modal
-                                //@ts-ignore
-                                navigation.navigate("ReserveTicket", {movie})}}
-                                              style={styles.reserveTicket}>
-                                <Ionicons name='ticket' size={25} color='white'/>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    toggleModal(); // Close the modal
+                                    //@ts-ignore
+                                    navigation.navigate("ReserveTicket", { movie });
+                                }}
+                                style={styles.reserveTicket}
+                            >
+                                <Ionicons name='ticket' size={25} color='white' />
                                 <Text style={styles.modalButtonText}>Reserve Ticket</Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.modalButton}>
@@ -215,48 +211,40 @@ const MovieDetails: React.FC<MovieDetailsProps> = ({ route }) => {
     );
 };
 
-
-
-
-
-
 const styles = StyleSheet.create({
     background: { flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' },
-    separator: { height: 0.25, backgroundColor: Colors.theme.cardBorder, marginVertical: 10 },
-    container: { flex: 1, backgroundColor: Colors.theme.background },
+    separator: { height: 0.25, backgroundColor: "#333333", marginVertical: 10 }, // Darker separator
+    container: { flex: 1, backgroundColor: "#0A0A0A" }, // Dark background
     coverContainer: { width: '100%', height: 200, position: 'relative' },
     cover: { width: '100%', height: '100%', resizeMode: 'cover' },
     lineargrad: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 },
-    detailsContainer: { flexDirection: 'row', paddingHorizontal: 20, paddingVertical: 5, backgroundColor: Colors.theme.background },
+    detailsContainer: { flexDirection: 'row', paddingHorizontal: 20, paddingVertical: 5, backgroundColor: "#0A0A0A" }, // Dark background
     movieInfos: { justifyContent: 'center' },
     cardContainer: { justifyContent: 'center', alignItems: 'center' },
-    title: { fontSize: 25, color: Colors.theme.BigTitle, fontWeight: 'bold', marginBottom: 10 },
-    subtitle: { marginTop: 13, fontSize: 14, color: Colors.theme.InactiveTint, marginBottom: 10 },
-    titleDescription: { fontWeight: 400, color: Colors.theme.tabIconDefault, marginBottom: 10 },
-    description: { fontWeight: 300, fontSize: 14, color: Colors.theme.textColorSmall },
+    title: { fontSize: 25, color: "#FFFFFF", fontWeight: 'bold', marginBottom: 10 }, // White text
+    subtitle: { marginTop: 13, fontSize: 14, color: "#8899AA", marginBottom: 10 }, // Lighter text
+    titleDescription: { fontWeight: 400, color: "#8899AA", marginBottom: 10 }, // Lighter text
+    description: { fontWeight: 300, fontSize: 14, color: "#8899AA" }, // Lighter text
     disContainer: { paddingVertical: 10, paddingHorizontal: 20 },
-    directedBy: { marginTop: 12, fontWeight: 300, color: Colors.theme.tabIconDefault },
-    directedByperson: { color: Colors.theme.tabIconDefault, fontWeight: 'bold', fontSize: 14 },
+    directedBy: { marginTop: 12, fontWeight: 300, color: "#8899AA" }, // Lighter text
+    directedByperson: { color: "#FFFFFF", fontWeight: 'bold', fontSize: 14 }, // White text
     adSection: { alignItems: 'center', justifyContent: 'center', padding: 10 },
-    adBanner: { width: '100%', height: 90, borderRadius: 3, backgroundColor: '#ccc', padding: 20 },
+    adBanner: { width: '100%', height: 90, borderRadius: 3, backgroundColor: '#333333', padding: 20 }, // Darker ad banner
     removeAdButton: { borderRadius: 5, alignItems: 'center' },
     ratingSection: { alignItems: 'center', flexDirection: 'row', justifyContent: 'center' },
-    ratingTitle: { fontSize: 15, fontWeight: 200, color: '#ffffff' },
+    ratingTitle: { fontSize: 15, fontWeight: 200, color: '#FFFFFF' }, // White text
     starsContainer: { marginHorizontal: 20, flexDirection: 'row', justifyContent: 'space-between' },
     rate: { alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20, margin: 10 },
-    containerRate: { alignItems: 'center', padding: 4, backgroundColor: Colors.theme.button, borderColor: '#fff', justifyContent: 'center', borderRadius: 10, flexDirection: 'row', height: 40, paddingHorizontal: 20 },
-    modalOverlay: { flex: 1, backgroundColor: "rgba(0, 0, 0, 0.5)", justifyContent: "flex-end" },
-    modalContainer: { width: "100%", backgroundColor: Colors.theme.background, padding: 20, borderRadius: 10, alignItems: "center" },
-    bottomModal: { width: "100%", backgroundColor: Colors.theme.background, padding: 20, borderTopLeftRadius: 20, borderTopRightRadius: 20, alignItems: "center" },
+    containerRate: { alignItems: 'center', padding: 4, backgroundColor: "#333333", borderColor: '#fff', justifyContent: 'center', borderRadius: 10, flexDirection: 'row', height: 40, paddingHorizontal: 20 }, // Darker button
+    modalOverlay: { flex: 1, backgroundColor: "rgba(0, 0, 0, 0.7)", justifyContent: "flex-end" }, // Darker overlay
+    modalContainer: { width: "100%", backgroundColor: "#0A0A0A", padding: 20, borderRadius: 10, alignItems: "center" }, // Dark background
+    bottomModal: { width: "100%", backgroundColor: "#0A0A0A", padding: 20, borderTopLeftRadius: 20, borderTopRightRadius: 20, alignItems: "center" }, // Dark background
     reserveTicket: { flexDirection: 'row', justifyContent: 'center', width: "100%", backgroundColor: "#118B50", padding: 15, borderRadius: 5, alignItems: "center", marginVertical: 5 },
-    modalTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 20, color: Colors.theme.textColorSmall, marginHorizontal: 20 },
-    modalButton: { width: "100%", padding: 15, backgroundColor: Colors.theme.button, borderRadius: 5, alignItems: "center", marginVertical: 5 },
+    modalTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 20, color: "#FFFFFF", marginHorizontal: 20 }, // White text
+    modalButton: { width: "100%", padding: 15, backgroundColor: "#333333", borderRadius: 5, alignItems: "center", marginVertical: 5 }, // Darker button
     modalButtonText: { color: "white", fontSize: 16, paddingHorizontal: 20 },
-    closeButton: { backgroundColor: Colors.theme.cardBorder },
+    closeButton: { backgroundColor: "#333333" }, // Darker button
     modalRatingSection: { alignItems: "center", marginVertical: 10 },
     starRatingContainer: { flexDirection: "row", justifyContent: "center", marginVertical: 10 }
 });
 
-
-
-export default MovieDetails;

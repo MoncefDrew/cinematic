@@ -1,4 +1,5 @@
 import {fetchFilms} from "@/api/MoviesApi";
+import MovieDetails from "@/app/(tabs)/MovieDetails";
 
 export type RootStackParamList = {
     Landing: undefined;
@@ -7,22 +8,25 @@ export type RootStackParamList = {
     MainApp: undefined; // For the drawer navigator
     MovieDetails:undefined;
     Popular:undefined;
-    ReserveTicket:undefined;
+    ReserveTicket:{Movie:Movie};
     TicketPage:undefined;
+    Program:undefined;
 };
 
 
 export interface Movie {
-    id: string;
+    id: string|number;
     poster_url: string;
     title: string;
     cover_url?: string;
     release_date?: number;
     description?: string;
-    genre?:[string];
-    duration?:number;
+    genre?:string[] | undefined;
+    duration?: number | string;
     directedBy?: string;
 }
+
+
 
 //Movies list for Movies vote testing
 export const moviesVotes = [
