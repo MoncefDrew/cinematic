@@ -13,6 +13,8 @@ export type RootDrawerParamList = {
     '(tabs)/MovieDetails': undefined;
     'auth/sign-in': undefined;
     'auth/sign-up': undefined;
+    '(tabs)/TicketPage':undefined;
+    '(tabs)/ReserveTicket':undefined;
 };
 
 export type MovieDetailsScreenNavigationProp = DrawerNavigationProp<

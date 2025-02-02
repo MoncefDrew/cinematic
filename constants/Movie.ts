@@ -7,6 +7,8 @@ export type RootStackParamList = {
     MainApp: undefined; // For the drawer navigator
     MovieDetails:undefined;
     Popular:undefined;
+    ReserveTicket:undefined;
+    TicketPage:undefined;
 };
 
 

@@ -23,6 +23,7 @@ import { supabase } from '@/lib/supabase';
 import LogOut from "@/components/LogOut";
 import SignUpPage from './auth/sign-up';
 import SignInPage from './auth/sign-in';
+import TicketPage from "@/app/(tabs)/TicketPage";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -202,6 +203,23 @@ function MainApp() {
                     headerLeft: () => null,
                 }}
             />
+
+            <Drawer.Screen
+                name="TicketPage"
+                component={TicketPage}
+                options={{
+                    drawerItemStyle: { display: 'none' },
+
+                    headerTitle: '',
+                    headerStyle: {
+                        height: 0,
+                    },
+                    headerTransparent: true,
+                    headerLeft: () => null,
+                }}
+            />
+
+
         </Drawer.Navigator>
     );
 }

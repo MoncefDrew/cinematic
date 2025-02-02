@@ -9,14 +9,17 @@ import {
     Alert,
     Modal ,
     Animated,
+    ImageBackground,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Colors } from "@/constants/Colors";
 import { RootStackParamList } from "@/constants/Movie";
-import { RouteProp } from "@react-navigation/native";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { RouteProp} from "@react-navigation/native";
+import {router, useNavigation, useRouter} from "expo-router";
 import {StatusBar} from "expo-status-bar";
+import {StackNavigationProp} from "@react-navigation/stack";
+import {COLORS} from "@/theme/theme";
+import AppHeader from "@/components/AppHeader";
 // Type definition for the route parameters expected by the MovieDetails screen
 type MovieDetailsRouteProp = RouteProp<RootStackParamList, "MovieDetails">;
 // Props interface for the ReserveTicket component
@@ -43,10 +46,13 @@ const ROWS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 const SEATS_PER_ROW = 8;
 const TICKET_PRICE = 12.99;
 
+type NavigationProp = StackNavigationProp<RootStackParamList, 'MovieDetails'>;
 
 
 const ReserveTicket: React.FC<MovieDetailsProps> = (movie) => {
-    const Movie = movie.route.params;
+    const navigation = useNavigation<NavigationProp>();
+
+    const Movie  = movie.route.params;
     const [selectedSeat, setSelectedSeat] = useState<string | null>(null);
     const [takenSeats] = useState<string[]>(['A3', 'B5', 'C7', 'D4', 'E2', 'F6']);
     const [showTicket, setShowTicket] = useState(false);
@@ -57,17 +63,15 @@ const ReserveTicket: React.FC<MovieDetailsProps> = (movie) => {
         setSelectedSeat((prev) => (prev === seatId ? null : seatId));
     };
 
+
+
+    const router = useRouter();
     const handleReservation = () => {
         if (!selectedSeat) {
             Alert.alert("Select a Seat", "Please select a seat to continue.");
 
         }
-        setShowTicket(true);
-        Animated.timing(fadeAnim, {
-            toValue: 1,
-            duration: 500,
-            useNativeDriver: true,
-        }).start();
+
     };
 
     const renderSeat = (row: string, seatNumber: number) => {
@@ -97,17 +101,34 @@ const ReserveTicket: React.FC<MovieDetailsProps> = (movie) => {
         );
     };
 
+    const TicketInfos = {
+
+    }
+
+    // @ts-ignore
     return (
         <View style={styles.container}>
             <StatusBar style="light" />
-            <ScrollView contentContainerStyle={styles.scrollContent}>
                 <View style={styles.header}>
-                    <Image source={Movie.movie.cover_url}/>
-                    <Text style={styles.title}>{Movie.movie.title}</Text>
-                    <Text style={styles.subtitle}>
-                        {Movie.movie.duration} • {Movie.movie.dateReleased}
-                    </Text>
+                    <ImageBackground
+                        style={styles.coverImage}
+                        source={{ uri: Movie.movie.cover_url }}
+                    >
+                        <LinearGradient
+                            colors={['transparent', '#121212']}
+                            style={styles.linearGradient}
+                        >
+                            <View style={styles.infoContainer}>
+                                <Text style={styles.title}>{Movie.movie.title}</Text>
+                                <Text style={styles.subtitle}>
+                                    {Movie.movie.duration} • {Movie.movie.dateReleased}
+                                </Text>
+                            </View>
+                        </LinearGradient>
+                    </ImageBackground>
                 </View>
+            <ScrollView contentContainerStyle={styles.scrollContent}>
+
 
                 <View style={styles.screenContainer}>
                     <View style={styles.screen} />
@@ -149,7 +170,7 @@ const ReserveTicket: React.FC<MovieDetailsProps> = (movie) => {
 
                 <TouchableOpacity
                     style={[styles.reserveButton, !selectedSeat && styles.disabledButton]}
-                    onPress={handleReservation}
+                    onPress={()=>{navigation.navigate("TicketPage",Movie)}}
                     disabled={!selectedSeat}
                 >
                     <Text style={styles.reserveButtonText}>
@@ -172,19 +193,31 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     header: {
-        marginBottom: 30,
-        alignItems: 'center',
+        width: '100%',
+    },
+    coverImage: {
+        width: '100%',
+        height: 200,
+        borderRadius:12,
+    },
+    linearGradient: {
+        flex: 1,
+        justifyContent: 'flex-end',
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+    },
+    infoContainer: {
+        backgroundColor: 'transparent',
     },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: '#ffffff',
-        textAlign: 'center',
+        color: 'white',
     },
     subtitle: {
-        fontSize: 16,
-        color: '#888888',
-        marginTop: 5,
+        fontSize: 14,
+        color: 'lightgrey',
+        marginTop: 4,
     },
     screenContainer: {
         alignItems: 'center',
@@ -213,8 +246,7 @@ const styles = StyleSheet.create({
     rowLabel: {
         color: '#888888',
         width: 30,
-        textAlign: 'center',
-    },
+        textAlign: 'center',},
     seat: {
         width: 35,
         height: 35,
