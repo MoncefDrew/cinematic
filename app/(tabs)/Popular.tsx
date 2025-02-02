@@ -1,31 +1,34 @@
-import React, { useEffect, useState } from "react";
-import { FlatList, Image, Text, View, StyleSheet } from "react-native";
+import React, { useEffect } from "react";
+import { FlatList, Text, View, StyleSheet } from "react-native";
 import MovieCard from "@/components/MovieCard";
-import { Colors } from "@/constants/Colors";
 import { useFonts } from "expo-font";
-import { fetchFilms, MostRatedFilms } from "@/api/MoviesApi"; // Ensure the correct path
-import { Movie } from "@/constants/Movie";
+import { useMovieStore } from '@/api/store/moviesStore'; // Adjust path as needed
 
 export default function Popular() {
-    const [movies, setMovies] = useState<Movie[]>([]);
+    const {
+        movies,
+        loading,
+        error,
+        fetchPopular
+    } = useMovieStore();
+
     const [loaded] = useFonts({
         Satoshi: require("../../assets/fonts/Satoshi-Variable.ttf"),
     });
 
-    // Fetch movies on component mount
+    // Fetch popular movies on component mount
     useEffect(() => {
-        const getMovies = async () => {
-            const fetchedMovies = await MostRatedFilms();
-            setMovies(fetchedMovies);
-        };
-        getMovies().then(r =>console.log(r) );
+        fetchPopular();
     }, []);
 
-    const handleMoviePress = (id: number) => {
+    const handleMoviePress = (id: string) => {
         console.log(`Movie ${id} pressed!`);
     };
 
-    // @ts-ignore
+    if (!loaded) {
+        return null;
+    }
+
     return (
         <View style={styles.main}>
             <View style={styles.welcome}>
@@ -38,13 +41,19 @@ export default function Popular() {
 
             {/* Popular Movies */}
             <Text style={styles.heading}>Popular Movies</Text>
-            <FlatList
-                data={movies}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => <MovieCard movie={item} />}
-            />
+            {loading ? (
+                <Text style={styles.text}>Loading...</Text>
+            ) : error ? (
+                <Text style={[styles.text, styles.error]}>{error}</Text>
+            ) : (
+                <FlatList
+                    data={movies}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({ item }) => <MovieCard movie={item} />}
+                />
+            )}
         </View>
     );
 }
@@ -53,35 +62,38 @@ const styles = StyleSheet.create({
     main: {
         height: "100%",
         flex: 1,
-        backgroundColor: "#0A0A0A", // Dark background for cinematic feel
+        backgroundColor: "#0A0A0A",
         padding: 20,
     },
     heading: {
         marginTop: 10,
-        color: "#FFFFFF", // White color for text
-        fontSize: 24, // Larger font size for headings
+        color: "#FFFFFF",
+        fontSize: 24,
         marginBottom: 20,
         fontFamily: "Satoshi",
-        fontWeight: "bold", // Bold font for headings
+        fontWeight: "bold",
     },
     text: {
         textAlign: "center",
-        color: "#8899AA", // Lighter color for secondary text
+        color: "#8899AA",
         fontWeight: "400",
-        fontSize: 16, // Slightly larger font size for readability
+        fontSize: 16,
+    },
+    error: {
+        color: "#FF4444",
     },
     welcome: {
         padding: 20,
-        backgroundColor: "#1A1A1A", // Darker background for the welcome section
-        borderColor: "#333333", // Subtle border color
-        borderRadius: 8, // Rounded corners
+        backgroundColor: "#1A1A1A",
+        borderColor: "#333333",
+        borderRadius: 8,
         alignItems: "center",
         borderWidth: 1,
         marginTop: 10,
-        shadowColor: "#000", // Adding shadow for depth
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.8,
         shadowRadius: 2,
-        elevation: 5, // Elevation for Android
+        elevation: 5,
     },
 });

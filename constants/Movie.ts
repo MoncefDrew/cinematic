@@ -1,4 +1,3 @@
-import {fetchFilms} from "@/api/MoviesApi";
 import MovieDetails from "@/app/(tabs)/MovieDetails";
 
 export type RootStackParamList = {
@@ -74,7 +73,3 @@ export const moviesVotes = [
 ]
 
 
-
-//movies list
-const moviesList: Promise<T | any[]> =  fetchFilms();
-export default moviesList;
