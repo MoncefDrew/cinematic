@@ -49,7 +49,7 @@ export default function TicketPage(Movie:MovieDetailsProps) {
 
             <View style={styles.ticketContainer}>
                 <ImageBackground source={{ uri: ticketData.ticketImage }} style={styles.ticketBGImage}>
-                    <LinearGradient colors={[COLORS.OrangeRGBA0, '#181b20']} style={styles.linearGradient}>
+                    <LinearGradient colors={[COLORS.OrangeRGBA0, '#E31837']} style={styles.linearGradient}>
                         <View style={[styles.blackCircle, { position: 'absolute', bottom: -40, left: -40 }]} />
                         <View style={[styles.blackCircle, { position: 'absolute', bottom: -40, right: -40 }]} />
                     </LinearGradient>
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
         borderStyle: 'dashed',
     },
     ticketFooter: {
-        backgroundColor: '#181b20',
+        backgroundColor: '#E31837',
         width: 300,
         alignItems: 'center',
         paddingBottom: SPACING.space_36,

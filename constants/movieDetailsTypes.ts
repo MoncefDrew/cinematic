@@ -1,5 +1,6 @@
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { RouteProp } from '@react-navigation/native';
+import {Movie} from "@/constants/Movie";
 
 export type RootDrawerParamList = {
     '(tabs)/Popular': undefined;
@@ -14,7 +15,7 @@ export type RootDrawerParamList = {
     'auth/sign-in': undefined;
     'auth/sign-up': undefined;
     '(tabs)/TicketPage':undefined;
-    '(tabs)/ReserveTicket':undefined;
+    '(tabs)/ReserveTicket':{Movie:Movie};
 };
 
 export type MovieDetailsScreenNavigationProp = DrawerNavigationProp<

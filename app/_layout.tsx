@@ -1,5 +1,4 @@
 import { useFonts } from 'expo-font';
-import { Colors } from "@/constants/Colors";
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from "@react-navigation/drawer";
 import { createStackNavigator } from '@react-navigation/stack';
 import React, { useEffect, useState } from 'react';
@@ -17,7 +16,7 @@ import ProfileHeader from "@/components/ProfileHeader";
 import SearchButton from "@/components/SearchButton";
 import MovieDetails from "@/app/(tabs)/MovieDetails";
 import ReserveTicket from "@/app/(tabs)/ReserveTicket";
-import { Alert, TouchableOpacity, View } from "react-native";
+import { Alert, TouchableOpacity, View, StyleSheet } from "react-native";
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import LogOut from "@/components/LogOut";
@@ -27,6 +26,18 @@ import TicketPage from "@/app/(tabs)/TicketPage";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
+
+// Modern Cinematic Theme Colors
+const CinematicColors = {
+    background: '#0A0A0A',
+    secondary: '#1A1A1A',
+    border: '#2A2A2A',
+    accent: '#E31837', // Cinema red
+    accentSoft: 'rgba(227, 24, 55, 0.15)', // Soft red for active states
+    text: '#FFFFFF',
+    textSecondary: '#B8B8B8',
+    highlight: '#3E7BFA', // Electric blue for special highlights
+};
 
 // Root Layout Component
 export default function RootLayout() {
@@ -46,10 +57,7 @@ export default function RootLayout() {
         });
     }, []);
 
-
-    if (!loaded) {
-        return null; // Render a loading screen while fonts are loading
-    }
+    if (!loaded) return null;
 
     return (
         <>
@@ -59,45 +67,68 @@ export default function RootLayout() {
     );
 }
 
-// Main App Drawer (after login)
+// Custom Drawer Content Component
+function CustomDrawerContent(props: any) {
+    return (
+        <DrawerContentScrollView
+            {...props}
+            style={styles.drawerScrollView}
+        >
+            <View style={styles.profileContainer}>
+                <ProfileHeader />
+            </View>
+            <DrawerItemList {...props} />
+            <View style={styles.logoutContainer}>
+                <LogOut {...props} />
+            </View>
+        </DrawerContentScrollView>
+    );
+}
+
+// Main App Drawer Navigation
 function MainApp() {
     return (
         <Drawer.Navigator
             screenOptions={{
-                drawerContentStyle: {},
+                drawerContentStyle: {
+                    paddingTop: 0,
+                },
                 drawerStyle: {
-                    backgroundColor: Colors.theme.background,
+                    backgroundColor: CinematicColors.background,
                     width: 280,
-                    borderTopRightRadius: 10,
-                    borderBottomRightRadius: 10,
+                    borderTopRightRadius: 16,
+                    borderBottomRightRadius: 16,
+                    borderRightWidth: 1,
+                    borderColor: CinematicColors.border,
                 },
                 drawerItemStyle: {
-                    borderRadius: 6,
+                    borderRadius: 8,
+                    marginHorizontal: 12,
+                    marginVertical: 4,
                 },
-                drawerActiveTintColor: Colors.theme.Activetint,
-                drawerInactiveTintColor: Colors.theme.currentTab,
-                drawerActiveBackgroundColor: Colors.theme.currentTab,
+                drawerActiveTintColor: CinematicColors.accent,
+                drawerInactiveTintColor: CinematicColors.textSecondary,
+                drawerActiveBackgroundColor: CinematicColors.accentSoft,
                 drawerLabelStyle: {
+                    fontFamily: 'Satoshi',
                     fontSize: 15,
+                    marginLeft: -20,
                 },
                 headerStyle: {
-                    backgroundColor: '#445566',
+                    backgroundColor: CinematicColors.background,
+                    borderBottomWidth: 1,
+                    borderBottomColor: CinematicColors.border,
+                    elevation: 0,
+                    shadowOpacity: 0,
                 },
-                headerTintColor: '#ffffff',
+                headerTintColor: CinematicColors.text,
                 headerTitleStyle: {
                     fontFamily: 'Satoshi',
                     fontSize: 18,
+                    color: CinematicColors.text,
                 },
             }}
-            drawerContent={(props) => (
-                <DrawerContentScrollView {...props}>
-                    <View style={{ marginBottom: 30, padding: 25 }}>
-                        <ProfileHeader />
-                    </View>
-                    <DrawerItemList {...props} />
-                    <LogOut {...props} />
-                </DrawerContentScrollView>
-            )}
+            drawerContent={(props) => <CustomDrawerContent {...props} />}
         >
             <Drawer.Screen
                 name="Popular"
@@ -106,7 +137,7 @@ function MainApp() {
                     drawerLabel: 'Popular',
                     headerTitle: 'Popular',
                     drawerIcon: ({ size, color }) => (
-                        <Ionicons name="copy" size={size} color={color} style={{ marginRight: 25 }} />
+                        <Ionicons name="copy" size={size} color={color} style={styles.drawerIcon} />
                     ),
                 }}
             />
@@ -117,7 +148,7 @@ function MainApp() {
                     drawerLabel: 'Search',
                     headerTitle: '',
                     drawerIcon: ({ size, color }) => (
-                        <Ionicons name="search" size={size} color={color} style={{ marginRight: 25 }} />
+                        <Ionicons name="search" size={size} color={color} style={styles.drawerIcon} />
                     ),
                     headerRight: () => <SearchButton />,
                 }}
@@ -129,7 +160,7 @@ function MainApp() {
                     drawerLabel: 'Profile',
                     headerTitle: 'Profile',
                     drawerIcon: ({ size, color }) => (
-                        <Ionicons name="person" size={size} color={color} style={{ marginRight: 25 }} />
+                        <Ionicons name="person" size={size} color={color} style={styles.drawerIcon} />
                     ),
                 }}
             />
@@ -140,7 +171,7 @@ function MainApp() {
                     drawerLabel: 'Watch list',
                     headerTitle: 'Watchlist',
                     drawerIcon: ({ size, color }) => (
-                        <Ionicons name="time" size={size} color={color} style={{ marginRight: 25 }} />
+                        <Ionicons name="time" size={size} color={color} style={styles.drawerIcon} />
                     ),
                 }}
             />
@@ -151,7 +182,7 @@ function MainApp() {
                     drawerLabel: 'Program',
                     headerTitle: 'Program',
                     drawerIcon: ({ size, color }) => (
-                        <Ionicons name="calendar" size={size} color={color} style={{ marginRight: 25 }} />
+                        <Ionicons name="calendar" size={size} color={color} style={styles.drawerIcon} />
                     ),
                 }}
             />
@@ -162,7 +193,7 @@ function MainApp() {
                     drawerLabel: 'Activity',
                     headerTitle: 'Activity',
                     drawerIcon: ({ size, color }) => (
-                        <Ionicons name="bar-chart" size={size} color={color} style={{ marginRight: 25 }} />
+                        <Ionicons name="bar-chart" size={size} color={color} style={styles.drawerIcon} />
                     ),
                 }}
             />
@@ -173,7 +204,7 @@ function MainApp() {
                     drawerLabel: 'Settings',
                     headerTitle: 'Settings',
                     drawerIcon: ({ size, color }) => (
-                        <Ionicons name="settings" size={size} color={color} style={{ marginRight: 25 }} />
+                        <Ionicons name="settings" size={size} color={color} style={styles.drawerIcon} />
                     ),
                 }}
             />
@@ -185,6 +216,7 @@ function MainApp() {
                     headerTitle: '',
                     headerStyle: {
                         height: 0,
+                        backgroundColor: 'transparent',
                     },
                     headerTransparent: true,
                     headerLeft: () => null,
@@ -198,36 +230,39 @@ function MainApp() {
                     headerTitle: '',
                     headerStyle: {
                         height: 0,
+                        backgroundColor: 'transparent',
                     },
                     headerTransparent: true,
                     headerLeft: () => null,
                 }}
             />
-
             <Drawer.Screen
                 name="TicketPage"
                 component={TicketPage}
                 options={{
                     drawerItemStyle: { display: 'none' },
-
                     headerTitle: '',
                     headerStyle: {
                         height: 0,
+                        backgroundColor: 'transparent',
                     },
                     headerTransparent: true,
                     headerLeft: () => null,
                 }}
             />
-
-
         </Drawer.Navigator>
     );
 }
 
-// Auth Stack for Landing, SignIn, and SignUp
+// Auth Stack Navigation
 export function AuthStack() {
     return (
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Navigator
+            screenOptions={{
+                headerShown: false,
+                cardStyle: { backgroundColor: CinematicColors.background }
+            }}
+        >
             <Stack.Screen name="Landing" component={LandingPage} />
             <Stack.Screen name="SignIn" component={SignInPage} />
             <Stack.Screen name="SignUp" component={SignUpPage} />
@@ -235,3 +270,32 @@ export function AuthStack() {
         </Stack.Navigator>
     );
 }
+
+const styles = StyleSheet.create({
+    drawerScrollView: {
+        backgroundColor: CinematicColors.background,
+    },
+    profileContainer: {
+        marginBottom: 30,
+        padding: 25,
+        borderBottomWidth: 1,
+        borderBottomColor: CinematicColors.border,
+    },
+    drawerIcon: {
+        marginRight: 25,
+    },
+    logoutContainer: {
+        marginTop: 20,
+        borderTopWidth: 1,
+        borderTopColor: CinematicColors.border,
+        paddingTop: 20,
+        marginHorizontal: 12,
+    },
+    headerButton: {
+        marginHorizontal: 16,
+    },
+    headerIcon: {
+        color: CinematicColors.text,
+    },
+});
+
