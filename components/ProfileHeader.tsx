@@ -1,9 +1,12 @@
 import React from 'react';
 import {View, Text, Image, TouchableOpacity} from 'react-native';
 import { Colors } from "@/constants/Colors";
+import {useAuthStore} from "@/api/store/AuthStore";
 
 const ProfileHeader = () => {
-    const username = 'Alucard'; // Static username
+    const auth = useAuthStore()
+
+    const username = auth.user.username; // Static username
     const profilePic = require('../assets/images/alucard.jpg'); // Static profile picture
 
     return (
@@ -12,8 +15,8 @@ const ProfileHeader = () => {
             <View style={{ flexDirection: 'row',alignItems: 'center', }}>
                 <View
                     style={{
-                        width: 80, // Container size
-                        height: 80, // Container size
+                        width: 50, // Container size
+                        height: 50, // Container size
                         borderRadius: 50, // Half of the width/height to make it circular
                         borderWidth: 1, // Border width around the profile picture
                         borderColor: Colors.theme.tabIconDefault, // Border color

@@ -2,17 +2,19 @@ import { Drawer } from "expo-router/drawer";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image, Modal, TextInput } from "react-native";
 import { useState } from "react";
-import { Ticket, sampleTickets } from "@/constants/ticket"; // Import the tickets
+import { Ticket, sampleTickets } from "@/constants/ticket";
+import {useAuthStore} from "@/api/store/AuthStore"; // Import the tickets
 
 export default function Profile() {
     // State for toggling visibility of tickets and edit profile modals
     const [showTickets, setShowTickets] = useState(false);
     const [showEditProfile, setShowEditProfile] = useState(false);
 
+    const auth = useAuthStore()
     // State for managing form data in the edit profile modal
     const [formData, setFormData] = useState({
-        username: 'John Doe',
-        email: 'john.doe@example.com'
+        username: auth.user.username,
+        email: auth.user.email,
     });
 
     // User statistics (e.g., movies watched, reviews written)

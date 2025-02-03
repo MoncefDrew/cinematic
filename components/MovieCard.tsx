@@ -38,15 +38,14 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
 // styles for movie card
 const styles = StyleSheet.create({
     card: {
-        width: 100, // Width of each movie card
         marginRight: 5,
         alignItems: "center",
 
     },
 
     image: {
-        width: 100,
-        height: 150, // Poster size
+        minWidth: 80,
+        minHeight: 120, // Poster size
         borderRadius: 2,
         borderWidth : 0.5,
         borderColor : Colors.theme.cardBorder,

@@ -5,7 +5,7 @@ import MovieCard from "@/components/MovieCard";
 import { useMovieStore } from '@/api/store/moviesStore'; // Adjust path as needed
 
 export default function Browse() {
-  const { movies, loading, error, fetchMovies } = useMovieStore();
+  const { movies, loading, error, fetchMovies,filteredMovies } = useMovieStore();
   const [showFilters, setShowFilters] = useState(false);
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
@@ -19,18 +19,10 @@ export default function Browse() {
   }, []);
 
   // Filter and sort movies
-  const filteredMovies = Array.isArray(movies) ? [...movies]
-      .filter(movie =>
-          (selectedGenres.length === 0 || selectedGenres.some(genre => movie.genres?.includes(genre))) &&
-          (selectedLanguages.length === 0 || selectedLanguages.includes(movie.language))
-      )
-      .sort((a, b) => {
-        if (sortBy === 'evaluation') {
-          return (b.Evaluation || 0) - (a.Evaluation || 0);
-        }
-        return (b.dateReleased || 0) - (a.dateReleased || 0);
-      }) : [];
 
+
+// Update your filteredMovies calculation
+  const displayMovies = filteredMovies.length > 0 ? filteredMovies : movies;
   if (loading) {
     return (
         <View style={styles.container}>
@@ -132,7 +124,7 @@ export default function Browse() {
             keyExtractor={item => item.id}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.movieGrid}
-            numColumns={3}
+            numColumns={4}
         />
       </View>
   );

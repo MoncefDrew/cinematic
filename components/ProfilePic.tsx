@@ -1,9 +1,11 @@
 import React from 'react';
 import {View, Text, Image} from 'react-native';
 import {Colors} from "@/constants/Colors";
+import {useAuthStore} from "@/api/store/AuthStore";
 
 const ProfilePic = () => {
-    const profilePic = require('../assets/images/alucard.jpg'); // Static profile picture
+    const auth = useAuthStore()
+    const profilePic = auth.user.profilePic
 
     return (
         <View style={{flexDirection: 'row', alignItems: 'center'}}>

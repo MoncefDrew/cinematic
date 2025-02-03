@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useRef, useState} from "react";
 import {
     View,
     Text,
@@ -9,6 +9,8 @@ import {
     Modal,
     TouchableWithoutFeedback,
     KeyboardAvoidingView,
+    Animated, // Import Animated
+
 } from "react-native";
 import { Colors } from "@/constants/Colors";
 import { useNavigation, useRouter } from "expo-router";
@@ -27,17 +29,37 @@ type MovieDetailsProps = {
     route: MovieDetailsRouteProp;
 };
 
-export default function MovieDetails ({ route }:any) {
+export default function MovieDetails({ route }: any) {
     const router = useRouter();
-    // @ts-ignore
     const { movie } = route.params;
     const navigation = useNavigation<NavigationProp>();
 
     const [isModalVisible, setModalVisible] = useState(false);
     const [userRating, setUserRating] = useState(0);
 
-    const toggleModal = () => setModalVisible(!isModalVisible);
+    // Animation value
+    const modalY = useRef(new Animated.Value(300)).current; // Start offscreen (bottom)
 
+    const toggleModal = () => {
+        if (isModalVisible) {
+            // Slide down
+            Animated.timing(modalY, {
+                toValue: 300,
+                duration: 300,
+                useNativeDriver: true,
+            }).start(() => setModalVisible(false)); // Hide modal after animation
+        } else {
+            setModalVisible(true); // Show modal first
+            // Slide up
+            Animated.timing(modalY, {
+                toValue: 0,
+                duration: 300,
+                useNativeDriver: true,
+            }).start();
+        }
+    };
+
+    // Render stars function (unchanged)
     const renderStars = (rating: number) => {
         return [...Array(5)].map((_, index) => (
             <TouchableOpacity
@@ -48,11 +70,12 @@ export default function MovieDetails ({ route }:any) {
                 <Ionicons
                     name={index < rating ? "star" : "star-outline"}
                     size={30}
-                    color="#FFD700" // Gold color for stars
+                    color="#FFD700"
                 />
             </TouchableOpacity>
         ));
     };
+
 
     return (
         <ScrollView style={styles.container}>
@@ -165,44 +188,53 @@ export default function MovieDetails ({ route }:any) {
             <Modal
                 visible={isModalVisible}
                 transparent
-                animationType="slide"
+                animationType="none" // Disable default animation
                 onRequestClose={toggleModal}
             >
                 <TouchableWithoutFeedback onPress={toggleModal}>
                     <View style={styles.modalOverlay}>
                         <KeyboardAvoidingView
                             style={styles.bottomModal}
-                            behavior="padding" // Optional, for better keyboard handling on iOS
+                            behavior="padding"
                         >
-                            <Text style={styles.modalTitle}>What would you like to do?</Text>
-
-                            {/* Rating Section */}
-                            <View style={styles.modalRatingSection}>
-                                <Text style={styles.modalButtonText}>Rate the Movie:</Text>
-                                <View style={styles.starsContainer}>{renderStars(userRating)}</View>
-                            </View>
-
-                            {/* Options List */}
-                            <TouchableOpacity
-                                onPress={() => {
-                                    toggleModal(); // Close the modal
-                                    //@ts-ignore
-                                    navigation.navigate("ReserveTicket", { movie });
-                                }}
-                                style={styles.reserveTicket}
+                            <Animated.View
+                                style={[
+                                    styles.modalContainer,
+                                    {
+                                        transform: [{ translateY: modalY }], // Apply animation
+                                    },
+                                ]}
                             >
-                                <Ionicons name='ticket' size={25} color='white' />
-                                <Text style={styles.modalButtonText}>Reserve Ticket</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.modalButton}>
-                                <Text style={styles.modalButtonText}>Mark as Watched</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={[styles.modalButton, styles.closeButton]}
-                                onPress={toggleModal}
-                            >
-                                <Text style={styles.modalButtonText}>Confirm</Text>
-                            </TouchableOpacity>
+                                <Text style={styles.modalTitle}>What would you like to do?</Text>
+
+                                {/* Rating Section */}
+                                <View style={styles.modalRatingSection}>
+                                    <Text style={styles.modalButtonText}>Rate the Movie:</Text>
+                                    <View style={styles.starsContainer}>{renderStars(userRating)}</View>
+                                </View>
+
+                                {/* Options List */}
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        toggleModal();
+                                        //@ts-ignore
+                                        navigation.navigate("ReserveTicket", { movie });
+                                    }}
+                                    style={styles.reserveTicket}
+                                >
+                                    <Ionicons name='ticket' size={25} color='white' />
+                                    <Text style={styles.modalButtonText}>Reserve Ticket</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.modalButton}>
+                                    <Text style={styles.modalButtonText}>Mark as Watched</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.modalButton, styles.closeButton]}
+                                    onPress={toggleModal}
+                                >
+                                    <Text style={styles.modalButtonText}>Confirm</Text>
+                                </TouchableOpacity>
+                            </Animated.View>
                         </KeyboardAvoidingView>
                     </View>
                 </TouchableWithoutFeedback>
@@ -212,6 +244,14 @@ export default function MovieDetails ({ route }:any) {
 };
 
 const styles = StyleSheet.create({
+    modalContainer: {
+        width: "100%",
+        backgroundColor: "#0A0A0A",
+        padding: 20,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        alignItems: "center",
+    },
     background: { flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' },
     separator: { height: 0.25, backgroundColor: "#333333", marginVertical: 10 }, // Darker separator
     container: { flex: 1, backgroundColor: "#0A0A0A" }, // Dark background
@@ -237,7 +277,6 @@ const styles = StyleSheet.create({
     rate: { alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20, margin: 10 },
     containerRate: { alignItems: 'center', padding: 4, backgroundColor: "#333333", borderColor: '#fff', justifyContent: 'center', borderRadius: 10, flexDirection: 'row', height: 40, paddingHorizontal: 20 }, // Darker button
     modalOverlay: { flex: 1, backgroundColor: "rgba(0, 0, 0, 0.7)", justifyContent: "flex-end" }, // Darker overlay
-    modalContainer: { width: "100%", backgroundColor: "#0A0A0A", padding: 20, borderRadius: 10, alignItems: "center" }, // Dark background
     bottomModal: { width: "100%", backgroundColor: "#0A0A0A", padding: 20, borderTopLeftRadius: 20, borderTopRightRadius: 20, alignItems: "center" }, // Dark background
     reserveTicket: { flexDirection: 'row', justifyContent: 'center', width: "100%", backgroundColor: "#118B50", padding: 15, borderRadius: 5, alignItems: "center", marginVertical: 5 },
     modalTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 20, color: "#FFFFFF", marginHorizontal: 20 }, // White text

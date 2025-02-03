@@ -267,6 +267,8 @@ export function AuthStack() {
             <Stack.Screen name="SignIn" component={SignInPage} />
             <Stack.Screen name="SignUp" component={SignUpPage} />
             <Stack.Screen name="MainApp" component={MainApp} />
+            <Stack.Screen name="MovieDetails" component={MovieDetails}/>
+            <Stack.Screen name="TicketPage" component={TicketPage}/>
         </Stack.Navigator>
     );
 }

@@ -23,6 +23,7 @@ import CustomIcon from '@/components/CustomIcon';
 import {Ionicons} from "@expo/vector-icons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import {useFonts} from "expo-font";
+import {useRouter} from "expo-router";
 
 const time ='19:00' ;
 
@@ -83,6 +84,18 @@ export default function ReserveTicket ({navigation, route}: any){
         "Poppins-SemiBold": require("../../assets/fonts/Poppins-SemiBold.ttf"),
     });
 
+    const router = useRouter();
+    const handleBack = () => {
+        const routes = navigation.getState().routes;
+        if (routes.length > 1) {
+            router.back();
+            console.log("Going back");
+        } else {
+            router.push("/MovieDetails");
+            console.log("Can't go back, navigating to fallback");
+        }
+    };
+
     if (!fontsLoaded) {
         return null; // or return a loading indicator
     }
@@ -133,7 +146,7 @@ export default function ReserveTicket ({navigation, route}: any){
                             <AppHeader
                                 name="close"
                                 header={''}
-                                action={() => navigation.goBack()}
+                                action={() => handleBack()}
                             />
                         </View>
                     </LinearGradient>

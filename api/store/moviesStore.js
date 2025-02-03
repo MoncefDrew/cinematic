@@ -9,6 +9,7 @@ export const useMovieStore = create(
             movies: [],
             loading: false,
             error: null,
+            filteredMovies: [], // Add this
 
             fetchMovies: async () => {
                 set({ loading: true })
@@ -38,6 +39,9 @@ export const useMovieStore = create(
                     set({ loading: false })
                 }
             },
+
+            setFilteredMovies: (movies) => set({ filteredMovies: movies }), // Add this
+
 
 
             clearMovies: () => set({ movies: [] }),
