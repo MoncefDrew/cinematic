@@ -133,7 +133,7 @@ export default function Browse() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#14171C',
+    backgroundColor: '#0A0A0A',
     padding: 16,
   },
   header: {

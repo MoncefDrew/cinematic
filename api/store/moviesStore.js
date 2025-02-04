@@ -10,7 +10,6 @@ export const useMovieStore = create(
             loading: false,
             error: null,
             filteredMovies: [], // Add this
-
             fetchMovies: async () => {
                 set({ loading: true })
                 try {

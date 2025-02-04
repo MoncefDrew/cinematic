@@ -30,21 +30,21 @@ export default function Popular() {
     }
 
     return (
-        <View style={styles.main}>
+        <View style={styles.container}>
             <View style={styles.welcome}>
-                <Text style={styles.heading}>Welcome to Cinematic</Text>
-                <Text style={styles.text}>
+                <Text style={styles.title}>Welcome to Cinematic</Text>
+                <Text style={styles.subtitle}>
                     You can navigate popular movies and book a ticket for your favorite
                     movie if you have a chance to. Hurry up now!
                 </Text>
             </View>
 
             {/* Popular Movies */}
-            <Text style={styles.heading}>Popular Movies</Text>
+            <Text style={styles.sectionTitle}>Popular Movies</Text>
             {loading ? (
-                <Text style={styles.text}>Loading...</Text>
+                <Text style={styles.loadingText}>Loading...</Text>
             ) : error ? (
-                <Text style={[styles.text, styles.error]}>{error}</Text>
+                <Text style={[styles.errorText]}>{error}</Text>
             ) : (
                 <FlatList
                     data={movies}
@@ -59,41 +59,55 @@ export default function Popular() {
 }
 
 const styles = StyleSheet.create({
-    main: {
-        height: "100%",
+    container: {
         flex: 1,
-        backgroundColor: "#0A0A0A",
-        padding: 20,
-    },
-    heading: {
-        marginTop: 10,
-        color: "#FFFFFF",
-        fontSize: 24,
-        marginBottom: 20,
-        fontFamily: "Satoshi",
-        fontWeight: "bold",
-    },
-    text: {
-        textAlign: "center",
-        color: "#8899AA",
-        fontWeight: "400",
-        fontSize: 16,
-    },
-    error: {
-        color: "#FF4444",
+        backgroundColor: "#111827", // Dark background to match the design
+        paddingHorizontal: 16,
+        paddingTop: 24,
     },
     welcome: {
-        padding: 20,
-        backgroundColor: "#1A1A1A",
-        borderColor: "#333333",
-        borderRadius: 8,
-        alignItems: "center",
+        backgroundColor: "#1F2937", // Dark card background
+        borderRadius: 12,
         borderWidth: 1,
-        marginTop: 10,
+        borderColor: "#374151", // Matching border color
+        padding: 16,
+        marginBottom: 24,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.8,
-        shadowRadius: 2,
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
         elevation: 5,
+    },
+    title: {
+        color: "#FFFFFF", // White text for the title
+        fontSize: 24,
+        fontFamily: "Satoshi",
+        fontWeight: "700",
+        marginBottom: 8,
+    },
+    subtitle: {
+        color: "#94A3B8", // Subdued text color
+        fontSize: 16,
+        fontFamily: "Satoshi",
+        lineHeight: 24,
+    },
+    sectionTitle: {
+        color: "#FFFFFF", // White text for section title
+        fontSize: 20,
+        fontFamily: "Satoshi",
+        fontWeight: "700",
+        marginBottom: 16,
+    },
+    loadingText: {
+        color: "#94A3B8", // Subdued text color for loading state
+        fontSize: 16,
+        fontFamily: "Satoshi",
+        textAlign: "center",
+    },
+    errorText: {
+        color: "#EF4444", // Red color for error messages
+        fontSize: 16,
+        fontFamily: "Satoshi",
+        textAlign: "center",
     },
 });

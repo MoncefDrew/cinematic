@@ -115,17 +115,18 @@ function MainApp() {
                     marginLeft: -20,
                 },
                 headerStyle: {
-                    backgroundColor: CinematicColors.background,
+                    backgroundColor: '#111827', // Dark background to match the container
                     borderBottomWidth: 1,
-                    borderBottomColor: CinematicColors.border,
-                    elevation: 0,
-                    shadowOpacity: 0,
+                    borderBottomColor: '#374151', // Matching border color
+                    elevation: 0, // Remove shadow
+                    shadowOpacity: 0, // Remove shadow
                 },
-                headerTintColor: CinematicColors.text,
+                headerTintColor: '#fff', // White color for back button and icons
                 headerTitleStyle: {
-                    fontFamily: 'Satoshi',
-                    fontSize: 18,
-                    color: CinematicColors.text,
+                    fontFamily: 'Satoshi', // Matching font family
+                    fontSize: 18, // Slightly smaller font size for the header
+                    color: '#fff', // White color for the title text
+                    fontWeight: '700', // Bold font weight to match your title style
                 },
             }}
             drawerContent={(props) => <CustomDrawerContent {...props} />}
@@ -146,7 +147,7 @@ function MainApp() {
                 component={Search}
                 options={{
                     drawerLabel: 'Search',
-                    headerTitle: '',
+                    headerTitle: 'Discover',
                     drawerIcon: ({ size, color }) => (
                         <Ionicons name="search" size={size} color={color} style={styles.drawerIcon} />
                     ),
@@ -275,21 +276,22 @@ export function AuthStack() {
 
 const styles = StyleSheet.create({
     drawerScrollView: {
-        backgroundColor: CinematicColors.background,
+        backgroundColor: '#111827', // Darker, more sophisticated background
     },
     profileContainer: {
         marginBottom: 30,
         padding: 25,
         borderBottomWidth: 1,
-        borderBottomColor: CinematicColors.border,
+        borderBottomColor: '#374151', // Matching border color
     },
     drawerIcon: {
         marginRight: 25,
+        color: '#fff', // White color for icons to match the text color
     },
     logoutContainer: {
         marginTop: 20,
         borderTopWidth: 1,
-        borderTopColor: CinematicColors.border,
+        borderTopColor: '#374151', // Matching border color
         paddingTop: 20,
         marginHorizontal: 12,
     },
@@ -297,7 +299,30 @@ const styles = StyleSheet.create({
         marginHorizontal: 16,
     },
     headerIcon: {
-        color: CinematicColors.text,
+        color: '#fff', // White color for header icons
+    },
+    // Additional styles for text and other elements in the drawer
+    drawerText: {
+        color: '#fff', // White color for text
+        fontSize: 16,
+        fontFamily: 'Satoshi',
+        marginVertical: 10,
+    },
+    drawerItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 10,
+        paddingHorizontal: 25,
+    },
+    drawerItemText: {
+        color: '#fff', // White color for item text
+        fontSize: 16,
+        fontFamily: 'Satoshi',
+    },
+    // Style for active drawer item
+    activeDrawerItem: {
+        backgroundColor: '#1F2937', // Dark background for active item
+        borderRadius: 12,
     },
 });
 
