@@ -122,15 +122,27 @@ export default function ReserveTicket ({navigation, route}: any){
 
             {/* Main Content */}
             <View style={styles.mainContainer}>
-                {/* Screen Indicator */}
-                <View style={styles.screenIndicator}>
-                    <View style={styles.screenLine} />
-                    <Text style={styles.screenText}>SCREEN</Text>
+                {/* Movie Info Section */}
+                <View style={styles.movieInfoContainer}>
+                    <Text style={styles.movieTitle}>{route.params?.movie.title || "Movie Title"}</Text>
+                    <View style={styles.movieMetaContainer}>
+                        <Text style={styles.movieMeta}>Today, 7:00 PM</Text>
+                        <Text style={styles.movieMeta}>•</Text>
+                        <Text style={styles.movieMeta}>Hall 1</Text>
+                    </View>
+                    <Text style={styles.movieDescription} numberOfLines={2}>
+                        {route.params?.movie.description ||
+                            "Experience the movie in our premium theater with state-of-the-art sound system and comfortable seating."}
+                    </Text>
                 </View>
 
                 {/* Seating Area */}
                 <View style={styles.seatContainer}>
-                    <Text style={styles.sectionTitle}>Choose Your Seat</Text>
+                    <View style={styles.screenContainer}>
+                        <View style={styles.screenLine} />
+                        <Text style={styles.screenText}>SCREEN</Text>
+                    </View>
+
                     <View style={styles.seatMap}>
                         {twoDSeatArray?.map((item, index) => (
                             <View key={index} style={styles.seatRow}>
@@ -140,7 +152,7 @@ export default function ReserveTicket ({navigation, route}: any){
                                         key={subitem.number}
                                         onPress={() => selectSeat(index, subindex, subitem.number)}>
                                         <MaterialIcons
-                                            name="event-seat"  // Changed icon to event-seat
+                                            name="event-seat"
                                             style={[
                                                 styles.seatIcon,
                                                 subitem.taken ? styles.takenSeat : {},
@@ -196,26 +208,80 @@ export default function ReserveTicket ({navigation, route}: any){
     );
 };
 
-
 const styles = StyleSheet.create({
-    seatContainer: {
-        backgroundColor: COLORS.BlackRGB10,
-        borderRadius: BORDERRADIUS.radius_25,
-        padding: SPACING.space_15,
-        borderWidth: 1,
-        borderColor: COLORS.WhiteRGBA15,
-    },
-    seatMap: {
-        gap: SPACING.space_8,
-        paddingHorizontal: SPACING.space_24,
-        paddingVertical: SPACING.space_20,
-    },
     seatRow: {
         flexDirection: "row",
         gap: SPACING.space_8,
         alignItems: 'center',
         justifyContent: "center",
     },
+    legendContainer: {
+        flexDirection: "row",
+        justifyContent: "space-evenly",
+        padding: SPACING.space_12,
+        borderTopWidth: 1,
+        borderColor: COLORS.WhiteRGBA15,
+        backgroundColor: COLORS.BlackRGB10,
+    },
+    mainContainer: {
+        padding: SPACING.space_16,
+    },
+    movieInfoContainer: {
+        marginBottom: SPACING.space_24,
+    },
+    movieTitle: {
+        fontFamily: "Poppins-Bold",
+        fontSize: FONTSIZE.size_24,
+        color: COLORS.White,
+        marginBottom: SPACING.space_8,
+    },
+    movieMetaContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: SPACING.space_10,
+        marginBottom: SPACING.space_8,
+    },
+    movieMeta: {
+        fontFamily: "Poppins-Regular",
+        fontSize: FONTSIZE.size_14,
+        color: COLORS.WhiteRGBA50,
+    },
+    movieDescription: {
+        fontFamily: "Poppins-Regular",
+        fontSize: FONTSIZE.size_14,
+        color: COLORS.WhiteRGBA75,
+    },
+    seatContainer: {
+        backgroundColor: COLORS.BlackRGB10,
+        borderRadius: BORDERRADIUS.radius_25,
+        borderWidth: 1,
+        borderColor: COLORS.WhiteRGBA15,
+        overflow: 'hidden',
+    },
+    screenContainer: {
+        alignItems: 'center',
+        paddingVertical: SPACING.space_20,
+        backgroundColor: COLORS.BlackRGB10,
+        borderBottomWidth: 1,
+        borderColor: COLORS.WhiteRGBA15,
+    },
+    screenLine: {
+        width: '70%',
+        height: 4,
+        backgroundColor: COLORS.WhiteRGBA50,
+        borderRadius: 2,
+    },
+    screenText: {
+        fontFamily: "Poppins-Regular",
+        fontSize: FONTSIZE.size_12,
+        color: COLORS.WhiteRGBA50,
+        marginTop: SPACING.space_10,
+    },
+    seatMap: {
+        gap: SPACING.space_8,
+        padding: SPACING.space_20,
+    },
+
     rowLabel: {
         fontFamily: "Poppins-Medium",
         fontSize: FONTSIZE.size_12,
@@ -234,14 +300,7 @@ const styles = StyleSheet.create({
     selectedSeat: {
         color: COLORS.Orange,
     },
-    legendContainer: {
-        flexDirection: "row",
-        justifyContent: "space-evenly",
-        marginTop: SPACING.space_20,
-        backgroundColor: COLORS.DarkGrey,
-        padding: SPACING.space_12,
-        borderRadius: BORDERRADIUS.radius_25,
-    },
+
     legendItem: {
         flexDirection: "row",
         alignItems: "center",
@@ -270,25 +329,12 @@ const styles = StyleSheet.create({
         marginHorizontal: SPACING.space_36,
         marginTop: SPACING.space_20 * 2,
     },
-    mainContainer: {
-        padding: SPACING.space_16,
-    },
+
     screenIndicator: {
         alignItems: 'center',
         marginBottom: SPACING.space_36,
     },
-    screenLine: {
-        width: '70%',
-        height: 4,
-        backgroundColor: COLORS.WhiteRGBA50,
-        borderRadius: 2,
-    },
-    screenText: {
-        fontFamily: "Poppins-Regular",
-        fontSize: FONTSIZE.size_12,
-        color: COLORS.WhiteRGBA50,
-        marginTop: SPACING.space_10,
-    },
+
     sectionTitle: {
         fontFamily: "Poppins-SemiBold",
         fontSize: FONTSIZE.size_18,
