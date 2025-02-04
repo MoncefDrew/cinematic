@@ -280,6 +280,7 @@ const styles = StyleSheet.create({
     seatMap: {
         gap: SPACING.space_8,
         padding: SPACING.space_20,
+
     },
 
     rowLabel: {
@@ -377,9 +378,9 @@ const styles = StyleSheet.create({
     },
     bookButton: {
         backgroundColor: COLORS.Orange,
-        paddingHorizontal: SPACING.space_24,
-        paddingVertical: SPACING.space_12,
-        borderRadius: BORDERRADIUS.radius_25,
+        paddingHorizontal: 30,
+        paddingVertical: 10,
+        borderRadius: 8,
     },
     bookButtonText: {
         fontFamily: "Poppins-SemiBold",

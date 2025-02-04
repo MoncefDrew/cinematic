@@ -44,8 +44,8 @@ const styles = StyleSheet.create({
     },
 
     image: {
-        minWidth: 80,
-        minHeight: 120, // Poster size
+        minWidth: 100,
+        minHeight: 150, // Poster size
         borderRadius: 2,
         borderWidth : 0.5,
         borderColor : Colors.theme.cardBorder,
