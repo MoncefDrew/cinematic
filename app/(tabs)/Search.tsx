@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, ScrollView, FlatList } from 'react-native';
 import { Ionicons } from "@expo/vector-icons";
 import MovieCard from "@/components/MovieCard";
-import { useMovieStore } from '@/api/store/moviesStore'; // Adjust path as needed
+import { useMovieStore } from '@/api/store/moviesStore';
 
 export default function Browse() {
-  const { movies, loading, error, fetchMovies,filteredMovies } = useMovieStore();
+  const { movies, loading, error, fetchMovies, filteredMovies } = useMovieStore();
   const [showFilters, setShowFilters] = useState(false);
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
@@ -18,15 +18,12 @@ export default function Browse() {
     fetchMovies();
   }, []);
 
-  // Filter and sort movies
-
-
-// Update your filteredMovies calculation
   const displayMovies = filteredMovies.length > 0 ? filteredMovies : movies;
+
   if (loading) {
     return (
         <View style={styles.container}>
-          <Text style={styles.text}>Loading...</Text>
+          <Text style={styles.loadingText}>Loading...</Text>
         </View>
     );
   }
@@ -34,15 +31,20 @@ export default function Browse() {
   if (error) {
     return (
         <View style={styles.container}>
-          <Text style={[styles.text, styles.error]}>{error}</Text>
+          <Text style={styles.errorText}>{error}</Text>
         </View>
     );
   }
 
   return (
       <View style={styles.container}>
+        {/* Welcome Section */}
+        <View style={styles.welcome}>
+          <Text style={styles.title}>Browse Movies</Text>
+          <Text style={styles.subtitle}>Discover your next favorite film from our curated collection</Text>
+        </View>
+
         <View style={styles.header}>
-          <Text style={styles.title}>Movies</Text>
           <View style={styles.headerActions}>
             <TouchableOpacity
                 style={styles.filterButton}
@@ -51,14 +53,14 @@ export default function Browse() {
               <Ionicons
                   name={showFilters ? "close" : "options"}
                   size={20}
-                  color="#007BFF"
+                  color="#94A3B8"
               />
             </TouchableOpacity>
             <TouchableOpacity
                 style={styles.sortButton}
                 onPress={() => setSortBy(prev => prev === 'evaluation' ? 'date' : 'evaluation')}
             >
-              <Ionicons name="swap-vertical" size={20} color="#007BFF" />
+              <Ionicons name="swap-vertical" size={20} color="#94A3B8" />
               <Text style={styles.sortButtonText}>
                 Sort by {sortBy === 'evaluation' ? 'Rating' : 'Release Date'}
               </Text>
@@ -68,7 +70,7 @@ export default function Browse() {
 
         {showFilters && (
             <View style={styles.filtersSection}>
-              <Text style={styles.filterTitle}>Genres</Text>
+              <Text style={styles.sectionTitle}>Genres</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 {genres.map(genre => (
                     <TouchableOpacity
@@ -91,7 +93,7 @@ export default function Browse() {
                 ))}
               </ScrollView>
 
-              <Text style={[styles.filterTitle, styles.marginTop]}>Languages</Text>
+              <Text style={[styles.sectionTitle, styles.marginTop]}>Languages</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 {languages.map(language => (
                     <TouchableOpacity
@@ -133,12 +135,26 @@ export default function Browse() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0A0A',
+    backgroundColor: "#111827",
+    paddingHorizontal: 16,
+    paddingTop: 24,
+  },
+  welcome: {
+    backgroundColor: "#1F2937",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#374151",
     padding: 16,
+    marginBottom: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     marginBottom: 16,
   },
@@ -148,60 +164,75 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   title: {
+    color: "#FFFFFF",
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#FFF',
+    fontFamily: "Satoshi",
+    fontWeight: "700",
+    marginBottom: 8,
   },
-  text: {
-    color: '#FFF',
+  subtitle: {
+    color: "#94A3B8",
     fontSize: 16,
-    textAlign: 'center',
+    fontFamily: "Satoshi",
+    lineHeight: 24,
   },
-  error: {
-    color: '#FF4444',
+  loadingText: {
+    color: "#94A3B8",
+    fontSize: 16,
+    fontFamily: "Satoshi",
+    textAlign: "center",
+  },
+  errorText: {
+    color: "#EF4444",
+    fontSize: 16,
+    fontFamily: "Satoshi",
+    textAlign: "center",
   },
   sortButton: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   sortButtonText: {
-    color: '#007BFF',
+    color: "#94A3B8",
     marginLeft: 4,
+    fontFamily: "Satoshi",
   },
   filterButton: {
     padding: 4,
   },
   filtersSection: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    color: "#FFFFFF",
+    fontSize: 20,
+    fontFamily: "Satoshi",
+    fontWeight: "700",
     marginBottom: 16,
   },
-  filterTitle: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
   marginTop: {
-    marginTop: 16,
+    marginTop: 24,
   },
   filterChip: {
-    backgroundColor: '#1A1D24',
+    backgroundColor: "#1F2937",
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
     marginRight: 8,
     borderWidth: 1,
-    borderColor: '#2A2D34',
+    borderColor: "#374151",
   },
   selectedChip: {
-    backgroundColor: '#007BFF',
-    borderColor: '#007BFF',
+    backgroundColor: "#374151",
+    borderColor: "#94A3B8",
   },
   filterChipText: {
-    color: '#FFF',
+    color: "#94A3B8",
     fontSize: 14,
+    fontFamily: "Satoshi",
   },
   selectedChipText: {
-    color: '#FFF',
+    color: "#FFFFFF",
   },
   movieGrid: {
     padding: 8,
