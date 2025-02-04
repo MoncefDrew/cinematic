@@ -7,76 +7,50 @@ import {
     StatusBar,
     ImageBackground,
     TouchableOpacity,
-    FlatList,
-    ToastAndroid,
+    Dimensions,
+    Alert,
 } from 'react-native';
 import {
     BORDERRADIUS,
     COLORS,
-    FONTFAMILY,
     FONTSIZE,
     SPACING,
 } from '@/theme/theme';
 import {LinearGradient} from "expo-linear-gradient";
 import AppHeader from '@/components/AppHeader';
-import CustomIcon from '@/components/CustomIcon';
-import {Ionicons} from "@expo/vector-icons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import {useFonts} from "expo-font";
 import {useRouter} from "expo-router";
 
-const time ='19:00' ;
-
-const generateDate = () => {
-    const date = new Date();
-    let weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    let weekdays = [];
-    for (let i = 0; i < 7; i++) {
-        let tempDate = {
-            date: new Date(date.getTime() + i * 24 * 60 * 60 * 1000).getDate(),
-            day: weekday[new Date(date.getTime() + i * 24 * 60 * 60 * 1000).getDay()],
-        };
-        weekdays.push(tempDate);
-    }
-    return weekdays;
-};
+const {width} = Dimensions.get('window');
+const SEAT_SIZE = width * 0.06;
 
 const generateSeats = () => {
-    let numRow = 8;
-    let numColumn = 3;
+    // Create a more rectangular layout
+    const rows = 6;  // Number of rows (A-F)
+    const seatsPerRow = 8;  // 8 seats per row
     let rowArray = [];
-    let start = 1;
-    let reachnine = false;
+    let seatNumber = 1;
 
-    for (let i = 0; i < numRow; i++) {
+    for (let i = 0; i < rows; i++) {
         let columnArray = [];
-        for (let j = 0; j < numColumn; j++) {
+        for (let j = 0; j < seatsPerRow; j++) {
             let seatObject = {
-                number: start,
+                number: seatNumber,
                 taken: Boolean(Math.round(Math.random())),
                 selected: false,
             };
             columnArray.push(seatObject);
-            start++;
-        }
-        if (i == 3) {
-            numColumn += 2;
-        }
-        if (numColumn < 9 && !reachnine) {
-            numColumn += 2;
-        } else {
-            reachnine = true;
-            numColumn -= 2;
+            seatNumber++;
         }
         rowArray.push(columnArray);
     }
     return rowArray;
 };
-
 export default function ReserveTicket ({navigation, route}: any){
     const [price, setPrice] = useState<number>(0);
     const [twoDSeatArray, setTwoDSeatArray] = useState<any[][]>(generateSeats());
-    const [selectedSeatArray, setSelectedSeatArray] = useState([]);
+    const [selectedSeat, setSelectedSeat] = useState<number | null>(null);
     const [fontsLoaded] = useFonts({
         "Poppins-Regular": require("../../assets/fonts/Poppins-Regular.ttf"),
         "Poppins-Medium": require("../../assets/fonts/Poppins-Medium.ttf"),
@@ -85,48 +59,40 @@ export default function ReserveTicket ({navigation, route}: any){
     });
 
     const router = useRouter();
-    const handleBack = () => {
-        const routes = navigation.getState().routes;
-        if (routes.length > 1) {
-            router.back();
-            console.log("Going back");
-        } else {
-            router.push("/MovieDetails");
-            console.log("Can't go back, navigating to fallback");
-        }
-    };
 
     if (!fontsLoaded) {
-        return null; // or return a loading indicator
+        return null;
     }
-    console.log(route);
 
     const selectSeat = (index: number, subindex: number, num: number) => {
         if (!twoDSeatArray[index][subindex].taken) {
-            let array: any = [...selectedSeatArray];
             let temp = [...twoDSeatArray];
-            temp[index][subindex].selected = !temp[index][subindex].selected;
-            if (!array.includes(num)) {
-                array.push(num);
-                setSelectedSeatArray(array);
-            } else {
-                const tempindex = array.indexOf(num);
-                if (tempindex > -1) {
-                    array.splice(tempindex, 1);
-                    setSelectedSeatArray(array);
-                }
+
+            // Deselect previously selected seat
+            if (selectedSeat !== null) {
+                temp = temp.map(row =>
+                    row.map(seat => ({...seat, selected: false}))
+                );
             }
-            setPrice(array.length * 5.0);
+
+            // Select new seat
+            temp[index][subindex].selected = !temp[index][subindex].selected;
+            setSelectedSeat(temp[index][subindex].selected ? num : null);
+            setPrice(temp[index][subindex].selected ? 5.0 : 0);
             setTwoDSeatArray(temp);
         }
     };
 
     const BookSeats = async () => {
+        if (selectedSeat === null) {
+            Alert.alert('Selection Required', 'Please select a seat before proceeding.');
+            return;
+        }
 
-            navigation.navigate('TicketPage', {
-                seatArray: selectedSeatArray,
-                ticketImage: route.params.movie.poster_url,
-            });
+        navigation.navigate('TicketPage', {
+            seatArray: [selectedSeat],
+            ticketImage: route.params.movie.poster_url,
+        });
     };
 
     return (
@@ -135,6 +101,8 @@ export default function ReserveTicket ({navigation, route}: any){
             bounces={false}
             showsVerticalScrollIndicator={false}>
             <StatusBar hidden />
+
+            {/* Movie Banner */}
             <View>
                 <ImageBackground
                     source={{uri: route.params?.movie.cover_url}}
@@ -145,78 +113,84 @@ export default function ReserveTicket ({navigation, route}: any){
                         <View style={styles.appHeaderContainer}>
                             <AppHeader
                                 name="close"
-                                header={''}
-                                action={() => handleBack()}
+                                action={() => router.back()}
                             />
                         </View>
                     </LinearGradient>
                 </ImageBackground>
-                <Text style={styles.screenText}>Screen this side</Text>
             </View>
 
-            <View style={styles.seatContainer}>
-                <View style={styles.containerGap20}>
-                    {twoDSeatArray?.map((item, index) => {
-                        return (
+            {/* Main Content */}
+            <View style={styles.mainContainer}>
+                {/* Screen Indicator */}
+                <View style={styles.screenIndicator}>
+                    <View style={styles.screenLine} />
+                    <Text style={styles.screenText}>SCREEN</Text>
+                </View>
+
+                {/* Seating Area */}
+                <View style={styles.seatContainer}>
+                    <Text style={styles.sectionTitle}>Choose Your Seat</Text>
+                    <View style={styles.seatMap}>
+                        {twoDSeatArray?.map((item, index) => (
                             <View key={index} style={styles.seatRow}>
-                                {item?.map((subitem, subindex) => {
-                                    return (
-                                        <TouchableOpacity
-                                            key={subitem.number}
-                                            onPress={() => {
-                                                selectSeat(index, subindex, subitem.number);
-                                            }}>
-                                            <MaterialIcons
-                                                name="chair"
-                                                style={[
-                                                    styles.seatIcon,
-                                                    subitem.taken ? {color: COLORS.Grey} : {},
-                                                    subitem.selected ? {color: COLORS.Orange} : {},
-                                                ]}
-                                            />
-                                        </TouchableOpacity>
-                                    );
-                                })}
+                                <Text style={styles.rowLabel}>{String.fromCharCode(65 + index)}</Text>
+                                {item?.map((subitem, subindex) => (
+                                    <TouchableOpacity
+                                        key={subitem.number}
+                                        onPress={() => selectSeat(index, subindex, subitem.number)}>
+                                        <MaterialIcons
+                                            name="event-seat"  // Changed icon to event-seat
+                                            style={[
+                                                styles.seatIcon,
+                                                subitem.taken ? styles.takenSeat : {},
+                                                subitem.selected ? styles.selectedSeat : {},
+                                            ]}
+                                        />
+                                    </TouchableOpacity>
+                                ))}
                             </View>
-                        );
-                    })}
-                </View>
-                <View style={styles.seatRadioContainer}>
-                    <View style={styles.radioContainer}>
-                        <MaterialIcons name="chair" style={styles.radioIcon} />
-                        <Text style={styles.radioText}>Available</Text>
+                        ))}
                     </View>
-                    <View style={styles.radioContainer}>
-                        <MaterialIcons
-                            name="chair"
-                            style={[styles.radioIcon, {color: COLORS.Grey}]}
-                        />
-                        <Text style={styles.radioText}>Taken</Text>
-                    </View>
-                    <View style={styles.radioContainer}>
-                        <MaterialIcons
-                            name="chair"
-                            style={[styles.radioIcon, {color: COLORS.Orange}]}
-                        />
-                        <Text style={styles.radioText}>Selected</Text>
+
+                    {/* Seat Legend */}
+                    <View style={styles.legendContainer}>
+                        <View style={styles.legendItem}>
+                            <MaterialIcons name="event-seat" style={styles.legendIcon} />
+                            <Text style={styles.legendText}>Available</Text>
+                        </View>
+                        <View style={styles.legendItem}>
+                            <MaterialIcons name="event-seat" style={[styles.legendIcon, styles.takenSeat]} />
+                            <Text style={styles.legendText}>Taken</Text>
+                        </View>
+                        <View style={styles.legendItem}>
+                            <MaterialIcons name="event-seat" style={[styles.legendIcon, styles.selectedSeat]} />
+                            <Text style={styles.legendText}>Selected</Text>
+                        </View>
                     </View>
                 </View>
-            </View>
 
-            <View>
-
-            </View>
-
-
-
-            <View style={styles.buttonPriceContainer}>
-                <View style={styles.priceContainer}>
-                    <Text style={styles.totalPriceText}>Total Price</Text>
-                    <Text style={styles.price}>$ {price}.00</Text>
+                {/* Price and Booking Section */}
+                <View style={styles.bottomContainer}>
+                    <View style={styles.priceContainer}>
+                        <Text style={styles.priceLabel}>Total Price</Text>
+                        <Text style={styles.priceAmount}>$ {price.toFixed(2)}</Text>
+                        {selectedSeat && (
+                            <Text style={styles.seatInfo}>
+                                Seat: {String.fromCharCode(65 + Math.floor((selectedSeat-1)/8))}{selectedSeat % 8 || 8}
+                            </Text>
+                        )}
+                    </View>
+                    <TouchableOpacity
+                        style={[
+                            styles.bookButton,
+                            !selectedSeat && styles.disabledButton
+                        ]}
+                        onPress={BookSeats}
+                        disabled={!selectedSeat}>
+                        <Text style={styles.bookButtonText}>Book Now</Text>
+                    </TouchableOpacity>
                 </View>
-                <TouchableOpacity onPress={BookSeats}>
-                    <Text style={styles.buttonText}>Buy Tickets</Text>
-                </TouchableOpacity>
             </View>
         </ScrollView>
     );
@@ -224,14 +198,70 @@ export default function ReserveTicket ({navigation, route}: any){
 
 
 const styles = StyleSheet.create({
+    seatContainer: {
+        backgroundColor: COLORS.BlackRGB10,
+        borderRadius: BORDERRADIUS.radius_25,
+        padding: SPACING.space_15,
+        borderWidth: 1,
+        borderColor: COLORS.WhiteRGBA15,
+    },
+    seatMap: {
+        gap: SPACING.space_8,
+        paddingHorizontal: SPACING.space_24,
+        paddingVertical: SPACING.space_20,
+    },
+    seatRow: {
+        flexDirection: "row",
+        gap: SPACING.space_8,
+        alignItems: 'center',
+        justifyContent: "center",
+    },
+    rowLabel: {
+        fontFamily: "Poppins-Medium",
+        fontSize: FONTSIZE.size_12,
+        color: COLORS.White,
+        width: 16,
+        marginRight: SPACING.space_8,
+    },
+    seatIcon: {
+        fontSize: FONTSIZE.size_20,  // Reduced size
+        color: COLORS.White,
+    },
+    takenSeat: {
+        color: COLORS.Grey,
+        opacity: 0.5,
+    },
+    selectedSeat: {
+        color: COLORS.Orange,
+    },
+    legendContainer: {
+        flexDirection: "row",
+        justifyContent: "space-evenly",
+        marginTop: SPACING.space_20,
+        backgroundColor: COLORS.DarkGrey,
+        padding: SPACING.space_12,
+        borderRadius: BORDERRADIUS.radius_25,
+    },
+    legendItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: SPACING.space_8,
+    },
+    legendIcon: {
+        fontSize: FONTSIZE.size_20,
+        color: COLORS.White,
+    },
+    disabledButton: {
+        backgroundColor: COLORS.Grey,
+        opacity: 0.5,
+    },
     container: {
-        display: "flex",
         flex: 1,
         backgroundColor: COLORS.Black,
     },
     ImageBG: {
         width: "100%",
-        aspectRatio: 3072 / 1727,
+        aspectRatio: 16/9,
     },
     linearGradient: {
         height: "100%",
@@ -240,115 +270,74 @@ const styles = StyleSheet.create({
         marginHorizontal: SPACING.space_36,
         marginTop: SPACING.space_20 * 2,
     },
+    mainContainer: {
+        padding: SPACING.space_16,
+    },
+    screenIndicator: {
+        alignItems: 'center',
+        marginBottom: SPACING.space_36,
+    },
+    screenLine: {
+        width: '70%',
+        height: 4,
+        backgroundColor: COLORS.WhiteRGBA50,
+        borderRadius: 2,
+    },
     screenText: {
-        textAlign: "center",
-        fontFamily: "Poppins-Regular", // Updated to Poppins-Regular
-        fontSize: FONTSIZE.size_10,
-        color: COLORS.WhiteRGBA15,
+        fontFamily: "Poppins-Regular",
+        fontSize: FONTSIZE.size_12,
+        color: COLORS.WhiteRGBA50,
+        marginTop: SPACING.space_10,
     },
-    seatContainer: {
-        marginVertical: SPACING.space_20,
-    },
-    containerGap20: {
-        gap: SPACING.space_20,
-    },
-    seatRow: {
-        flexDirection: "row",
-        gap: SPACING.space_20,
-        justifyContent: "center",
-    },
-    seatIcon: {
-        fontSize: FONTSIZE.size_24,
+    sectionTitle: {
+        fontFamily: "Poppins-SemiBold",
+        fontSize: FONTSIZE.size_18,
         color: COLORS.White,
+        marginBottom: SPACING.space_15,
     },
-    seatRadioContainer: {
-        flexDirection: "row",
-        marginTop: SPACING.space_36,
-        marginBottom: SPACING.space_10,
-        alignItems: "center",
-        justifyContent: "space-evenly",
-    },
-    radioContainer: {
-        flexDirection: "row",
-        gap: SPACING.space_10,
-        alignItems: "center",
-    },
-    radioIcon: {
-        fontSize: FONTSIZE.size_20,
-        color: COLORS.White,
-    },
-    radioText: {
-        fontFamily: "Poppins-Medium", // Updated to Poppins-Medium
+
+    legendText: {
+        fontFamily: "Poppins-Regular",
         fontSize: FONTSIZE.size_12,
         color: COLORS.White,
     },
-    containerGap24: {
-        gap: SPACING.space_24,
-    },
-    dateContainer: {
-        width: SPACING.space_10 * 7,
-        height: SPACING.space_10 * 10,
-        borderRadius: SPACING.space_10 * 10,
-        backgroundColor: COLORS.DarkGrey,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    dateText: {
-        fontFamily: "Poppins-Medium", // Updated to Poppins-Medium
-        fontSize: FONTSIZE.size_24,
-        color: COLORS.White,
-    },
-    dayText: {
-        fontFamily: "Poppins-Regular", // Updated to Poppins-Regular
-        fontSize: FONTSIZE.size_12,
-        color: COLORS.White,
-    },
-    OutterContainer: {
-        marginVertical: SPACING.space_24,
-    },
-    timeContainer: {
-        paddingVertical: SPACING.space_10,
-        borderWidth: 1,
-        borderColor: COLORS.WhiteRGBA50,
-        paddingHorizontal: SPACING.space_20,
-        borderRadius: BORDERRADIUS.radius_25,
-        backgroundColor: COLORS.DarkGrey,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    timeText: {
-        fontFamily: "Poppins-Regular", // Updated to Poppins-Regular
-        fontSize: FONTSIZE.size_14,
-        color: COLORS.White,
-    },
-    buttonPriceContainer: {
+    bottomContainer: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        paddingHorizontal: 60,
-        paddingBottom: SPACING.space_24,
+        marginTop: SPACING.space_24,
+        backgroundColor: COLORS.DarkGrey,
+        padding: SPACING.space_20,
+        borderRadius: BORDERRADIUS.radius_25,
     },
     priceContainer: {
-        alignItems: "center",
+        alignItems: "flex-start",
     },
-    totalPriceText: {
-        fontFamily: "Poppins-Regular", // Updated to Poppins-Regular
+    priceLabel: {
+        fontFamily: "Poppins-Regular",
         fontSize: FONTSIZE.size_14,
-        color: COLORS.Grey,
+        color: COLORS.WhiteRGBA50,
     },
-    price: {
-        fontFamily: "Poppins-Medium", // Updated to Poppins-Medium
+    priceAmount: {
+        fontFamily: "Poppins-Bold",
         fontSize: FONTSIZE.size_24,
         color: COLORS.White,
     },
-    buttonText: {
-        borderRadius: BORDERRADIUS.radius_25,
+    seatInfo: {
+        fontFamily: "Poppins-Regular",
+        fontSize: FONTSIZE.size_12,
+        color: COLORS.Orange,
+        marginTop: 4,
+    },
+    bookButton: {
+        backgroundColor: COLORS.Orange,
         paddingHorizontal: SPACING.space_24,
-        paddingVertical: SPACING.space_10,
-        fontFamily: "Poppins-SemiBold", // Updated to Poppins-SemiBold
+        paddingVertical: SPACING.space_12,
+        borderRadius: BORDERRADIUS.radius_25,
+    },
+    bookButtonText: {
+        fontFamily: "Poppins-SemiBold",
         fontSize: FONTSIZE.size_16,
         color: COLORS.White,
-        backgroundColor: COLORS.Orange,
     },
 });
-

@@ -142,15 +142,15 @@ const styles = StyleSheet.create({
         marginHorizontal:80,
         marginBottom:40,
         backgroundColor: COLORS.Orange,
-        paddingVertical: 12,
+        paddingVertical: 2,
         borderRadius: 8,
         alignItems: 'center',
     },
     buttonText: {
         borderRadius: BORDERRADIUS.radius_25,
-        paddingHorizontal: SPACING.space_24,
-        paddingVertical: SPACING.space_10,
-        fontFamily: "Poppins-SemiBold", // Updated to Poppins-SemiBold
+        paddingHorizontal: 10,
+        paddingVertical: 10,
+        fontFamily: "Poppins-regular", // Updated to Poppins-SemiBold
         fontSize: FONTSIZE.size_16,
         color: COLORS.White,
         backgroundColor: COLORS.Orange,
