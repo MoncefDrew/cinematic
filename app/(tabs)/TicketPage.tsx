@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
     Text,
     View,
@@ -11,53 +11,70 @@ import AppHeader from '@/components/AppHeader';
 import {
     BORDERRADIUS,
     COLORS,
-    FONTFAMILY,
     FONTSIZE,
     SPACING,
 } from '@/theme/theme';
 import {LinearGradient} from "expo-linear-gradient";
-import CustomIcon from '@/components/CustomIcon';
 import {Ionicons} from "@expo/vector-icons";
 import {useFonts} from "expo-font";
 
-export default function TicketPage({navigation, route}: any){
-    const [ticketData, setTicketData] = useState<any>(route.params);
-    if (ticketData !== route.params && route.params != undefined) {
-        setTicketData(route.params);
-    }
-
+export default function TicketPage({navigation, route}: any) {
     const [fontsLoaded] = useFonts({
         "Poppins-Regular": require("../../assets/fonts/Poppins-Regular.ttf"),
         "Poppins-Medium": require("../../assets/fonts/Poppins-Medium.ttf"),
         "Poppins-Bold": require("../../assets/fonts/Poppins-Bold.ttf"),
     });
-
-    if (!fontsLoaded) {
-        return null; // or return a loading indicator
+    const [ticketData, setTicketData] = useState<any>(route.params);
+    if (ticketData !== route.params && route.params != undefined) {
+        setTicketData(route.params);
     }
-    if (ticketData == undefined || ticketData == null) {
+
+    console.log("price",route?.params.price);
+
+    // Update ticketData when route.params changes
+    useEffect(() => {
+        if (route.params) {
+            setTicketData(route.params);
+        }
+    }, [route.params]);
+
+    const handleGoBack = useCallback(() => {
+        try {
+            navigation.navigate('ReserveTicket', {
+                movie: ticketData?.movieData
+            });
+        } catch (error) {
+            console.error("Navigation error:", error);
+            navigation.goBack();
+        }
+    }, [navigation, ticketData]);
+    if (!fontsLoaded) {
+        return null;
+    }
+
+    if (!ticketData) {
         return (
             <View style={styles.container}>
-                <StatusBar hidden />
+                <StatusBar hidden/>
                 <View style={styles.appHeaderContainer}>
                     <AppHeader
-                        name="close"
-                        header={'My Tickets'}
-                        action={() => navigation.goBack()}
+                        name="back"
+                        header={'My Ticket'}
+                        action={handleGoBack}
                     />
                 </View>
             </View>
         );
-
     }
+
     return (
         <View style={styles.container}>
             <StatusBar hidden />
             <View style={styles.appHeaderContainer}>
                 <AppHeader
                     name="close"
-                    header={'My Tickets'}
-                    action={() => navigation.goBack()}
+                    header={'Tickets'}
+                    action={handleGoBack}
                 />
             </View>
 
@@ -106,24 +123,17 @@ export default function TicketPage({navigation, route}: any){
                     <View style={styles.ticketSeatContainer}>
                         <View style={styles.subtitleContainer}>
                             <Text style={styles.subheading}>Hall</Text>
-                            <Text style={styles.subtitle}>02</Text>
+                            <Text style={styles.subtitle}>{ticketData?.seatDetails?.hall || '02'}</Text>
                         </View>
                         <View style={styles.subtitleContainer}>
                             <Text style={styles.subheading}>Row</Text>
-                            <Text style={styles.subtitle}>04</Text>
+                            <Text style={styles.subtitle}>{ticketData?.seatDetails?.row || 'A'}</Text>
                         </View>
                         <View style={styles.subtitleContainer}>
-                            <Text style={styles.subheading}>Seats</Text>
-                            <Text style={styles.subtitle}>
-                                {ticketData?.seatArray
-                                    .slice(0, 3)
-                                    .map((item: any, index: number, arr: any) => {
-                                        return item + (index == arr.length - 1 ? '' : ', ');
-                                    })}
-                            </Text>
+                            <Text style={styles.subheading}>Seat</Text>
+                            <Text style={styles.subtitle}>{ticketData?.seatDetails?.seatNumber || '1'}</Text>
                         </View>
                     </View>
-
                 </View>
             </View>
 
@@ -139,8 +149,8 @@ export default function TicketPage({navigation, route}: any){
 
 const styles = StyleSheet.create({
     button: {
-        marginHorizontal:80,
-        marginBottom:40,
+        marginHorizontal: 80,
+        marginBottom: 40,
         backgroundColor: COLORS.Orange,
         paddingVertical: 2,
         borderRadius: 8,
@@ -172,7 +182,7 @@ const styles = StyleSheet.create({
     },
     ticketBGImage: {
         alignSelf: "center",
-        width: 300,
+        width: 310,
         aspectRatio: 200 / 300,
         borderTopLeftRadius: BORDERRADIUS.radius_25,
         borderTopRightRadius: BORDERRADIUS.radius_25,
@@ -185,14 +195,14 @@ const styles = StyleSheet.create({
     linear: {
         borderTopColor: COLORS.Black,
         borderTopWidth: 3,
-        width: 300,
+        width: 310,
         alignSelf: "center",
         backgroundColor: COLORS.Orange,
         borderStyle: "dashed",
     },
     ticketFooter: {
         backgroundColor: COLORS.Orange,
-        width: 300,
+        width: 310,
         alignItems: "center",
         paddingBottom: SPACING.space_36,
         alignSelf: "center",

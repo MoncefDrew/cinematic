@@ -20,15 +20,13 @@ import {LinearGradient} from "expo-linear-gradient";
 import AppHeader from '@/components/AppHeader';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import {useFonts} from "expo-font";
-import {useRouter} from "expo-router";
 
 const {width} = Dimensions.get('window');
 const SEAT_SIZE = width * 0.06;
 
 const generateSeats = () => {
-    // Create a more rectangular layout
-    const rows = 6;  // Number of rows (A-F)
-    const seatsPerRow = 8;  // 8 seats per row
+    const rows = 6;
+    const seatsPerRow = 8;
     let rowArray = [];
     let seatNumber = 1;
 
@@ -47,10 +45,14 @@ const generateSeats = () => {
     }
     return rowArray;
 };
-export default function ReserveTicket ({navigation, route}: any){
-    const [price, setPrice] = useState<number>(0);
-    const [twoDSeatArray, setTwoDSeatArray] = useState<any[][]>(generateSeats());
+
+// @ts-ignore
+export default function ReserveTicket ({navigation, route}){
+
+    const [price, setPrice] = useState<number>(100);
+    const [twoDSeatArray, setTwoDSeatArray] = useState(generateSeats());
     const [selectedSeat, setSelectedSeat] = useState<number | null>(null);
+
     const [fontsLoaded] = useFonts({
         "Poppins-Regular": require("../../assets/fonts/Poppins-Regular.ttf"),
         "Poppins-Medium": require("../../assets/fonts/Poppins-Medium.ttf"),
@@ -58,41 +60,67 @@ export default function ReserveTicket ({navigation, route}: any){
         "Poppins-SemiBold": require("../../assets/fonts/Poppins-SemiBold.ttf"),
     });
 
-    const router = useRouter();
-
     if (!fontsLoaded) {
-        return null;
+        console.log('Fonts not loaded'); // Debug log
+        return (
+            <View style={[styles.container, {justifyContent: 'center', alignItems: 'center'}]}>
+                <Text style={{color: COLORS.White}}>Loading fonts...</Text>
+            </View>
+        );
+    }
+
+    if (!route.params?.movie) {
+        console.log('No movie data'); // Debug log
+        return (
+            <View style={[styles.container, {justifyContent: 'center', alignItems: 'center'}]}>
+                <Text style={{color: COLORS.White}}>No movie data available</Text>
+            </View>
+        );
     }
 
     const selectSeat = (index: number, subindex: number, num: number) => {
         if (!twoDSeatArray[index][subindex].taken) {
             let temp = [...twoDSeatArray];
 
-            // Deselect previously selected seat
             if (selectedSeat !== null) {
                 temp = temp.map(row =>
                     row.map(seat => ({...seat, selected: false}))
                 );
             }
 
-            // Select new seat
             temp[index][subindex].selected = !temp[index][subindex].selected;
             setSelectedSeat(temp[index][subindex].selected ? num : null);
-            setPrice(temp[index][subindex].selected ? 5.0 : 0);
+            setPrice(100);
             setTwoDSeatArray(temp);
         }
     };
 
-    const BookSeats = async () => {
+    const BookSeats = () => {
         if (selectedSeat === null) {
             Alert.alert('Selection Required', 'Please select a seat before proceeding.');
             return;
         }
 
+        const rowIndex = Math.floor((selectedSeat - 1) / 8);
+        const rowLetter = String.fromCharCode(65 + rowIndex);
+        const seatInRow = selectedSeat % 8 || 8;
+
         navigation.navigate('TicketPage', {
             seatArray: [selectedSeat],
             ticketImage: route.params.movie.poster_url,
+            movieData: route.params.movie,
+            seatDetails: {
+                hall: "02",
+                row: rowLetter,
+                seatNumber: seatInRow,
+                rawSeatNumber: selectedSeat
+            },
+            price:price,
         });
+    };
+
+    const handleBack = () => {
+        navigation.goBack();
     };
 
     return (
@@ -101,8 +129,6 @@ export default function ReserveTicket ({navigation, route}: any){
             bounces={false}
             showsVerticalScrollIndicator={false}>
             <StatusBar hidden />
-
-            {/* Movie Banner */}
             <View>
                 <ImageBackground
                     source={{uri: route.params?.movie.cover_url}}
@@ -113,16 +139,14 @@ export default function ReserveTicket ({navigation, route}: any){
                         <View style={styles.appHeaderContainer}>
                             <AppHeader
                                 name="close"
-                                action={() => router.back()}
+                                action={handleBack}
                             />
                         </View>
                     </LinearGradient>
                 </ImageBackground>
             </View>
 
-            {/* Main Content */}
             <View style={styles.mainContainer}>
-                {/* Movie Info Section */}
                 <View style={styles.movieInfoContainer}>
                     <Text style={styles.movieTitle}>{route.params?.movie.title || "Movie Title"}</Text>
                     <View style={styles.movieMetaContainer}>
@@ -130,13 +154,8 @@ export default function ReserveTicket ({navigation, route}: any){
                         <Text style={styles.movieMeta}>•</Text>
                         <Text style={styles.movieMeta}>Hall 1</Text>
                     </View>
-                    <Text style={styles.movieDescription} numberOfLines={2}>
-                        {route.params?.movie.description ||
-                            "Experience the movie in our premium theater with state-of-the-art sound system and comfortable seating."}
-                    </Text>
                 </View>
 
-                {/* Seating Area */}
                 <View style={styles.seatContainer}>
                     <View style={styles.screenContainer}>
                         <View style={styles.screenLine} />
@@ -165,7 +184,6 @@ export default function ReserveTicket ({navigation, route}: any){
                         ))}
                     </View>
 
-                    {/* Seat Legend */}
                     <View style={styles.legendContainer}>
                         <View style={styles.legendItem}>
                             <MaterialIcons name="event-seat" style={styles.legendIcon} />
@@ -182,11 +200,10 @@ export default function ReserveTicket ({navigation, route}: any){
                     </View>
                 </View>
 
-                {/* Price and Booking Section */}
                 <View style={styles.bottomContainer}>
                     <View style={styles.priceContainer}>
                         <Text style={styles.priceLabel}>Total Price</Text>
-                        <Text style={styles.priceAmount}>$ {price.toFixed(2)}</Text>
+                        <Text style={styles.priceAmount}>{price.toFixed(2)} DA</Text>
                         {selectedSeat && (
                             <Text style={styles.seatInfo}>
                                 Seat: {String.fromCharCode(65 + Math.floor((selectedSeat-1)/8))}{selectedSeat % 8 || 8}
@@ -207,7 +224,6 @@ export default function ReserveTicket ({navigation, route}: any){
         </ScrollView>
     );
 };
-
 const styles = StyleSheet.create({
     seatRow: {
         flexDirection: "row",

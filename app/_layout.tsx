@@ -16,13 +16,14 @@ import ProfileHeader from "@/components/ProfileHeader";
 import SearchButton from "@/components/SearchButton";
 import MovieDetails from "@/app/(tabs)/MovieDetails";
 import ReserveTicket from "@/app/(tabs)/ReserveTicket";
-import { Alert, TouchableOpacity, View, StyleSheet } from "react-native";
+import {View, StyleSheet } from "react-native";
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import LogOut from "@/components/LogOut";
 import SignUpPage from './auth/sign-up';
 import SignInPage from './auth/sign-in';
 import TicketPage from "@/app/(tabs)/TicketPage";
+import PaymentPage from "@/app/(tabs)/PaymentPage";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -251,6 +252,19 @@ function MainApp() {
                     headerLeft: () => null,
                 }}
             />
+            <Drawer.Screen
+                name="Payment"
+                component={PaymentPage}
+                options={{
+                    headerTitle: '',
+                    headerStyle: {
+                        height: 0,
+                        backgroundColor: 'transparent',
+                    },
+                    headerTransparent: true,
+                    headerLeft: () => null,
+                }}
+            />
         </Drawer.Navigator>
     );
 }
@@ -262,14 +276,14 @@ export function AuthStack() {
             screenOptions={{
                 headerShown: false,
                 cardStyle: { backgroundColor: CinematicColors.background }
-            }}
-        >
+            }}>
             <Stack.Screen name="Landing" component={LandingPage} />
             <Stack.Screen name="SignIn" component={SignInPage} />
             <Stack.Screen name="SignUp" component={SignUpPage} />
             <Stack.Screen name="MainApp" component={MainApp} />
             <Stack.Screen name="MovieDetails" component={MovieDetails}/>
             <Stack.Screen name="TicketPage" component={TicketPage}/>
+            <Stack.Screen name="PaymentPage" component={PaymentPage}/>
         </Stack.Navigator>
     );
 }
