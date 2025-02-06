@@ -1,4 +1,4 @@
-import React, {useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {
     View,
     Text,
@@ -29,16 +29,47 @@ type MovieDetailsProps = {
     route: MovieDetailsRouteProp;
 };
 
-export default function MovieDetails({ route }: any) {
+export default function MovieDetails({ navigation,route }: any) {
     const router = useRouter();
-    const { movie } = route.params;
-    const navigation = useNavigation<NavigationProp>();
+
+    console.log("movie ",route.params)
 
     const [isModalVisible, setModalVisible] = useState(false);
     const [userRating, setUserRating] = useState(0);
+    const modalY = useRef(new Animated.Value(300)).current;
 
-    // Animation value
-    const modalY = useRef(new Animated.Value(300)).current; // Start offscreen (bottom)
+    const { movie } = route.params.movie;
+    const { duration, projection_date, start_time, end_time } = route.params.movie;
+    const [canReserve, setCanReserve] = useState(false);
+    const [timeRemaining, setTimeRemaining] = useState('');
+
+    const checkReservationAvailability = () => {
+        const [hours, minutes,seconds] = start_time.split(':');
+        const projectionDate = new Date(projection_date);
+        projectionDate.setHours(Number(hours), Number(minutes), 0);
+
+        const now = new Date();
+        const diffHours = (projectionDate.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+        setCanReserve(diffHours <= 24 && diffHours > 0);
+
+        if (diffHours > 24) {
+            const days = Math.floor(diffHours / 24);
+            setTimeRemaining(`Opens in ${days} days`);
+        } else if (diffHours > 0) {
+            const hours = Math.floor(diffHours);
+            const minutes = Math.floor((diffHours - hours) * 60);
+            setTimeRemaining(`${hours}h ${minutes}m remaining`);
+        } else {
+            setTimeRemaining('Projection ended');
+        }
+    };
+
+    useEffect(() => {
+        checkReservationAvailability();
+        const timer = setInterval(checkReservationAvailability, 60000);
+        return () => clearInterval(timer);
+    }, [projection_date, start_time]);
 
     const toggleModal = () => {
         if (isModalVisible) {
@@ -80,7 +111,7 @@ export default function MovieDetails({ route }: any) {
     return (
         <ScrollView style={styles.container}>
             <TouchableOpacity
-                onPress={() => router.back()}
+                onPress={() => navigation.navigate("Program")}
                 style={{
                     position: "absolute",
                     top: 40,
@@ -216,14 +247,21 @@ export default function MovieDetails({ route }: any) {
                                 {/* Options List */}
                                 <TouchableOpacity
                                     onPress={() => {
-                                        toggleModal();
-                                        //@ts-ignore
-                                        navigation.navigate("ReserveTicket", { movie });
+                                        if (canReserve) {
+                                            toggleModal();
+                                            navigation.navigate("ReserveTicket", { movie });
+                                        }
                                     }}
-                                    style={styles.reserveTicket}
+                                    style={[
+                                        styles.reserveTicket,
+                                        !canReserve && styles.disabledButton
+                                    ]}
+                                    disabled={!canReserve}
                                 >
                                     <Ionicons name='ticket' size={25} color='white' />
-                                    <Text style={styles.modalButtonText}>Reserve Ticket</Text>
+                                    <Text style={styles.modalButtonText}>
+                                        {canReserve ? 'Reserve Ticket' : timeRemaining}
+                                    </Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity style={styles.modalButton}>
                                     <Text style={styles.modalButtonText}>Mark as Watched</Text>
@@ -284,6 +322,10 @@ const styles = StyleSheet.create({
     modalButtonText: { color: "white", fontSize: 16, paddingHorizontal: 20 },
     closeButton: { backgroundColor: "#333333" }, // Darker button
     modalRatingSection: { alignItems: "center", marginVertical: 10 },
-    starRatingContainer: { flexDirection: "row", justifyContent: "center", marginVertical: 10 }
+    starRatingContainer: { flexDirection: "row", justifyContent: "center", marginVertical: 10 },
+    disabledButton: {
+        backgroundColor: '#374151',
+        opacity: 0.7
+    }
 });
 

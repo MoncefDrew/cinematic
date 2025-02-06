@@ -120,7 +120,7 @@ export default function ReserveTicket ({navigation, route}){
     };
 
     const handleBack = () => {
-        navigation.goBack();
+        navigation.navigate("MovieDetails", {route});
     };
 
     return (

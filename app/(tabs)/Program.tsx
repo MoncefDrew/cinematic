@@ -4,6 +4,7 @@ import { useFonts } from 'expo-font';
 import { useNavigation } from "@react-navigation/native";
 import { useMovieStore } from "@/api/store/moviesStore";
 import { useProjectionStore } from "@/api/store/ProjectionStore";
+import MovieCard from "@/components/MovieCard";
 
 const WeeklyMovieSchedule = () => {
     const [loaded] = useFonts({
@@ -72,8 +73,8 @@ const WeeklyMovieSchedule = () => {
         const truncatedDescription = item.movie.description.length > 50
             ? item.movie.description.substring(0, 70) + '...'
             : item.movie.description;
-
         const isStreaming = isMovieStreaming(item.start_time);
+
 
         return (
             <TouchableOpacity style={styles.movieContainer}>
@@ -85,7 +86,9 @@ const WeeklyMovieSchedule = () => {
                         {isStreaming && <View style={styles.streamingDot} />}
                     </View>
                     <View style={styles.movieContent}>
-                        <Image source={{uri: item.movie.poster_url}} style={styles.poster}/>
+                        <View  style={styles.poster}>
+                            <MovieCard movie={item}  />
+                        </View>
                         <View style={styles.movieInfo}>
                             <Text style={styles.movieTitle} numberOfLines={1}>{item.movie.title}</Text>
                             <Text style={styles.movieDescription}>{truncatedDescription}</Text>
@@ -127,7 +130,6 @@ const WeeklyMovieSchedule = () => {
                 keyExtractor={(item) => item.date}
                 renderItem={({ item: date }) => {
                     const dayMovies = getMoviesForDay(date.date);
-
                     return dayMovies.length > 0 ? (
                         <FlatList
                             data={dayMovies}
@@ -229,9 +231,7 @@ const styles = StyleSheet.create({
         padding: 16,
     },
     poster: {
-        width: 110,
-        height: 160,
-        borderRadius: 8,
+
         marginRight: 16,
     },
     movieInfo: {

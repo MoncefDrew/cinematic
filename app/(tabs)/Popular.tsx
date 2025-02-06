@@ -51,7 +51,9 @@ export default function Popular() {
                     horizontal
                     showsHorizontalScrollIndicator={false}
                     keyExtractor={(item) => item.id}
-                    renderItem={({ item }) => <MovieCard movie={item} />}
+                    renderItem={({ item }) => <MovieCard movie={item}
+
+                    />}
                 />
             )}
         </View>
