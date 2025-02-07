@@ -4,7 +4,7 @@ import { useFonts } from 'expo-font';
 import { useNavigation } from "@react-navigation/native";
 import { useMovieStore } from "@/api/store/moviesStore";
 import { useProjectionStore } from "@/api/store/ProjectionStore";
-import MovieCard from "@/components/MovieCard";
+import {Movie} from "@/constants/Movie";
 
 const WeeklyMovieSchedule = () => {
     const [loaded] = useFonts({
@@ -14,6 +14,7 @@ const WeeklyMovieSchedule = () => {
     const [selectedGenre, setSelectedGenre] = useState(null);
     const { movies } = useMovieStore();
     const { projections, fetchProjections } = useProjectionStore();
+    const navigation = useNavigation();
 
     useEffect(() => {
         fetchProjections();
@@ -21,15 +22,14 @@ const WeeklyMovieSchedule = () => {
 
     if (!loaded) return null;
 
-    const isMovieStreaming = (projectionTime) => {
+    //checking the streaming state
+    const isMovieStreaming = (projectionTime:any) => {
         const now = new Date();
         const [hours, minutes] = projectionTime.split(':');
         const projectionDate = new Date();
         projectionDate.setHours(parseInt(hours), parseInt(minutes));
-
-        // Movie is considered streaming if it started within the last 2 hours
-        const timeDiff = now.getTime() - projectionDate.getTime();
-        return timeDiff >= 0 && timeDiff <= 2 * 60 * 60 * 1000;
+        // @ts-ignore
+        return now - projectionDate >= 0 && now - projectionDate <= 2 * 60 * 60 * 1000;
     };
 
     const getNextWeekDates = () => {
@@ -43,22 +43,20 @@ const WeeklyMovieSchedule = () => {
                     weekday: 'long',
                     month: 'long',
                     day: 'numeric',
-                    year: 'numeric'
+                    year: 'numeric',
                 }),
                 date: date.toISOString().split('T')[0],
-                dayNumber: date.getDate()
+                dayNumber: date.getDate(),
             };
         });
     };
 
-    const getProjectionsWithMovies = () => {
-        return projections
-            .map(projection => {
-                const matchedMovie = movies.find(movie => movie.film_id === projection.film_id);
-                return matchedMovie ? { ...projection, movie: matchedMovie } : null;
-            })
-            .filter(Boolean);
-    };
+    const getProjectionsWithMovies = () => projections
+        .map(projection => ({
+            ...projection,
+            movie: movies.find(movie => movie.film_id === projection.film_id),
+        }))
+        .filter(projection => projection.movie);
 
     const filteredMovies = getProjectionsWithMovies().filter(projection => {
         const matchesSearch = projection.movie.title.toLowerCase().includes(searchQuery.toLowerCase());
@@ -66,29 +64,48 @@ const WeeklyMovieSchedule = () => {
         return matchesSearch && matchesGenre;
     });
 
-    const getMoviesForDay = (day) =>
-        filteredMovies.filter((projection) => projection.projection_date === day);
+    const getMoviesForDay = (day) => filteredMovies.filter(projection => projection.projection_date === day);
 
-    const renderMovieItem = ({ item, dayName, dayNumber, fullDate }) => {
-        const truncatedDescription = item.movie.description.length > 50
-            ? item.movie.description.substring(0, 70) + '...'
+
+    const travelToMovie = (item) => {
+        const { movie } = item;
+        const {projection_id,start_time,projection_date,end_time,duration} = item;
+        navigation.navigate('MovieDetails', {fromProgram: true,movie,projection_id,projection_date,start_time,end_time,duration });
+    };
+
+
+    const renderMovieItem = ({ item, fullDate }) => {
+        const truncatedDescription = item.movie.description.length > 70
+            ? `${item.movie.description.substring(0, 70)}...`
             : item.movie.description;
         const isStreaming = isMovieStreaming(item.start_time);
 
+        const formatTime = (timeString) => {
+            const [hours, minutes] = timeString.split(':');
+            const hour = parseInt(hours, 10);
+            const period = hour >= 12 ? 'PM' : 'AM';
+            const formattedHour = hour % 12 || 12;
+            return `${formattedHour}:${minutes} ${period}`;
+        };
 
         return (
-            <TouchableOpacity style={styles.movieContainer}>
+            <TouchableOpacity onPress={() => travelToMovie(item)} style={styles.movieContainer}>
                 <View style={styles.movieCard}>
-                    <View style={styles.dateMarker}>
-                        <View style={styles.dateInfo}>
-                            <Text style={styles.fullDateText}>{fullDate}</Text>
+                    <View style={styles.headerContainer}>
+                        <View style={styles.timeContainer}>
+                            {isStreaming ? (
+                                <View style={styles.streamingContainer}>
+                                    <View style={styles.streamingDot} />
+                                    <Text style={styles.streamingText}>Streaming</Text>
+                                </View>
+                            ) : (
+                                <Text style={styles.movieTime}>{formatTime(item.start_time)}</Text>
+                            )}
                         </View>
-                        {isStreaming && <View style={styles.streamingDot} />}
+                        <Text style={styles.fullDateText}>{fullDate}</Text>
                     </View>
                     <View style={styles.movieContent}>
-                        <View  style={styles.poster}>
-                            <MovieCard movie={item}  />
-                        </View>
+                        <Image source={{ uri: item.movie.poster_url }} style={styles.poster} />
                         <View style={styles.movieInfo}>
                             <Text style={styles.movieTitle} numberOfLines={1}>{item.movie.title}</Text>
                             <Text style={styles.movieDescription}>{truncatedDescription}</Text>
@@ -99,7 +116,6 @@ const WeeklyMovieSchedule = () => {
                                     <Text style={styles.metadataText}>{item.movie.rating}</Text>
                                 </View>
                                 <View style={styles.timePrice}>
-                                    <Text style={styles.movieTime}>{item.projectionTime}</Text>
                                     <Text style={styles.moviePrice}>100.00 DA</Text>
                                 </View>
                             </View>
@@ -109,7 +125,6 @@ const WeeklyMovieSchedule = () => {
             </TouchableOpacity>
         );
     };
-
     return (
         <View style={styles.container}>
             <View style={styles.header}>
@@ -133,13 +148,8 @@ const WeeklyMovieSchedule = () => {
                     return dayMovies.length > 0 ? (
                         <FlatList
                             data={dayMovies}
-                            keyExtractor={(item) => item.id}
-                            renderItem={({item}) => renderMovieItem({
-                                item,
-                                dayName: date.dayName,
-                                dayNumber: date.dayNumber,
-                                fullDate: date.fullDate
-                            })}
+                            keyExtractor={(item) => item.projection_id}
+                            renderItem={({ item }) => renderMovieItem({ item, fullDate: date.fullDate })}
                             horizontal
                             showsHorizontalScrollIndicator={false}
                         />
@@ -155,7 +165,7 @@ const WeeklyMovieSchedule = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#111827', // Darker, more sophisticated background
+        backgroundColor: '#111827',
         paddingHorizontal: 16,
         paddingTop: 24,
     },
@@ -210,28 +220,20 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: 12,
     },
-    dateInfo: {
-        flex: 1,
-    },
     fullDateText: {
         color: '#fff',
         fontFamily: 'Satoshi',
         fontSize: 14,
         fontWeight: '600',
     },
-    streamingDot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: '#10B981', // Green color for streaming indicator
-        marginLeft: 8,
-    },
     movieContent: {
         flexDirection: 'row',
         padding: 16,
     },
     poster: {
-
+        width: 90,
+        height: 140,
+        borderRadius: 8,
         marginRight: 16,
     },
     movieInfo: {
@@ -284,7 +286,7 @@ const styles = StyleSheet.create({
         fontWeight: '500',
     },
     moviePrice: {
-        color: '#10B981', // Changed to match streaming dot color
+        color: '#10B981',
         fontSize: 16,
         fontFamily: 'Satoshi',
         fontWeight: '700',
@@ -296,6 +298,32 @@ const styles = StyleSheet.create({
         fontStyle: 'italic',
         textAlign: 'center',
         marginVertical: 16,
+    },
+    headerContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 10,
+        paddingTop: 10,
+    },
+    timeContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    streamingContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    streamingDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: '#10B981',
+        marginRight: 5,
+    },
+    streamingText: {
+        color: '#10B981',
+        fontWeight: 'bold',
     },
 });
 

@@ -46,14 +46,13 @@ export default function Popular() {
             ) : error ? (
                 <Text style={[styles.errorText]}>{error}</Text>
             ) : (
+
                 <FlatList
                     data={movies}
                     horizontal
                     showsHorizontalScrollIndicator={false}
-                    keyExtractor={(item) => item.id}
-                    renderItem={({ item }) => <MovieCard movie={item}
-
-                    />}
+                    keyExtractor={(item) => item.film_id}
+                    renderItem={({ item }) => <MovieCard movie={item}/>}
                 />
             )}
         </View>

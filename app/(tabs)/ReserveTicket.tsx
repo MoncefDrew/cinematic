@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
     Text,
     View,
@@ -52,7 +52,10 @@ export default function ReserveTicket ({navigation, route}){
     const [price, setPrice] = useState<number>(100);
     const [twoDSeatArray, setTwoDSeatArray] = useState(generateSeats());
     const [selectedSeat, setSelectedSeat] = useState<number | null>(null);
-
+    const [movieDetails, setMovieDetails] = useState<any>(route.params);
+    if (movieDetails !== route.params && route.params != undefined) {
+        setMovieDetails(route.params);
+    }
     const [fontsLoaded] = useFonts({
         "Poppins-Regular": require("../../assets/fonts/Poppins-Regular.ttf"),
         "Poppins-Medium": require("../../assets/fonts/Poppins-Medium.ttf"),
@@ -119,9 +122,20 @@ export default function ReserveTicket ({navigation, route}){
         });
     };
 
-    const handleBack = () => {
-        navigation.navigate("MovieDetails", {route});
-    };
+    useEffect(() => {
+        if (route.params) {
+            setMovieDetails(route.params);
+        }
+    }, [route.params]);
+
+    const handleBack = useCallback(() => {
+        try {
+            navigation.navigate('MovieDetails',route.params);
+        } catch (error) {
+            console.error("Navigation error:", error);
+            navigation.goBack();
+        }
+    }, [navigation, movieDetails]);
 
     return (
         <ScrollView
