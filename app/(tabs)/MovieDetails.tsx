@@ -12,7 +12,6 @@ import {
     Animated, // Import Animated
 
 } from "react-native";
-import {Colors} from "@/constants/Colors";
 import {useNavigation, useRouter} from "expo-router";
 import MovieCard from "@/components/MovieCard";
 import {Ionicons} from "@expo/vector-icons";
@@ -22,9 +21,9 @@ import {LinearGradient} from "expo-linear-gradient";
 import ProfilePic from "@/components/ProfilePic";
 import {StackNavigationProp} from "@react-navigation/stack";
 
+
 type MovieDetailsRouteProp = RouteProp<RootStackParamList, "MovieDetails">;
 type NavigationProp = StackNavigationProp<RootStackParamList, 'Popular'>;
-
 type MovieDetailsProps = {
     route: MovieDetailsRouteProp;
 };
@@ -40,6 +39,17 @@ export default function MovieDetails({route}: any) {
     const {duration, projection_date, start_time, end_time} = route.params;
     const [canReserve, setCanReserve] = useState(false);
     const [timeRemaining, setTimeRemaining] = useState('');
+
+
+    //refreshes the start time and projection
+    useEffect(() => {
+        if (showReserveButton){
+
+            checkReservationAvailability();
+            const timer = setInterval(checkReservationAvailability, 60000);
+            return () => clearInterval(timer);
+        }
+    }, [projection_date, start_time]);
 
 
     const showReserveButton = route.params?.fromProgram || false;
@@ -65,15 +75,6 @@ export default function MovieDetails({route}: any) {
         }
     };
 
-    //refreshes the start time and projection
-    useEffect(() => {
-        if (showReserveButton){
-
-        checkReservationAvailability();
-        const timer = setInterval(checkReservationAvailability, 60000);
-        return () => clearInterval(timer);
-        }
-    }, [projection_date, start_time]);
 
 
     //options modal
@@ -124,8 +125,7 @@ export default function MovieDetails({route}: any) {
                     top: 40,
                     left: 20,
                     zIndex: 1,
-                }}
-            >
+                }}>
                 <Ionicons
                     name="arrow-back"
                     size={30}
