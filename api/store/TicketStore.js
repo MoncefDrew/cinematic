@@ -10,23 +10,35 @@ export const useTicketStore = create(
                 tickets: [],
                 loading: false,
                 error: null,
-                createTicket :async (projection_id) =>{
-                    set({loading:true})
-                    try{
-                        const {user} = useAuthStore()
-                        const username = user.username
-                        console.log("sending req to api")
-                        const { data,error } = await axios.post(`http://localhost:3000/api/ticket/`, {projection_id, username})
-                        console.log("getting resp from api",data,error)
 
-                        set({ tickets: data, error: null })
+                createTicket: async (projection_id) => {
+                set({ loading: true });
 
-                    }catch (error){
+                try {
+                    const { user } = useAuthStore.getState(); // Ensure correct Zustand method
+                    const username = user?.username;
 
-                    } finally {
-
+                    if (!projection_id || !username) {
+                        throw new Error("Missing projection_id or username.");
                     }
-                },
+
+                    console.log("Sending request to API...");
+                    const { data } = await axios.post('http://localhost:3000/api/ticket/', {
+                        projection_id,
+                        username,
+                    });
+
+                    console.log("Response from API:", data);
+
+                    set({ tickets: data, error: null });
+                } catch (error) {
+                    console.error("Error creating ticket:", error.message);
+                    set({ error: error.message });
+                } finally {
+                    set({ loading: false });
+                }
+            },
+
                 fetchTickets: async () => {
                     set({ loading: true })
                     try {
