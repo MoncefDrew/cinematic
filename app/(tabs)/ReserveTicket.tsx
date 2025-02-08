@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import {
     Text,
     View,
@@ -16,126 +16,160 @@ import {
     FONTSIZE,
     SPACING,
 } from '@/theme/theme';
-import {LinearGradient} from "expo-linear-gradient";
+import { LinearGradient } from "expo-linear-gradient";
 import AppHeader from '@/components/AppHeader';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import {useFonts} from "expo-font";
+import { useFonts } from "expo-font";
+import {useSeatStore} from '@/api/store/seatsStore';
 
-const {width} = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 const SEAT_SIZE = width * 0.06;
 
-const generateSeats = () => {
-    const rows = 6;
-    const seatsPerRow = 8;
-    let rowArray = [];
-    let seatNumber = 1;
+export default function ReserveTicket({ navigation, route }:any) {
+    const {
+        seats,
+        loading,
+        error,
+        selectedSeat,
+        fetchSeats,
+        selectSeat,
+        reserveSeat
+    } = useSeatStore();
 
-    for (let i = 0; i < rows; i++) {
-        let columnArray = [];
-        for (let j = 0; j < seatsPerRow; j++) {
-            let seatObject = {
-                number: seatNumber,
-                taken: Boolean(Math.round(Math.random())),
-                selected: false,
-            };
-            columnArray.push(seatObject);
-            seatNumber++;
-        }
-        rowArray.push(columnArray);
-    }
-    return rowArray;
-};
+    const [price] = useState(100); // Fixed price state
 
-// @ts-ignore
-export default function ReserveTicket ({navigation, route}){
-
-    const [price, setPrice] = useState<number>(100);
-    const [twoDSeatArray, setTwoDSeatArray] = useState(generateSeats());
-    const [selectedSeat, setSelectedSeat] = useState<number | null>(null);
-    const [movieDetails, setMovieDetails] = useState<any>(route.params);
-    useEffect(() => {
-        if (route.params) {
-            setMovieDetails(route.params);
-        }
-    }, [route.params]);
     const handleBack = useCallback(() => {
         try {
-            navigation.navigate('MovieDetails',route.params);
+            navigation.navigate('MovieDetails', route.params);
         } catch (error) {
             console.error("Navigation error:", error);
             navigation.goBack();
         }
-    }, [navigation, movieDetails]);
+    }, [navigation, route.params]);
+
+    useEffect(() => {
+        const loadSeats = async () => {
+            if (route.params?.projection_id) {
+                console.log('Fetching seats for projection:', route.params.projection_id); // Debug log
+                await fetchSeats(route.params.projection_id);
+            } else {
+                console.log('No projection ID available'); // Debug log
+            }
+        };
+
+        loadSeats();
+    }, [route.params?.projection_id]);
+
+    // Add debug logging for seats state
+    useEffect(() => {
+        console.log('Current seats state:', seats); // Debug log
+    }, [seats]);
+
     const [fontsLoaded] = useFonts({
         "Poppins-Regular": require("../../assets/fonts/Poppins-Regular.ttf"),
         "Poppins-Medium": require("../../assets/fonts/Poppins-Medium.ttf"),
         "Poppins-Bold": require("../../assets/fonts/Poppins-Bold.ttf"),
         "Poppins-SemiBold": require("../../assets/fonts/Poppins-SemiBold.ttf"),
     });
-
-    if (movieDetails !== route.params && route.params != undefined) {
-        setMovieDetails(route.params);
-    }
     if (!fontsLoaded) {
-        console.log('Fonts not loaded'); // Debug log
         return (
-            <View style={[styles.container, {justifyContent: 'center', alignItems: 'center'}]}>
-                <Text style={{color: COLORS.White}}>Loading fonts...</Text>
+            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+                <Text style={{ color: COLORS.White }}>Loading fonts...</Text>
             </View>
         );
     }
-
     if (!route.params?.movie) {
-        console.log('No movie data'); // Debug log
         return (
-            <View style={[styles.container, {justifyContent: 'center', alignItems: 'center'}]}>
-                <Text style={{color: COLORS.White}}>No movie data available</Text>
+            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+                <Text style={{ color: COLORS.White }}>No movie data available</Text>
             </View>
         );
     }
 
-    const selectSeat = (index: number, subindex: number, num: number) => {
-        if (!twoDSeatArray[index][subindex].taken) {
-            let temp = [...twoDSeatArray];
-
-            if (selectedSeat !== null) {
-                temp = temp.map(row =>
-                    row.map(seat => ({...seat, selected: false}))
-                );
-            }
-
-            temp[index][subindex].selected = !temp[index][subindex].selected;
-            setSelectedSeat(temp[index][subindex].selected ? num : null);
-            setPrice(100);
-            setTwoDSeatArray(temp);
+    // Helper function to chunk array into rows
+    const chunks = (array: any[], size: number) => {
+        if (!array) return [];
+        const chunked = [];
+        for (let i = 0; i < array.length; i += size) {
+            chunked.push(array.slice(i, i + size));
         }
+        return chunked;
     };
 
-    const BookSeats = () => {
+    // ReserveTicket.tsx - Updated renderSeats function
+    const renderSeats = () => {
+        if (!seats || seats.length === 0) {
+            console.log('No seats available to render'); // Debug log
+            return (
+                <View style={[styles.seatMap, { alignItems: 'center', justifyContent: 'center' }]}>
+                    <Text style={{ color: COLORS.White }}>No seats available</Text>
+                </View>
+            );
+        }
+
+        const seatRows = chunks(seats, 8);
+        console.log('Rendered seat rows:', seatRows); // Debug log
+
+        return (
+            <View style={styles.seatMap}>
+                {seatRows.map((row, rowIndex) => (
+                    <View key={rowIndex} style={styles.seatRow}>
+                        <Text style={styles.rowLabel}>{String.fromCharCode(65 + rowIndex)}</Text>
+                        {row.map((seat) => {
+                            const seatIndex = seat.number - 1;
+                            return (
+                                <TouchableOpacity
+                                    key={seat.number}
+                                    onPress={() => selectSeat(seatIndex)}
+                                    disabled={seat.taken}>
+                                    <MaterialIcons
+                                        name="event-seat"
+                                        style={[
+                                            styles.seatIcon,
+                                            seat.taken ? styles.takenSeat : {},
+                                            seat.selected ? styles.selectedSeat : {},
+                                        ]}
+                                    />
+                                </TouchableOpacity>
+                            );
+                        })}
+                    </View>
+                ))}
+            </View>
+        );
+    };
+
+    // seat choosing
+    const handleBookSeats = async () => {
         if (selectedSeat === null) {
             Alert.alert('Selection Required', 'Please select a seat before proceeding.');
             return;
         }
 
-        const rowIndex = Math.floor((selectedSeat - 1) / 8);
-        const rowLetter = String.fromCharCode(65 + rowIndex);
-        const seatInRow = selectedSeat % 8 || 8;
+        try {
+            const seatNumber = selectedSeat + 1; // Convert from index to seat number
 
-        navigation.navigate('TicketPage', {
-            seatArray: [selectedSeat],
-            ticketImage: route.params.movie.poster_url,
-            movieData: route.params.movie,
-            seatDetails: {
-                hall: "02",
-                row: rowLetter,
-                seatNumber: seatInRow,
-                rawSeatNumber: selectedSeat
-            },
-            price:price,
-        });
+            const rowIndex = Math.floor(selectedSeat / 8);
+            const rowLetter = String.fromCharCode(65 + rowIndex);
+            const seatInRow = (selectedSeat % 8) + 1;
+
+            navigation.navigate('TicketPage', {
+                projection_id:route?.params.projection_id,
+                seatArray: [seatNumber],
+                ticketImage: route.params.movie.poster_url,
+                movieData: route.params.movie,
+                seatDetails: {
+                    hall: "02",
+                    row: rowLetter,
+                    seatNumber: selectedSeat,
+                    rawSeatNumber: seatNumber
+                },
+                price: price,
+            });
+        } catch (error) {
+            Alert.alert('Error', 'Failed to reserve seat. Please try again.');
+        }
     };
-
-
 
     return (
         <ScrollView
@@ -145,7 +179,7 @@ export default function ReserveTicket ({navigation, route}){
             <StatusBar hidden />
             <View>
                 <ImageBackground
-                    source={{uri: route.params?.movie.cover_url}}
+                    source={{ uri: route.params?.movie.cover_url }}
                     style={styles.ImageBG}>
                     <LinearGradient
                         colors={[COLORS.BlackRGB10, COLORS.Black]}
@@ -176,27 +210,17 @@ export default function ReserveTicket ({navigation, route}){
                         <Text style={styles.screenText}>SCREEN</Text>
                     </View>
 
-                    <View style={styles.seatMap}>
-                        {twoDSeatArray?.map((item, index) => (
-                            <View key={index} style={styles.seatRow}>
-                                <Text style={styles.rowLabel}>{String.fromCharCode(65 + index)}</Text>
-                                {item?.map((subitem, subindex) => (
-                                    <TouchableOpacity
-                                        key={subitem.number}
-                                        onPress={() => selectSeat(index, subindex, subitem.number)}>
-                                        <MaterialIcons
-                                            name="event-seat"
-                                            style={[
-                                                styles.seatIcon,
-                                                subitem.taken ? styles.takenSeat : {},
-                                                subitem.selected ? styles.selectedSeat : {},
-                                            ]}
-                                        />
-                                    </TouchableOpacity>
-                                ))}
-                            </View>
-                        ))}
-                    </View>
+                    {loading ? (
+                        <View style={[styles.seatMap, { alignItems: 'center', justifyContent: 'center' }]}>
+                            <Text style={{ color: COLORS.White }}>Loading seats...</Text>
+                        </View>
+                    ) : error ? (
+                        <View style={[styles.seatMap, { alignItems: 'center', justifyContent: 'center' }]}>
+                            <Text style={{ color: COLORS.White }}>{error}</Text>
+                        </View>
+                    ) : (
+                        renderSeats()
+                    )}
 
                     <View style={styles.legendContainer}>
                         <View style={styles.legendItem}>
@@ -218,9 +242,9 @@ export default function ReserveTicket ({navigation, route}){
                     <View style={styles.priceContainer}>
                         <Text style={styles.priceLabel}>Total Price</Text>
                         <Text style={styles.priceAmount}>{price.toFixed(2)} DA</Text>
-                        {selectedSeat && (
+                        {selectedSeat !== null && (
                             <Text style={styles.seatInfo}>
-                                Seat: {String.fromCharCode(65 + Math.floor((selectedSeat-1)/8))}{selectedSeat % 8 || 8}
+                                Seat: {String.fromCharCode(65 + Math.floor(selectedSeat/8))}{(selectedSeat % 8) + 1}
                             </Text>
                         )}
                     </View>
@@ -229,7 +253,7 @@ export default function ReserveTicket ({navigation, route}){
                             styles.bookButton,
                             !selectedSeat && styles.disabledButton
                         ]}
-                        onPress={BookSeats}
+                        onPress={handleBookSeats}
                         disabled={!selectedSeat}>
                         <Text style={styles.bookButtonText}>Book Now</Text>
                     </TouchableOpacity>
@@ -237,7 +261,7 @@ export default function ReserveTicket ({navigation, route}){
             </View>
         </ScrollView>
     );
-};
+}
 const styles = StyleSheet.create({
     seatRow: {
         flexDirection: "row",

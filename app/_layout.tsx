@@ -24,6 +24,7 @@ import SignUpPage from './auth/sign-up';
 import SignInPage from './auth/sign-in';
 import TicketPage from "@/app/(tabs)/TicketPage";
 import PaymentPage from "@/app/(tabs)/PaymentPage";
+import {useAuthStore} from "@/api/store/AuthStore";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -43,9 +44,11 @@ const CinematicColors = {
 // Root Layout Component
 export default function RootLayout() {
     const [session, setSession] = useState<Session | null>(null);
+    const {user} = useAuthStore()
     const [loaded] = useFonts({
         SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
         Satoshi: require('../assets/fonts/Satoshi-Variable.ttf'),
+        Poppins: require('../assets/fonts/Poppins-SemiBold.ttf')
     });
 
     useEffect(() => {
@@ -59,7 +62,6 @@ export default function RootLayout() {
     }, []);
 
     if (!loaded) return null;
-
     return (
         <>
             <StatusBar style="light" backgroundColor="transparent" />
@@ -111,13 +113,13 @@ function MainApp() {
                 drawerInactiveTintColor: CinematicColors.textSecondary,
                 drawerActiveBackgroundColor: CinematicColors.accentSoft,
                 drawerLabelStyle: {
-                    fontFamily: 'Satoshi',
+                    fontFamily: 'Poppins',
                     fontSize: 15,
                     marginLeft: -20,
                 },
                 headerStyle: {
                     backgroundColor: '#111827', // Dark background to match the container
-                    borderBottomWidth: 1,
+                    borderBottomWidth: 0,
                     borderBottomColor: '#374151', // Matching border color
                     elevation: 0, // Remove shadow
                     shadowOpacity: 0, // Remove shadow

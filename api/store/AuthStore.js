@@ -8,7 +8,9 @@ export const useAuthStore = create(
             user: null,
             setUser: (user) => set({ user }),
             logout: () => set({ user: null }),
+
         }),
+
         {
             name: 'auth-storage', // Key for AsyncStorage
             getStorage: () => AsyncStorage,

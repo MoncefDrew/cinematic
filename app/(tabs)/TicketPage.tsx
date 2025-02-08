@@ -17,6 +17,8 @@ import {
 import {LinearGradient} from "expo-linear-gradient";
 import {Ionicons} from "@expo/vector-icons";
 import {useFonts} from "expo-font";
+import {useSeatStore} from '@/api/store/seatsStore';
+
 
 export default function TicketPage({navigation, route}: any) {
     const [fontsLoaded] = useFonts({
@@ -29,9 +31,10 @@ export default function TicketPage({navigation, route}: any) {
         setTicketData(route.params);
     }
 
-    console.log("price",route?.params.price);
+    const {reserveSeat} = useSeatStore();    // Update ticketData when route.params changes
+    const {seatNumber} = route.params.seatDetails
+    console.log(seatNumber)
 
-    // Update ticketData when route.params changes
     useEffect(() => {
         if (route.params) {
             setTicketData(route.params);
@@ -41,7 +44,10 @@ export default function TicketPage({navigation, route}: any) {
     const handleGoBack = useCallback(() => {
         try {
             navigation.navigate('ReserveTicket', {
+                projection_id:route?.params.projection_id,
+                movieData: route.params.movie,
                 movie: ticketData?.movieData
+
             });
         } catch (error) {
             console.error("Navigation error:", error);
@@ -52,6 +58,11 @@ export default function TicketPage({navigation, route}: any) {
         return null;
     }
 
+    const submitTicket = async() =>{
+        await reserveSeat(route.params.projection_id, seatNumber);
+        console.log("finished")
+
+    }
     if (!ticketData) {
         return (
             <View style={styles.container}>
@@ -139,7 +150,7 @@ export default function TicketPage({navigation, route}: any) {
 
             <TouchableOpacity
                 style={styles.button}
-                onPress={() => Alert.alert('Cinematic Red Button Clicked!')}
+                onPress={() => submitTicket()}
             >
                 <Text style={styles.buttonText}>Buy the Ticket</Text>
             </TouchableOpacity>

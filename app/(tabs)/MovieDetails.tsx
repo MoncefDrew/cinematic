@@ -31,7 +31,7 @@ type MovieDetailsProps = {
 
 export default function MovieDetails({route}: any) {
     const router = useRouter();
-    const {movie} = route.params;
+    const {movie,seats,projection_id} = route.params;
     const navigation = useNavigation<NavigationProp>();
     const [userRating, setUserRating] = useState(0);
     const [isModalVisible, setModalVisible] = useState(false);
@@ -240,7 +240,7 @@ export default function MovieDetails({route}: any) {
                                         onPress={() => {
                                             if (canReserve) {
                                                 toggleModal();
-                                                navigation.navigate("ReserveTicket", {movie});
+                                                navigation.navigate("ReserveTicket", {movie,seats,projection_id});
                                             }
                                         }}
                                         style={[styles.reserveTicket, !canReserve && styles.disabledButton]}

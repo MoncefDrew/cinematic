@@ -7,20 +7,17 @@ import { useProjectionStore } from "@/api/store/ProjectionStore";
 import {Movie} from "@/constants/Movie";
 
 const WeeklyMovieSchedule = () => {
-    const [loaded] = useFonts({
-        Satoshi: require('../../assets/fonts/Satoshi-Variable.ttf'),
-    });
+    const [loaded] = useFonts({Satoshi: require('../../assets/fonts/Satoshi-Variable.ttf'),});
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedGenre, setSelectedGenre] = useState(null);
     const { movies } = useMovieStore();
     const { projections, fetchProjections } = useProjectionStore();
     const navigation = useNavigation();
-
     useEffect(() => {
         fetchProjections();
     }, [fetchProjections]);
-
     if (!loaded) return null;
+
 
     //checking the streaming state
     const isMovieStreaming = (projectionTime:any) => {
@@ -69,8 +66,9 @@ const WeeklyMovieSchedule = () => {
 
     const travelToMovie = (item) => {
         const { movie } = item;
-        const {projection_id,start_time,projection_date,end_time,duration} = item;
-        navigation.navigate('MovieDetails', {fromProgram: true,movie,projection_id,projection_date,start_time,end_time,duration });
+        const {projection_id,start_time,projection_date,duration,seats} = item;
+        // @ts-ignore
+        navigation.navigate('MovieDetails', {fromProgram: true,movie,projection_id,projection_date,start_time,seats,duration });
     };
 
 
@@ -79,7 +77,6 @@ const WeeklyMovieSchedule = () => {
             ? `${item.movie.description.substring(0, 70)}...`
             : item.movie.description;
         const isStreaming = isMovieStreaming(item.start_time);
-
         const formatTime = (timeString) => {
             const [hours, minutes] = timeString.split(':');
             const hour = parseInt(hours, 10);
