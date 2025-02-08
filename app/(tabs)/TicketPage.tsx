@@ -18,7 +18,7 @@ import {LinearGradient} from "expo-linear-gradient";
 import {Ionicons} from "@expo/vector-icons";
 import {useFonts} from "expo-font";
 import {useSeatStore} from '@/api/store/seatsStore';
-
+import {useTicketStore} from '@/api/store/TicketStore'
 
 export default function TicketPage({navigation, route}: any) {
     const [fontsLoaded] = useFonts({
@@ -30,7 +30,7 @@ export default function TicketPage({navigation, route}: any) {
     if (ticketData !== route.params && route.params != undefined) {
         setTicketData(route.params);
     }
-
+    const {createTicket} = useTicketStore()
     const {reserveSeat} = useSeatStore();    // Update ticketData when route.params changes
     const {seatNumber} = route.params.seatDetails
     console.log(seatNumber)
@@ -59,6 +59,8 @@ export default function TicketPage({navigation, route}: any) {
     }
 
     const submitTicket = async() =>{
+        await createTicket(route.params.projection_id);
+        console.log("created ticket successfully")
         await reserveSeat(route.params.projection_id, seatNumber);
         console.log("finished")
 

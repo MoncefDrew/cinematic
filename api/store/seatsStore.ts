@@ -57,12 +57,14 @@ export const  useSeatStore = create<SeatStore>((set, get) => ({
         set({ loading: true, error: null });
         try {
             await axios.post(`http://localhost:3000/api/projection/${projectionId}/seats`, {
-                seatIndex: seatNumber - 1 // Convert from seat number to index
+                seatIndex: seatNumber , // Convert from seat number to index
+                reserved:true,
+
             });
 
             const { seats } = get();
             const updatedSeats = seats.map(seat =>
-                seat.number === seatNumber ? { ...seat, taken: true, selected: false } : seat
+                seat.number === seatNumber ? { ...seat, reserved: true, selected: false } : seat
             );
 
             set({

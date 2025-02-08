@@ -22,9 +22,6 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useFonts } from "expo-font";
 import {useSeatStore} from '@/api/store/seatsStore';
 
-const { width } = Dimensions.get('window');
-const SEAT_SIZE = width * 0.06;
-
 export default function ReserveTicket({ navigation, route }:any) {
     const {
         seats,
@@ -33,7 +30,6 @@ export default function ReserveTicket({ navigation, route }:any) {
         selectedSeat,
         fetchSeats,
         selectSeat,
-        reserveSeat
     } = useSeatStore();
 
     const [price] = useState(100); // Fixed price state
@@ -121,12 +117,13 @@ export default function ReserveTicket({ navigation, route }:any) {
                                 <TouchableOpacity
                                     key={seat.number}
                                     onPress={() => selectSeat(seatIndex)}
-                                    disabled={seat.taken}>
+                                    disabled={seat.reserved}>
+
                                     <MaterialIcons
                                         name="event-seat"
                                         style={[
                                             styles.seatIcon,
-                                            seat.taken ? styles.takenSeat : {},
+                                            seat.reserved ? styles.takenSeat : {},
                                             seat.selected ? styles.selectedSeat : {},
                                         ]}
                                     />
