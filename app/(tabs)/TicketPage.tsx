@@ -96,7 +96,7 @@ export default function TicketPage({navigation, route}: any) {
                     source={{uri: ticketData?.ticketImage}}
                     style={styles.ticketBGImage}>
                     <LinearGradient
-                        colors={[COLORS.OrangeRGBA0, COLORS.Orange]}
+                        colors={['rgba(27, 26, 85, 0)', '#1B1A55']}
                         style={styles.linearGradient}>
                         <View
                             style={[
@@ -162,27 +162,30 @@ export default function TicketPage({navigation, route}: any) {
 
 const styles = StyleSheet.create({
     button: {
+        backgroundColor: '#13123b',
+
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#535C91',
         marginHorizontal: 80,
         marginBottom: 40,
-        backgroundColor: COLORS.Orange,
-        paddingVertical: 2,
-        borderRadius: 8,
+
         alignItems: 'center',
     },
+
     buttonText: {
         borderRadius: BORDERRADIUS.radius_25,
-        paddingHorizontal: 10,
         paddingVertical: 10,
-        fontFamily: "Poppins-regular", // Updated to Poppins-SemiBold
+        fontFamily: "Poppins-regular",
         fontSize: FONTSIZE.size_16,
-        color: COLORS.White,
-        backgroundColor: COLORS.Orange,
+        color: '#FFFFFF',
     },
 
+    // Updated styles with new color palette
     container: {
         display: "flex",
         flex: 1,
-        backgroundColor: COLORS.Black,
+        backgroundColor: '#070F2B',
     },
     appHeaderContainer: {
         marginHorizontal: SPACING.space_36,
@@ -191,7 +194,6 @@ const styles = StyleSheet.create({
     ticketContainer: {
         flex: 1,
         justifyContent: "center",
-
     },
     ticketBGImage: {
         alignSelf: "center",
@@ -206,15 +208,15 @@ const styles = StyleSheet.create({
         height: "50%",
     },
     linear: {
-        borderTopColor: COLORS.Black,
+        borderTopColor: '#070F2B',
         borderTopWidth: 3,
         width: 310,
         alignSelf: "center",
-        backgroundColor: COLORS.Orange,
+        backgroundColor: '#1B1A55',
         borderStyle: "dashed",
     },
     ticketFooter: {
-        backgroundColor: COLORS.Orange,
+        backgroundColor: '#1B1A55',
         width: 310,
         alignItems: "center",
         paddingBottom: SPACING.space_36,
@@ -237,37 +239,39 @@ const styles = StyleSheet.create({
         marginVertical: SPACING.space_10,
     },
     dateTitle: {
-        fontFamily: "Poppins-Medium", // Updated to Poppins-Medium
+        fontFamily: "Poppins-Medium",
         fontSize: FONTSIZE.size_24,
-        color: COLORS.White,
+        color: '#9290C3',
     },
     subtitle: {
-        fontFamily: "Poppins-Regular", // Updated to Poppins-Regular
+        fontFamily: "Poppins-Regular",
         fontSize: FONTSIZE.size_14,
-        color: COLORS.White,
+        color: '#9290C3',
     },
     subheading: {
-        fontFamily: "Poppins-Medium", // Updated to Poppins-Medium
+        fontFamily: "Poppins-Medium",
         fontSize: FONTSIZE.size_18,
-        color: COLORS.White,
+        color: '#535C91',
     },
     subtitleContainer: {
         alignItems: "center",
     },
     clockIcon: {
         fontSize: FONTSIZE.size_24,
-        color: COLORS.White,
+        color: '#535C91',
         paddingBottom: SPACING.space_10,
     },
+    blackCircle: {
+        height: 70,
+        width: 70,
+        borderRadius: 80,
+        backgroundColor: '#070F2B',
+    },
+
     barcodeImage: {
         height: 50,
         aspectRatio: 158 / 52,
     },
-    blackCircle: {
-        height: 80,
-        width: 80,
-        borderRadius: 80,
-        backgroundColor: COLORS.Black,
-    },
+
 });
 

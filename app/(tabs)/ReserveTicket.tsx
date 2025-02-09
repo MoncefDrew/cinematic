@@ -177,9 +177,9 @@ export default function ReserveTicket({ navigation, route }:any) {
             <View>
                 <ImageBackground
                     source={{ uri: route.params?.movie.cover_url }}
-                    style={styles.ImageBG}>
-                    <LinearGradient
-                        colors={[COLORS.BlackRGB10, COLORS.Black]}
+                style={styles.ImageBG}>
+                <LinearGradient
+                    colors={[COLORS.BlackRGB10, '#0A0A0A']}
                         style={styles.linearGradient}>
                         <View style={styles.appHeaderContainer}>
                             <AppHeader
@@ -260,115 +260,9 @@ export default function ReserveTicket({ navigation, route }:any) {
     );
 }
 const styles = StyleSheet.create({
-    seatRow: {
-        flexDirection: "row",
-        gap: SPACING.space_8,
-        alignItems: 'center',
-        justifyContent: "center",
-    },
-    legendContainer: {
-        flexDirection: "row",
-        justifyContent: "space-evenly",
-        padding: SPACING.space_12,
-        borderTopWidth: 1,
-        borderColor: COLORS.WhiteRGBA15,
-        backgroundColor: COLORS.BlackRGB10,
-    },
-    mainContainer: {
-        padding: SPACING.space_16,
-    },
-    movieInfoContainer: {
-        marginBottom: SPACING.space_24,
-    },
-    movieTitle: {
-        fontFamily: "Poppins-Bold",
-        fontSize: FONTSIZE.size_24,
-        color: COLORS.White,
-        marginBottom: SPACING.space_8,
-    },
-    movieMetaContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: SPACING.space_10,
-        marginBottom: SPACING.space_8,
-    },
-    movieMeta: {
-        fontFamily: "Poppins-Regular",
-        fontSize: FONTSIZE.size_14,
-        color: COLORS.WhiteRGBA50,
-    },
-    movieDescription: {
-        fontFamily: "Poppins-Regular",
-        fontSize: FONTSIZE.size_14,
-        color: COLORS.WhiteRGBA75,
-    },
-    seatContainer: {
-        backgroundColor: COLORS.BlackRGB10,
-        borderRadius: BORDERRADIUS.radius_25,
-        borderWidth: 1,
-        borderColor: COLORS.WhiteRGBA15,
-        overflow: 'hidden',
-    },
-    screenContainer: {
-        alignItems: 'center',
-        paddingVertical: SPACING.space_20,
-        backgroundColor: COLORS.BlackRGB10,
-        borderBottomWidth: 1,
-        borderColor: COLORS.WhiteRGBA15,
-    },
-    screenLine: {
-        width: '70%',
-        height: 4,
-        backgroundColor: COLORS.WhiteRGBA50,
-        borderRadius: 2,
-    },
-    screenText: {
-        fontFamily: "Poppins-Regular",
-        fontSize: FONTSIZE.size_12,
-        color: COLORS.WhiteRGBA50,
-        marginTop: SPACING.space_10,
-    },
-    seatMap: {
-        gap: SPACING.space_8,
-        padding: SPACING.space_20,
-
-    },
-
-    rowLabel: {
-        fontFamily: "Poppins-Medium",
-        fontSize: FONTSIZE.size_12,
-        color: COLORS.White,
-        width: 16,
-        marginRight: SPACING.space_8,
-    },
-    seatIcon: {
-        fontSize: FONTSIZE.size_20,  // Reduced size
-        color: COLORS.White,
-    },
-    takenSeat: {
-        color: COLORS.Grey,
-        opacity: 0.5,
-    },
-    selectedSeat: {
-        color: COLORS.Orange,
-    },
-
-    legendItem: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: SPACING.space_8,
-    },
-    legendIcon: {
-        fontSize: FONTSIZE.size_20,
-        color: COLORS.White,
-    },
-    disabledButton: {
-        backgroundColor: COLORS.Grey,
-        opacity: 0.5,
-    },
     container: {
         flex: 1,
-        backgroundColor: COLORS.Black,
+        backgroundColor: '#0A0A0A',
     },
     ImageBG: {
         width: "100%",
@@ -380,33 +274,140 @@ const styles = StyleSheet.create({
     appHeaderContainer: {
         marginHorizontal: SPACING.space_36,
         marginTop: SPACING.space_20 * 2,
+        padding:12,
     },
+    mainContainer: {
+        padding: SPACING.space_16,
+        margin:16,
 
-    screenIndicator: {
+    },
+    movieInfoContainer: {
+        marginBottom: SPACING.space_24,
+    },
+    movieTitle: {
+        fontFamily: "Poppins-Bold",
+        fontSize: FONTSIZE.size_24,
+        color: '#9290C3',
+        marginBottom: SPACING.space_8,
+    },
+    movieMetaContainer: {
+        flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: SPACING.space_36,
+        gap: SPACING.space_10,
+        marginBottom: SPACING.space_8,
     },
-
-    sectionTitle: {
-        fontFamily: "Poppins-SemiBold",
-        fontSize: FONTSIZE.size_18,
-        color: COLORS.White,
-        marginBottom: SPACING.space_15,
+    movieMeta: {
+        fontFamily: "Poppins-Regular",
+        fontSize: FONTSIZE.size_14,
+        color: '#9290C3',
+        opacity: 0.7,
     },
+    movieDescription: {
+        fontFamily: "Poppins-Regular",
+        fontSize: FONTSIZE.size_14,
+        color: '#9290C3',
+        opacity: 0.75,
+    },
+    seatContainer: {
+        backgroundColor: '#1B1A55',
+        borderRadius: BORDERRADIUS.radius_25,
+        borderWidth: 1,
+        borderColor: '#535C91',
+        overflow: 'hidden',
+    },
+    screenContainer: {
+        alignItems: 'center',
+        paddingVertical: SPACING.space_20,
+        backgroundColor: '#070F2B',
+        borderBottomWidth: 1,
+        borderColor: '#535C91',
+    },
+    screenLine: {
+        width: '70%',
+        height: 4,
+        backgroundColor: '#9290C3',
+        borderRadius: 2,
+    },
+    screenText: {
+        fontFamily: "Poppins-Regular",
+        fontSize: FONTSIZE.size_12,
+        color: '#9290C3',
+        marginTop: SPACING.space_10,
+    },
+    seatMap: {
+        gap: SPACING.space_8,
+        padding: SPACING.space_20,
+        alignItems: 'center',
+    },
+    seatRow: {
+        flexDirection: 'row',
+        gap: SPACING.space_2,
+        marginBottom: SPACING.space_2,
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+    },
+    rowLabel: {
+        fontFamily: "Poppins-Medium",
+        fontSize: FONTSIZE.size_12,
+        color: '#9290C3',
+        width: 20,
+        textAlign: 'center',
+        marginRight: SPACING.space_12,
+    },
+    seat: {
+        width: 32,
+        height: 32,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    seatIcon: {
+        fontSize: FONTSIZE.size_24,
+        color: '#9290C3',
+        textAlign: 'center',
+        width: 32,
+        height: 32,
+    },
+    takenSeat: {
+        color: '#363b5e',
+        opacity: 0.5,
+    },
+    selectedSeat: {
+        color: '#cfcfda',
+    },
+    legendContainer: {
 
+        flexDirection: "row",
+        justifyContent: "space-evenly",
+        padding: SPACING.space_12,
+        borderTopWidth: 1,
+        borderColor: '#535C91',
+        backgroundColor: '#1B1A55',
+    },
+    legendItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: SPACING.space_8,
+    },
+    legendIcon: {
+        fontSize: FONTSIZE.size_20,
+        color: '#9290C3',
+    },
     legendText: {
         fontFamily: "Poppins-Regular",
         fontSize: FONTSIZE.size_12,
-        color: COLORS.White,
+        color: '#9290C3',
     },
     bottomContainer: {
+        borderRadius: BORDERRADIUS.radius_25,
+        borderWidth: 1,
+        borderColor: '#535C91',
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
         marginTop: SPACING.space_24,
-        backgroundColor: COLORS.DarkGrey,
+        backgroundColor: '#1B1A55',
         padding: SPACING.space_20,
-        borderRadius: BORDERRADIUS.radius_25,
     },
     priceContainer: {
         alignItems: "flex-start",
@@ -414,28 +415,46 @@ const styles = StyleSheet.create({
     priceLabel: {
         fontFamily: "Poppins-Regular",
         fontSize: FONTSIZE.size_14,
-        color: COLORS.WhiteRGBA50,
+        color: '#9290C3',
+        opacity: 0.7,
     },
     priceAmount: {
         fontFamily: "Poppins-Bold",
         fontSize: FONTSIZE.size_24,
-        color: COLORS.White,
+        color: '#9290C3',
     },
     seatInfo: {
         fontFamily: "Poppins-Regular",
         fontSize: FONTSIZE.size_12,
-        color: COLORS.Orange,
+        color: '#535C91',
         marginTop: 4,
     },
     bookButton: {
-        backgroundColor: COLORS.Orange,
+        backgroundColor: '#13123b',
         paddingHorizontal: 30,
         paddingVertical: 10,
         borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#535C91',
     },
     bookButtonText: {
         fontFamily: "Poppins-SemiBold",
         fontSize: FONTSIZE.size_16,
-        color: COLORS.White,
+        color: '#d6d5f3',
+    },
+    disabledButton: {
+        backgroundColor: '#1B1A55',
+        opacity: 0.5,
+
+    },
+    screenIndicator: {
+        alignItems: 'center',
+        marginBottom: SPACING.space_36,
+    },
+    sectionTitle: {
+        fontFamily: "Poppins-SemiBold",
+        fontSize: FONTSIZE.size_18,
+        color: '#9290C3',
+        marginBottom: SPACING.space_15,
     },
 });
