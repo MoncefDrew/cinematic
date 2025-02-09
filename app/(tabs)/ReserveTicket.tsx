@@ -179,7 +179,7 @@ export default function ReserveTicket({ navigation, route }:any) {
                     source={{ uri: route.params?.movie.cover_url }}
                 style={styles.ImageBG}>
                 <LinearGradient
-                    colors={[COLORS.BlackRGB10, '#0A0A0A']}
+                    colors={[COLORS.BlackRGB10, '#030314']}
                         style={styles.linearGradient}>
                         <View style={styles.appHeaderContainer}>
                             <AppHeader
@@ -262,7 +262,7 @@ export default function ReserveTicket({ navigation, route }:any) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0A0A0A',
+        backgroundColor: '#030314',
     },
     ImageBG: {
         width: "100%",

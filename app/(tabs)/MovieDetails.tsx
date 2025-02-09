@@ -36,7 +36,7 @@ export default function MovieDetails({route}: any) {
     const [userRating, setUserRating] = useState(0);
     const [isModalVisible, setModalVisible] = useState(false);
     const modalY = useRef(new Animated.Value(300)).current;
-    const {duration, projection_date, start_time, end_time} = route.params;
+    const { projection_date, start_time, end_time} = route.params;
     const [canReserve, setCanReserve] = useState(false);
     const [timeRemaining, setTimeRemaining] = useState('');
 
@@ -104,12 +104,12 @@ export default function MovieDetails({route}: any) {
             <TouchableOpacity
                 key={index}
                 onPress={() => setUserRating(index + 1)}
-                style={{marginHorizontal: 5}}
+                style={{margin:10}}
             >
                 <Ionicons
                     name={index < rating ? "star" : "star-outline"}
                     size={30}
-                    color="#FFD700"
+                    color="#4A3F8C"
                 />
             </TouchableOpacity>
         ));
@@ -137,7 +137,7 @@ export default function MovieDetails({route}: any) {
             <View style={styles.coverContainer}>
                 <Image source={{uri: movie.cover_url}} style={styles.cover}/>
                 <LinearGradient
-                    colors={["transparent", "#0A0A0A"]} // Dark gradient
+                    colors={["transparent", "#030314"]} // Dark gradient
                     style={styles.lineargrad}
                 />
             </View>
@@ -273,80 +273,207 @@ export default function MovieDetails({route}: any) {
 const styles = StyleSheet.create({
     modalContainer: {
         width: "100%",
-        backgroundColor: "#0A0A0A",
+        backgroundColor: "#030314", // Even darker blue-purple
         padding: 20,
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         alignItems: "center",
     },
-    background: {flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%'},
-    separator: {height: 0.25, backgroundColor: "#333333", marginVertical: 10}, // Darker separator
-    container: {flex: 1, backgroundColor: "#0A0A0A"}, // Dark background
-    coverContainer: {width: '100%', height: 200, position: 'relative'},
-    cover: {width: '100%', height: '100%', resizeMode: 'cover'},
-    lineargrad: {position: 'absolute', left: 0, right: 0, top: 0, bottom: 0},
-    detailsContainer: {flexDirection: 'row', paddingHorizontal: 20, paddingVertical: 5, backgroundColor: "#0A0A0A"}, // Dark background
-    movieInfos: {justifyContent: 'center'},
-    cardContainer: {justifyContent: 'center', alignItems: 'center'},
-    title: {fontSize: 25, color: "#FFFFFF", fontWeight: 'bold', marginBottom: 10}, // White text
-    subtitle: {marginTop: 13, fontSize: 14, color: "#8899AA", marginBottom: 10}, // Lighter text
-    titleDescription: {fontWeight: 400, color: "#8899AA", marginBottom: 10}, // Lighter text
-    description: {fontWeight: 300, fontSize: 14, color: "#8899AA"}, // Lighter text
-    disContainer: {paddingVertical: 10, paddingHorizontal: 20},
-    directedBy: {marginTop: 12, fontWeight: 300, color: "#8899AA"}, // Lighter text
-    directedByperson: {color: "#FFFFFF", fontWeight: 'bold', fontSize: 14}, // White text
-    adSection: {alignItems: 'center', justifyContent: 'center', padding: 10},
-    adBanner: {width: '100%', height: 90, borderRadius: 3, backgroundColor: '#333333', padding: 20}, // Darker ad banner
-    removeAdButton: {borderRadius: 5, alignItems: 'center'},
-    ratingSection: {alignItems: 'center', flexDirection: 'row', justifyContent: 'center'},
-    ratingTitle: {fontSize: 15, fontWeight: 200, color: '#FFFFFF'}, // White text
-    starsContainer: {marginHorizontal: 20, flexDirection: 'row', justifyContent: 'space-between'},
-    rate: {alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20, margin: 10},
+    background: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100%',
+        height: '100%'
+    },
+    separator: {
+        height: 0.25,
+        backgroundColor: "#2E2A4A", // Deep purple for separators
+        marginVertical: 10
+    },
+    container: {
+
+        flex: 1,
+        backgroundColor: "#030314" // Darkest blue-purple background
+    },
+    coverContainer: {
+        width: '100%',
+        height: 200,
+        position: 'relative'
+    },
+    cover: {
+        width: '100%',
+        height: '100%',
+        resizeMode: 'cover'
+    },
+    lineargrad: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0
+    },
+    detailsContainer: {
+        flexDirection: 'row',
+        paddingHorizontal: 20,
+        paddingVertical: 5,
+        backgroundColor: "#030314", // Darkest blue-purple
+
+    },
+    movieInfos: {
+        justifyContent: 'center'
+    },
+    cardContainer: {
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    title: {
+        fontSize: 25,
+        color: "#9290C3",
+        fontWeight: 'bold',
+        marginBottom: 10
+    },
+    subtitle: {
+        marginTop: 13,
+        fontSize: 14,
+        color: "#6B668F", // Muted purple for secondary text
+        marginBottom: 10
+    },
+    titleDescription: {
+        fontWeight: 400,
+        color: "#6B668F", // Muted purple
+        marginBottom: 10
+    },
+    description: {
+        fontWeight: 300,
+        fontSize: 14,
+        color: "#6B668F" // Muted purple
+    },
+    disContainer: {
+        paddingVertical: 10,
+        paddingHorizontal: 20
+    },
+    directedBy: {
+        marginTop: 12,
+        fontWeight: 300,
+        color: "#6B668F" // Muted purple
+    },
+    directedByperson: {
+        color: "#FFFFFF",
+        fontWeight: 'bold',
+        fontSize: 14
+    },
+    adSection: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 10
+    },
+    adBanner: {
+        width: '100%',
+        height: 90,
+        borderRadius: 3,
+        backgroundColor: '#0A0821', // Very dark purple
+        padding: 20
+    },
+    removeAdButton: {
+        borderRadius: 5,
+        alignItems: 'center'
+    },
+    ratingSection: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'center'
+    },
+    ratingTitle: {
+        fontSize: 15,
+        fontWeight: 200,
+        color: '#FFFFFF'
+    },
+    starsContainer: {
+        marginHorizontal: 20,
+        flexDirection: 'row',
+        justifyContent: 'space-between'
+    },
+    rate: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 20,
+        margin: 10,
+
+    },
     containerRate: {
         alignItems: 'center',
-        padding: 4,
-        backgroundColor: "#333333",
-        borderColor: '#fff',
+        backgroundColor: "#0A0821", // Very dark purple for buttons
+        borderColor: '#2E2A4A', // Deep purple for borders
         justifyContent: 'center',
         borderRadius: 10,
         flexDirection: 'row',
         height: 40,
-        paddingHorizontal: 20
-    }, // Darker button
-    modalOverlay: {flex: 1, backgroundColor: "rgba(0, 0, 0, 0.7)", justifyContent: "flex-end"}, // Darker overlay
+        paddingHorizontal: 20,
+        borderWidth:1,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: "rgba(3, 3, 20, 0.95)", // Almost black with slight purple tint
+        justifyContent: "flex-end"
+    },
     bottomModal: {
         width: "100%",
-        backgroundColor: "#0A0A0A",
+        backgroundColor: "#030314", // Darkest blue-purple
         padding: 20,
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
+        borderColor: '#2E2A4A', // Deep purple for borders
+        borderTopWidth:1,
         alignItems: "center"
-    }, // Dark background
+    },
     reserveTicket: {
         flexDirection: 'row',
         justifyContent: 'center',
         width: "100%",
-        backgroundColor: "#118B50",
+        backgroundColor: "#121023", // Rich purple for primary action
         padding: 15,
+        borderRadius: 5,
+        borderColor:'#2E2A4A',
+        alignItems: "center",
+        marginVertical: 5
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+        marginBottom: 20,
+        color: "#FFFFFF",
+        marginHorizontal: 20
+    },
+    modalButton: {
+        borderWidth:1,
+        borderColor: '#2E2A4A', // Deep purple for borders
+        width: "100%",
+        padding: 15,
+        backgroundColor: "#0A0821", // Very dark purple for secondary buttons
         borderRadius: 5,
         alignItems: "center",
         marginVertical: 5
     },
-    modalTitle: {fontSize: 18, fontWeight: "bold", marginBottom: 20, color: "#FFFFFF", marginHorizontal: 20}, // White text
-    modalButton: {
-        width: "100%",
-        padding: 15,
-        backgroundColor: "#333333",
-        borderRadius: 5,
+    modalButtonText: {
+        fontFamily:'Satoshi',
+        fontWeight:600,
+        color: "#897cdc",
+        fontSize: 16,
+        paddingHorizontal: 15
+    },
+    closeButton: {
+        backgroundColor: "#0A0821" // Very dark purple
+    },
+    modalRatingSection: {
         alignItems: "center",
-        marginVertical: 5
-    }, // Darker button
-    modalButtonText: {color: "white", fontSize: 16, paddingHorizontal: 20},
-    closeButton: {backgroundColor: "#333333"}, // Darker button
-    modalRatingSection: {alignItems: "center", marginVertical: 10},
-    starRatingContainer: {flexDirection: "row", justifyContent: "center", marginVertical: 10},
+        marginVertical: 10
+    },
+    starRatingContainer: {
+        flexDirection: "row",
+        justifyContent: "center",
+        marginVertical: 10
+    },
     disabledButton: {
-        backgroundColor: '#374151',
+        backgroundColor: '#0A0821', // Very dark purple
         opacity: 0.7
     }
 });

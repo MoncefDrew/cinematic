@@ -5,6 +5,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useMovieStore } from "@/api/store/moviesStore";
 import { useProjectionStore } from "@/api/store/ProjectionStore";
 import {Movie} from "@/constants/Movie";
+import {LinearGradient} from "expo-linear-gradient";
 
 const WeeklyMovieSchedule = () => {
     const [loaded] = useFonts({Satoshi: require('../../assets/fonts/Satoshi-Variable.ttf'),});
@@ -86,8 +87,16 @@ const WeeklyMovieSchedule = () => {
         };
 
         return (
-            <TouchableOpacity onPress={() => travelToMovie(item)} style={styles.movieContainer}>
-                <View style={styles.movieCard}>
+            <TouchableOpacity
+                onPress={() => travelToMovie(item)}
+                style={styles.movieContainer}
+            >
+                <LinearGradient
+                    colors={[ '#13122a','#13122a',]}
+                    style={styles.movieCard}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                >
                     <View style={styles.headerContainer}>
                         <View style={styles.timeContainer}>
                             {isStreaming ? (
@@ -102,10 +111,17 @@ const WeeklyMovieSchedule = () => {
                         <Text style={styles.fullDateText}>{fullDate}</Text>
                     </View>
                     <View style={styles.movieContent}>
-                        <Image source={{ uri: item.movie.poster_url }} style={styles.poster} />
+                        <Image
+                            source={{ uri: item.movie.poster_url }}
+                            style={styles.poster}
+                        />
                         <View style={styles.movieInfo}>
-                            <Text style={styles.movieTitle} numberOfLines={1}>{item.movie.title}</Text>
-                            <Text style={styles.movieDescription}>{truncatedDescription}</Text>
+                            <Text style={styles.movieTitle} numberOfLines={1}>
+                                {item.movie.title}
+                            </Text>
+                            <Text style={styles.movieDescription}>
+                                {truncatedDescription}
+                            </Text>
                             <View style={styles.movieDetails}>
                                 <View style={styles.movieMetadata}>
                                     <Text style={styles.metadataText}>{item.movie.duration}</Text>
@@ -118,24 +134,34 @@ const WeeklyMovieSchedule = () => {
                             </View>
                         </View>
                     </View>
-                </View>
+                </LinearGradient>
             </TouchableOpacity>
         );
     };
+
     return (
-        <View style={styles.container}>
+        <LinearGradient
+            colors={['#030314','#030314'  ]}
+            style={styles.container}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+        >
             <View style={styles.header}>
                 <Text style={styles.title}>Weekly Schedule</Text>
-                <Text style={styles.subtitle}>Discover upcoming movies and showtimes for the week ahead</Text>
+                <Text style={styles.subtitle}>
+                    Discover upcoming movies and showtimes for the week ahead
+                </Text>
             </View>
 
-            <TextInput
-                style={styles.searchInput}
-                placeholder="Search movies..."
-                placeholderTextColor="#8899AA"
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-            />
+            <View style={styles.searchContainer}>
+                <TextInput
+                    style={styles.searchInput}
+                    placeholder="Search movies..."
+                    placeholderTextColor="#9290C3"
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                />
+            </View>
 
             <FlatList
                 data={getNextWeekDates()}
@@ -143,165 +169,99 @@ const WeeklyMovieSchedule = () => {
                 renderItem={({ item: date }) => {
                     const dayMovies = getMoviesForDay(date.date);
                     return dayMovies.length > 0 ? (
-                        <FlatList
-                            data={dayMovies}
-                            keyExtractor={(item) => item.projection_id}
-                            renderItem={({ item }) => renderMovieItem({ item, fullDate: date.fullDate })}
-                            horizontal
-                            showsHorizontalScrollIndicator={false}
-                        />
+                        <View style={styles.dayContainer}>
+                            <Text style={styles.dayText}>{date.fullDate}</Text>
+                            <FlatList
+                                data={dayMovies}
+                                keyExtractor={(item) => item.projection_id}
+                                renderItem={({ item }) => renderMovieItem({ item, fullDate: date.fullDate })}
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerStyle={styles.moviesList}
+                            />
+                        </View>
                     ) : (
-                        <Text style={styles.noMovies}>No movies scheduled for {date.fullDate}</Text>
+                        <Text style={styles.noMovies}>
+                            No movies scheduled for {date.fullDate}
+                        </Text>
                     );
                 }}
             />
-        </View>
+        </LinearGradient>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#111827',
-        paddingHorizontal: 16,
         paddingTop: 24,
+        padding:6
     },
     header: {
+        marginHorizontal: 20,
         marginBottom: 24,
     },
     title: {
-        color: '#fff',
+        color: '#9290C3',
         fontSize: 32,
         fontFamily: 'Satoshi',
         fontWeight: '700',
         marginBottom: 8,
     },
     subtitle: {
-        color: '#94A3B8',
+        color: '#535C91',
         fontSize: 16,
         fontFamily: 'Satoshi',
         lineHeight: 24,
     },
+    searchContainer: {
+        marginHorizontal: 20,
+        marginBottom: 24,
+    },
     searchInput: {
-        backgroundColor: '#1F2937',
+        backgroundColor: 'rgba(27, 26, 85, 0.7)',
         borderRadius: 12,
         padding: 16,
-        color: '#fff',
-        marginBottom: 24,
+        color: '#9290C3',
         fontFamily: 'Satoshi',
         fontSize: 16,
         borderWidth: 1,
-        borderColor: '#374151',
+        borderColor: '#535C91',
+    },
+    dayContainer: {
+        marginBottom: 24,
+    },
+    dayText: {
+        color: '#9290C3',
+        fontSize: 18,
+        fontFamily: 'Satoshi',
+        fontWeight: '600',
+        marginHorizontal: 20,
+        marginBottom: 12,
+    },
+    moviesList: {
+        paddingHorizontal: 20,
     },
     movieContainer: {
         marginRight: 16,
-        marginBottom: 20,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-    },
-    movieCard: {
-        backgroundColor: '#1F2937',
-        width: 340,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: '#374151',
+        marginBottom: 8,
+        borderRadius: 16,
         overflow: 'hidden',
     },
-    dateMarker: {
-        backgroundColor: '#374151',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: 12,
-    },
-    fullDateText: {
-        color: '#fff',
-        fontFamily: 'Satoshi',
-        fontSize: 14,
-        fontWeight: '600',
-    },
-    movieContent: {
-        flexDirection: 'row',
-        padding: 16,
-    },
-    poster: {
-        width: 90,
-        height: 140,
-        borderRadius: 8,
-        marginRight: 16,
-    },
-    movieInfo: {
-        flex: 1,
-        justifyContent: 'space-between',
-    },
-    movieTitle: {
-        color: '#fff',
-        fontSize: 20,
-        fontFamily: 'Satoshi',
-        fontWeight: '700',
-        marginBottom: 8,
-    },
-    movieDescription: {
-        color: '#94A3B8',
-        fontSize: 14,
-        fontFamily: 'Satoshi',
-        lineHeight: 20,
-        marginBottom: 12,
-    },
-    movieDetails: {
-        flexDirection: 'column',
-    },
-    movieMetadata: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 8,
-    },
-    metadataText: {
-        color: '#94A3B8',
-        fontSize: 13,
-        fontFamily: 'Satoshi',
-    },
-    metadataDot: {
-        color: '#94A3B8',
-        marginHorizontal: 8,
-    },
-    timePrice: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        backgroundColor: '#2D3748',
-        padding: 8,
-        borderRadius: 8,
-    },
-    movieTime: {
-        color: '#fff',
-        fontSize: 14,
-        fontFamily: 'Satoshi',
-        fontWeight: '500',
-    },
-    moviePrice: {
-        color: '#10B981',
-        fontSize: 16,
-        fontFamily: 'Satoshi',
-        fontWeight: '700',
-    },
-    noMovies: {
-        color: '#94A3B8',
-        fontSize: 14,
-        fontFamily: 'Satoshi',
-        fontStyle: 'italic',
-        textAlign: 'center',
-        marginVertical: 16,
+    movieCard: {
+        width: 340,
+        borderRadius: 16,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: '#535C91',
     },
     headerContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 10,
-        paddingTop: 10,
+        padding: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(83, 92, 145, 0.3)',
     },
     timeContainer: {
         flexDirection: 'row',
@@ -310,17 +270,101 @@ const styles = StyleSheet.create({
     streamingContainer: {
         flexDirection: 'row',
         alignItems: 'center',
+        backgroundColor: 'rgba(146, 144, 195, 0.1)',
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 12,
     },
     streamingDot: {
         width: 8,
         height: 8,
         borderRadius: 4,
-        backgroundColor: '#10B981',
-        marginRight: 5,
+        backgroundColor: '#9290C3',
+        marginRight: 6,
     },
     streamingText: {
-        color: '#10B981',
-        fontWeight: 'bold',
+        color: '#9290C3',
+        fontFamily: 'Satoshi',
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    movieTime: {
+        color: '#9290C3',
+        fontSize: 14,
+        fontFamily: 'Satoshi',
+        fontWeight: '600',
+    },
+    fullDateText: {
+        color: '#9290C3',
+        fontFamily: 'Satoshi',
+        fontSize: 14,
+        fontWeight: '500',
+    },
+    movieContent: {
+        flexDirection: 'row',
+        padding: 16,
+    },
+    poster: {
+        width: 100,
+        height: 150,
+        borderRadius: 12,
+        marginRight: 16,
+    },
+    movieInfo: {
+        flex: 1,
+        justifyContent: 'space-between',
+    },
+    movieTitle: {
+        color: '#9290C3',
+        fontSize: 20,
+        fontFamily: 'Satoshi',
+        fontWeight: '700',
+        marginBottom: 8,
+    },
+    movieDescription: {
+        color: '#535C91',
+        fontSize: 14,
+        fontFamily: 'Satoshi',
+        lineHeight: 20,
+        marginBottom: 12,
+    },
+    movieDetails: {
+        flexDirection: 'column',
+        gap: 8,
+    },
+    movieMetadata: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    metadataText: {
+        color: '#535C91',
+        fontSize: 13,
+        fontFamily: 'Satoshi',
+    },
+    metadataDot: {
+        color: '#535C91',
+        marginHorizontal: 8,
+    },
+    timePrice: {
+        backgroundColor: 'rgba(27, 26, 85, 0.7)',
+        padding: 10,
+        borderRadius: 12,
+        alignSelf: 'flex-start',
+    },
+    moviePrice: {
+        color: '#9290C3',
+        fontSize: 16,
+        fontFamily: 'Satoshi',
+        fontWeight: '700',
+    },
+    noMovies: {
+        color: '#535C91',
+        fontSize: 14,
+        fontFamily: 'Satoshi',
+        fontStyle: 'italic',
+        textAlign: 'center',
+        marginVertical: 16,
+        marginHorizontal: 20,
     },
 });
 

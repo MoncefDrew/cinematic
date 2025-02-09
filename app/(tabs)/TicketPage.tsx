@@ -81,7 +81,12 @@ export default function TicketPage({navigation, route}: any) {
     }
 
     return (
-        <View style={styles.container}>
+        <LinearGradient
+            colors={[ '#030314','#030314',]}
+            style={styles.container}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+        >
             <StatusBar hidden />
             <View style={styles.appHeaderContainer}>
                 <AppHeader
@@ -90,6 +95,7 @@ export default function TicketPage({navigation, route}: any) {
                     action={handleGoBack}
                 />
             </View>
+
 
             <View style={styles.ticketContainer}>
                 <ImageBackground
@@ -156,14 +162,13 @@ export default function TicketPage({navigation, route}: any) {
             >
                 <Text style={styles.buttonText}>Buy the Ticket</Text>
             </TouchableOpacity>
-        </View>
+        </LinearGradient>
     );
 };
 
 const styles = StyleSheet.create({
     button: {
         backgroundColor: '#13123b',
-
         borderRadius: 8,
         borderWidth: 1,
         borderColor: '#535C91',
@@ -185,7 +190,6 @@ const styles = StyleSheet.create({
     container: {
         display: "flex",
         flex: 1,
-        backgroundColor: '#070F2B',
     },
     appHeaderContainer: {
         marginHorizontal: SPACING.space_36,
@@ -265,7 +269,7 @@ const styles = StyleSheet.create({
         height: 70,
         width: 70,
         borderRadius: 80,
-        backgroundColor: '#070F2B',
+        backgroundColor: '#030314',
     },
 
     barcodeImage: {
