@@ -7,9 +7,10 @@ export const useMovieStore = create(
     persist(
         (set) => ({
             movies: [],
+            featuredMovie: null, // Add a featuredMovie variable
+            filteredMovies: [], // Add this
             loading: false,
             error: null,
-            filteredMovies: [], // Add this
             fetchMovies: async () => {
                 set({ loading: true })
                 try {
@@ -41,6 +42,19 @@ export const useMovieStore = create(
 
             setFilteredMovies: (movies) => set({ filteredMovies: movies }), // Add this
 
+
+            fetchFeaturedMovie: async () => {
+                set({ loading: true });
+                try {
+
+                    const {data} = await axios.get('http://localhost:3000/api/film/featured'); // Call your API route
+
+                    set({ featuredMovie: data.featuredMovie, loading: false }); // Update the store
+                } catch (error) {
+                    set({ error: error.message, loading: false });
+                    console.error('Error fetching featured movie:', error);
+                }
+            },
 
 
             clearMovies: () => set({ movies: [] }),

@@ -1,16 +1,19 @@
 import React, { useEffect } from "react";
-import { FlatList, Text, View, StyleSheet } from "react-native";
+import { FlatList, Text, View, StyleSheet, ScrollView } from "react-native";
 import MovieCard from "@/components/MovieCard";
 import { useFonts } from "expo-font";
 import { useMovieStore } from '@/api/store/moviesStore';
 import { LinearGradient } from 'expo-linear-gradient';
+import FeaturedMovie from "@/components/featuredMovie";
 
 export default function Popular() {
     const {
         movies,
         loading,
         error,
-        fetchPopular
+        fetchFeaturedMovie,
+        fetchPopular,
+        featuredMovie,
     } = useMovieStore();
 
     const [loaded] = useFonts({
@@ -18,12 +21,9 @@ export default function Popular() {
     });
 
     useEffect(() => {
+        fetchFeaturedMovie();
         fetchPopular();
-    }, []);
-
-    const handleMoviePress = (id: string) => {
-        console.log(`Movie ${id} pressed!`);
-    };
+    }, [fetchFeaturedMovie, fetchPopular]);
 
     if (!loaded) {
         return null;
@@ -36,30 +36,37 @@ export default function Popular() {
             start={{ x: 0, y: 0 }}
             end={{ x: 0, y: 1 }}
         >
-            <View style={styles.content}>
-                <View style={styles.welcome}>
-                    <Text style={styles.title}>Welcome to Cinematic</Text>
-                    <Text style={styles.subtitle}>
-                        You can navigate popular movies and book a ticket for your favorite
-                        movie if you have a chance to. Hurry up now!
-                    </Text>
-                </View>
+            <ScrollView contentContainerStyle={styles.scrollContent}>
+                <View style={styles.content}>
+                    <View style={styles.welcome}>
+                        <Text style={styles.title}>Welcome to Cinematic</Text>
+                        <Text style={styles.subtitle}>
+                            You can navigate popular movies and book a ticket for your favorite
+                            movie if you have a chance to. Hurry up now!
+                        </Text>
+                    </View>
 
-                <Text style={styles.sectionTitle}>Popular Movies</Text>
-                {loading ? (
-                    <Text style={styles.loadingText}>Loading...</Text>
-                ) : error ? (
-                    <Text style={[styles.errorText]}>{error}</Text>
-                ) : (
-                    <FlatList
-                        data={movies}
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        keyExtractor={(item) => item.film_id}
-                        renderItem={({ item }) => <MovieCard movie={item}/>}
-                    />
-                )}
-            </View>
+                    {/* Featured Movie Section */}
+                    {featuredMovie && <FeaturedMovie movie={featuredMovie} />}
+
+                    {/* Popular Movies Section */}
+                    <Text style={styles.sectionTitle}>Popular Movies</Text>
+                    {loading ? (
+                        <Text style={styles.loadingText}>Loading...</Text>
+                    ) : error ? (
+                        <Text style={styles.errorText}>{error}</Text>
+                    ) : (
+                        <FlatList
+                            data={movies}
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            keyExtractor={(item) => item.film_id}
+                            renderItem={({ item }) => <MovieCard movie={item} />}
+                            contentContainerStyle={styles.flatListContent}
+                        />
+                    )}
+                </View>
+            </ScrollView>
         </LinearGradient>
     );
 }
@@ -67,6 +74,9 @@ export default function Popular() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+    },
+    scrollContent: {
+        flexGrow: 1,
     },
     content: {
         flex: 1,
@@ -85,7 +95,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
         elevation: 5,
-        backdropFilter: 'blur(10px)', // Note: This only works on iOS
     },
     title: {
         color: "#9290C3",
@@ -118,5 +127,8 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontFamily: "Satoshi",
         textAlign: "center",
+    },
+    flatListContent: {
+        paddingBottom: 24, // Add padding to avoid overlap with the FeaturedMovie component
     },
 });
