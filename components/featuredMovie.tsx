@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
     featuredMovieButtonText: {
         borderRadius: BORDERRADIUS.radius_25,
         fontSize: FONTSIZE.size_16,
-        color: '#535C91',
+        color: '#a2acdc',
         fontFamily: 'Satoshi',
         fontWeight: '700',
     },
