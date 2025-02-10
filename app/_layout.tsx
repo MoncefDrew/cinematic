@@ -29,16 +29,19 @@ import {useAuthStore} from "@/api/store/AuthStore";
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
-// Modern Cinematic Theme Colors
 const CinematicColors = {
-    background: '#0A0A0A',
-    secondary: '#1A1A1A',
-    border: '#2A2A2A',
-    accent: '#E31837', // Cinema red
-    accentSoft: 'rgba(227, 24, 55, 0.15)', // Soft red for active states
+    background: '#0A0B1E', // Deep navy background
+    surface: '#12132D', // Slightly lighter navy for layers
+    primary: '#6366F1', // Electric purple
+    primaryLight: '#818CF8', // Lighter purple for hover states
+    accent: '#4F46E5', // Deep purple accent
+    accentSoft: 'rgba(99, 102, 241, 0.15)', // Soft purple for active states
     text: '#FFFFFF',
-    textSecondary: '#B8B8B8',
-    highlight: '#3E7BFA', // Electric blue for special highlights
+    textSecondary: '#9B9BC0',
+    border: '#1E2048',
+    gradientStart: 'rgba(18, 19, 45, 0.95)',
+    gradientEnd: 'rgba(10, 11, 30, 0.98)',
+    cardBackground: '#181935',
 };
 
 // Root Layout Component
@@ -89,6 +92,7 @@ function CustomDrawerContent(props: any) {
 }
 
 // Main App Drawer Navigation
+
 function MainApp() {
     return (
         <Drawer.Navigator
@@ -97,39 +101,41 @@ function MainApp() {
                     paddingTop: 0,
                 },
                 drawerStyle: {
-                    backgroundColor: CinematicColors.background,
-                    width: 280,
-                    borderTopRightRadius: 16,
-                    borderBottomRightRadius: 16,
+                    backgroundColor: CinematicColors.surface,
+                    width: 300,
+                    borderTopRightRadius: 24,
+                    borderBottomRightRadius: 24,
                     borderRightWidth: 1,
                     borderColor: CinematicColors.border,
                 },
                 drawerItemStyle: {
-                    borderRadius: 8,
-                    marginHorizontal: 12,
+                    borderRadius: 16,
+                    marginHorizontal: 16,
                     marginVertical: 4,
+                    padding: 4,
                 },
-                drawerActiveTintColor: CinematicColors.accent,
+                drawerActiveTintColor: CinematicColors.primary,
                 drawerInactiveTintColor: CinematicColors.textSecondary,
                 drawerActiveBackgroundColor: CinematicColors.accentSoft,
                 drawerLabelStyle: {
                     fontFamily: 'Poppins',
                     fontSize: 15,
-                    marginLeft: -20,
+                    fontWeight: '500',
+                    marginLeft: -16,
                 },
                 headerStyle: {
-                    backgroundColor: '#111827', // Dark background to match the container
-                    borderBottomWidth: 0,
-                    borderBottomColor: '#374151', // Matching border color
-                    elevation: 0, // Remove shadow
-                    shadowOpacity: 0, // Remove shadow
+                    backgroundColor: CinematicColors.background,
+                    borderBottomWidth: 1,
+                    borderBottomColor: CinematicColors.border,
+                    elevation: 0,
+                    shadowOpacity: 0,
                 },
-                headerTintColor: '#fff', // White color for back button and icons
+                headerTintColor: CinematicColors.primary,
                 headerTitleStyle: {
-                    fontFamily: 'Satoshi', // Matching font family
-                    fontSize: 18, // Slightly smaller font size for the header
-                    color: '#fff', // White color for the title text
-                    fontWeight: '700', // Bold font weight to match your title style
+                    fontFamily: 'Satoshi',
+                    fontSize: 20,
+                    color: CinematicColors.text,
+                    fontWeight: '600',
                 },
             }}
             drawerContent={(props) => <CustomDrawerContent {...props} />}
@@ -292,53 +298,136 @@ export function AuthStack() {
 
 const styles = StyleSheet.create({
     drawerScrollView: {
-        backgroundColor: '#111827', // Darker, more sophisticated background
+        backgroundColor: CinematicColors.surface,
     },
     profileContainer: {
-        marginBottom: 30,
-        padding: 25,
+        marginBottom: 32,
+        padding: 24,
         borderBottomWidth: 1,
-        borderBottomColor: '#374151', // Matching border color
+        borderBottomColor: CinematicColors.border,
     },
     drawerIcon: {
-        marginRight: 25,
-        color: '#fff', // White color for icons to match the text color
+        marginRight: 20,
+        width: 24,
+        height: 24,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     logoutContainer: {
-        marginTop: 20,
+        marginTop: 24,
         borderTopWidth: 1,
-        borderTopColor: '#374151', // Matching border color
-        paddingTop: 20,
-        marginHorizontal: 12,
+        borderTopColor: CinematicColors.border,
+        paddingTop: 24,
+        marginHorizontal: 16,
     },
     headerButton: {
         marginHorizontal: 16,
+        padding: 8,
+        borderRadius: 12,
+        backgroundColor: CinematicColors.accentSoft,
     },
     headerIcon: {
-        color: '#fff', // White color for header icons
+        color: CinematicColors.primary,
     },
-    // Additional styles for text and other elements in the drawer
     drawerText: {
-        color: '#fff', // White color for text
+        color: CinematicColors.text,
         fontSize: 16,
         fontFamily: 'Satoshi',
-        marginVertical: 10,
+        marginVertical: 8,
+        letterSpacing: 0.3,
     },
     drawerItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 10,
-        paddingHorizontal: 25,
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 16,
+        marginVertical: 4,
     },
     drawerItemText: {
-        color: '#fff', // White color for item text
-        fontSize: 16,
+        color: CinematicColors.text,
+        fontSize: 15,
+        fontFamily: 'Satoshi',
+        fontWeight: '500',
+        letterSpacing: 0.2,
+    },
+    activeDrawerItem: {
+        backgroundColor: CinematicColors.accentSoft,
+        borderRadius: 16,
+    },
+    drawerHeader: {
+        paddingTop: 48,
+        paddingBottom: 24,
+        paddingHorizontal: 24,
+        backgroundColor: CinematicColors.cardBackground,
+    },
+    profileImage: {
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        marginBottom: 16,
+        borderWidth: 2,
+        borderColor: CinematicColors.primary,
+    },
+    profileName: {
+        color: CinematicColors.text,
+        fontSize: 18,
+        fontFamily: 'Satoshi',
+        fontWeight: '600',
+        marginBottom: 4,
+    },
+    profileEmail: {
+        color: CinematicColors.textSecondary,
+        fontSize: 14,
         fontFamily: 'Satoshi',
     },
-    // Style for active drawer item
-    activeDrawerItem: {
-        backgroundColor: '#1F2937', // Dark background for active item
+    divider: {
+        height: 1,
+        backgroundColor: CinematicColors.border,
+        marginVertical: 8,
+        marginHorizontal: 16,
+    },
+    // New movie card style matching the image
+    movieCard: {
+        backgroundColor: CinematicColors.cardBackground,
+        borderRadius: 16,
+        overflow: 'hidden',
+        marginHorizontal: 16,
+        marginVertical: 8,
+    },
+    movieCardImage: {
+        width: '100%',
+        height: 200,
         borderRadius: 12,
     },
+    movieCardContent: {
+        padding: 16,
+    },
+    movieTitle: {
+        color: CinematicColors.text,
+        fontSize: 18,
+        fontFamily: 'Satoshi',
+        fontWeight: '600',
+        marginBottom: 8,
+    },
+    movieDescription: {
+        color: CinematicColors.textSecondary,
+        fontSize: 14,
+        fontFamily: 'Satoshi',
+        lineHeight: 20,
+    },
+    bookButton: {
+        backgroundColor: CinematicColors.primary,
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 8,
+        alignSelf: 'flex-start',
+        marginTop: 12,
+    },
+    bookButtonText: {
+        color: CinematicColors.text,
+        fontSize: 14,
+        fontFamily: 'Satoshi',
+        fontWeight: '500',
+    }
 });
-

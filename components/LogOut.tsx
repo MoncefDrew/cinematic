@@ -1,8 +1,22 @@
 import { supabase } from "@/lib/supabase";
-import {Modal, StyleSheet, TouchableOpacity, View, TouchableWithoutFeedback, Alert} from "react-native";
+import { Modal, StyleSheet, TouchableOpacity, View, TouchableWithoutFeedback, Alert } from "react-native";
 import React, { useState } from "react";
 import { Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+
+// Matching the cinematic theme colors
+const CinematicColors = {
+    background: '#0A0B1E',
+    surface: '#12132D',
+    primary: '#6366F1',
+    danger: '#DC2626',
+    dangerSoft: '#991B1B',
+    border: '#1E2048',
+    text: '#FFFFFF',
+    textSecondary: '#9B9BC0',
+    overlay: 'rgba(10, 11, 30, 0.95)',
+    cardBackground: '#181935',
+};
 
 export default function LogOut(props: any) {
     const [showConfirmation, setShowConfirmation] = useState(false);
@@ -22,13 +36,14 @@ export default function LogOut(props: any) {
             <TouchableOpacity
                 onPress={() => setShowConfirmation(true)}
                 style={styles.buttonContainer}
+                activeOpacity={0.7}
             >
                 <View style={styles.buttonContent}>
                     <View style={styles.iconContainer}>
-                        <Ionicons name="exit" color="#EF4444" size={26} />
+                        <Ionicons name="log-out-outline" color={CinematicColors.danger} size={24} />
                     </View>
                     <View style={styles.textContainer}>
-                        <Text style={styles.buttonText}>Log Out</Text>
+                        <Text style={styles.buttonText}>Sign Out</Text>
                     </View>
                 </View>
             </TouchableOpacity>
@@ -44,24 +59,29 @@ export default function LogOut(props: any) {
                         <TouchableWithoutFeedback>
                             <View style={styles.modalContainer}>
                                 <View style={styles.modalHeader}>
-                                    <Ionicons name="warning" size={28} color="#EF4444" />
-                                    <Text style={styles.modalTitle}>Confirm Logout</Text>
+                                    <View style={styles.warningIconContainer}>
+                                        <Ionicons name="warning-outline" size={28} color={CinematicColors.danger} />
+                                    </View>
+                                    <Text style={styles.modalTitle}>Sign Out</Text>
                                 </View>
                                 <Text style={styles.modalText}>
-                                    Are you sure you want to log out? You'll need to sign in again to access your account.
+                                    Are you sure you want to sign out? You'll need to sign in again to access your account.
                                 </Text>
                                 <View style={styles.modalButtons}>
                                     <TouchableOpacity
                                         style={styles.cancelButton}
                                         onPress={() => setShowConfirmation(false)}
+                                        activeOpacity={0.8}
                                     >
                                         <Text style={styles.cancelButtonText}>Cancel</Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity
                                         style={styles.logoutButton}
                                         onPress={handleLogout}
+                                        activeOpacity={0.8}
                                     >
-                                        <Text style={styles.logoutButtonText}>Log Out</Text>
+                                        <Ionicons name="log-out-outline" size={20} color={CinematicColors.text} style={styles.logoutButtonIcon} />
+                                        <Text style={styles.logoutButtonText}>Sign Out</Text>
                                     </TouchableOpacity>
                                 </View>
                             </View>
@@ -75,73 +95,74 @@ export default function LogOut(props: any) {
 
 const styles = StyleSheet.create({
     buttonContainer: {
-        backgroundColor: "#1F2937",
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        borderRadius: 8,
+        backgroundColor: CinematicColors.cardBackground,
+        paddingVertical: 14,
+        paddingHorizontal: 20,
+        borderRadius: 16,
         borderWidth: 1,
-        borderColor: "#374151",
-        justifyContent: "flex-start",
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
+        borderColor: CinematicColors.border,
+        marginHorizontal: 16,
+        marginTop: 8,
     },
     buttonContent: {
         flexDirection: "row",
         alignItems: "center",
     },
     iconContainer: {
-        justifyContent: "flex-start",
-        marginRight: 32,
+        marginRight: 16,
     },
     textContainer: {
-        justifyContent: "flex-start",
+        flex: 1,
     },
     buttonText: {
-        color: "#EF4444",
+        color: CinematicColors.danger,
         fontSize: 16,
-        fontWeight: "500",
+        fontFamily: "Satoshi",
+        fontWeight: "600",
     },
     modalOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: CinematicColors.overlay,
         justifyContent: 'center',
         alignItems: 'center',
     },
     modalContainer: {
-        backgroundColor: "#1F2937",
-        borderRadius: 12,
+        backgroundColor: CinematicColors.surface,
+        borderRadius: 24,
         padding: 24,
-        width: '80%',
+        width: '85%',
         maxWidth: 400,
         borderWidth: 1,
-        borderColor: "#374151",
+        borderColor: CinematicColors.border,
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.35,
-        shadowRadius: 6,
-        elevation: 8,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.44,
+        shadowRadius: 10.32,
+        elevation: 16,
     },
     modalHeader: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 16,
-        gap: 12,
+        marginBottom: 20,
+        gap: 16,
+    },
+    warningIconContainer: {
+        backgroundColor: 'rgba(220, 38, 38, 0.1)',
+        padding: 8,
+        borderRadius: 12,
     },
     modalTitle: {
-        color: "#FFFFFF",
-        fontSize: 20,
+        color: CinematicColors.text,
+        fontSize: 24,
         fontFamily: "Satoshi",
         fontWeight: "700",
     },
     modalText: {
-        color: "#94A3B8",
+        color: CinematicColors.textSecondary,
         fontSize: 16,
         fontFamily: "Satoshi",
         lineHeight: 24,
-        marginBottom: 24,
+        marginBottom: 28,
     },
     modalButtons: {
         flexDirection: 'row',
@@ -149,27 +170,33 @@ const styles = StyleSheet.create({
         gap: 12,
     },
     cancelButton: {
-        paddingVertical: 10,
-        paddingHorizontal: 16,
-        borderRadius: 6,
-        backgroundColor: "#374151",
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 12,
+        backgroundColor: 'rgba(99, 102, 241, 0.1)',
         borderWidth: 1,
-        borderColor: "#4B5563",
+        borderColor: CinematicColors.border,
     },
     cancelButtonText: {
-        color: "#FFFFFF",
+        color: CinematicColors.textSecondary,
         fontSize: 16,
         fontFamily: "Satoshi",
         fontWeight: "600",
     },
     logoutButton: {
-        paddingVertical: 10,
-        paddingHorizontal: 16,
-        borderRadius: 6,
-        backgroundColor: "#EF4444",
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 12,
+        backgroundColor: CinematicColors.danger,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    logoutButtonIcon: {
+        marginRight: 8,
     },
     logoutButtonText: {
-        color: "#FFFFFF",
+        color: CinematicColors.text,
         fontSize: 16,
         fontFamily: "Satoshi",
         fontWeight: "600",
