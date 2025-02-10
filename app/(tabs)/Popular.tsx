@@ -56,14 +56,21 @@ export default function Popular() {
                     ) : error ? (
                         <Text style={styles.errorText}>{error}</Text>
                     ) : (
-                        <FlatList
-                            data={movies}
-                            horizontal
-                            showsHorizontalScrollIndicator={false}
-                            keyExtractor={(item) => item.film_id}
-                            renderItem={({ item }) => <MovieCard movie={item} />}
-                            contentContainerStyle={styles.flatListContent}
-                        />
+                        <View style={styles.listContainer}>
+                            <FlatList
+                                data={movies}
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                keyExtractor={(item) => item.film_id}
+                                renderItem={({ item }) => <MovieCard movie={item} />}
+                            />
+                            <LinearGradient
+                                colors={['transparent', '#02040a']}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 0 }}
+                                style={styles.gradientOverlay}
+                            />
+                        </View>
                     )}
                 </View>
             </ScrollView>
@@ -72,6 +79,19 @@ export default function Popular() {
 }
 
 const styles = StyleSheet.create({
+
+    listContainer: {
+        position: 'relative',
+    },
+    gradientOverlay: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        width: 60,
+        height: '100%',
+        zIndex: 1,
+    },
+
     container: {
         flex: 1,
     },
@@ -128,7 +148,5 @@ const styles = StyleSheet.create({
         fontFamily: "Satoshi",
         textAlign: "center",
     },
-    flatListContent: {
-        paddingBottom: 24, // Add padding to avoid overlap with the FeaturedMovie component
-    },
+
 });
