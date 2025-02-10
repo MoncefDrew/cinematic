@@ -206,10 +206,10 @@ export default function MovieDetails({route}: any) {
                 <View style={styles.rate}>
                     <View style={styles.containerRate}>
                         <ProfilePic/>
-                        <Text style={{color: "white", paddingHorizontal: 20}}>
+                        <Text style={{color: "#919cd7", paddingHorizontal: 18,paddingVertical:2}}>
                             Rate, reserve, add to list + more
                         </Text>
-                        <Ionicons name="ellipsis-horizontal" color="white" size={17}/>
+                        <Ionicons name="ellipsis-horizontal" color="#919cd7" size={17}/>
                     </View>
                 </View>
             </TouchableOpacity>
@@ -402,15 +402,25 @@ const styles = StyleSheet.create({
 
     },
     containerRate: {
-        alignItems: 'center',
-        backgroundColor: "#0A0821", // Very dark purple for buttons
-        borderColor: '#2E2A4A', // Deep purple for borders
+            backgroundColor: '#13123b',
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: '#535C91',
+            paddingVertical: 22,
+            paddingHorizontal: 20,
+            alignItems: 'center',
+            alignSelf: 'flex-start', // Align button to the left
+            elevation: 3, // Add shadow for Android
+            shadowColor: '#000', // Add shadow for iOS
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.3,
+            shadowRadius: 4,
+
+
         justifyContent: 'center',
-        borderRadius: 10,
         flexDirection: 'row',
         height: 40,
-        paddingHorizontal: 20,
-        borderWidth:1,
+
     },
     modalOverlay: {
         flex: 1,
@@ -418,6 +428,7 @@ const styles = StyleSheet.create({
         justifyContent: "flex-end"
     },
     bottomModal: {
+
         width: "100%",
         backgroundColor: "#030314", // Darkest blue-purple
         padding: 20,
