@@ -59,7 +59,6 @@ export const  useSeatStore = create<SeatStore>((set, get) => ({
             await axios.post(`http://localhost:3000/api/projection/${projectionId}/seats`, {
                 seatIndex: seatNumber , // Convert from seat number to index
                 reserved:true,
-
             });
 
             const { seats } = get();

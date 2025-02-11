@@ -23,8 +23,10 @@ import LogOut from "@/components/LogOut";
 import SignUpPage from './auth/sign-up';
 import SignInPage from './auth/sign-in';
 import TicketPage from "@/app/(tabs)/TicketPage";
-import PaymentPage from "@/app/(tabs)/PaymentPage";
 import {useAuthStore} from "@/api/store/AuthStore";
+import MyTicketsScreen from "@/app/(tabs)/myTickets";
+import myTickets from "@/app/(tabs)/myTickets";
+import MyTickets from "@/app/(tabs)/myTickets";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -260,9 +262,10 @@ function MainApp() {
                     headerLeft: () => null,
                 }}
             />
+
             <Drawer.Screen
-                name="Payment"
-                component={PaymentPage}
+                name="My tickets"
+                component={MyTickets}
                 options={{
                     headerTitle: '',
                     headerStyle: {
@@ -291,7 +294,8 @@ export function AuthStack() {
             <Stack.Screen name="MainApp" component={MainApp} />
             <Stack.Screen name="MovieDetails" component={MovieDetails}/>
             <Stack.Screen name="TicketPage" component={TicketPage}/>
-            <Stack.Screen name="PaymentPage" component={PaymentPage}/>
+            <Stack.Screen name="MyTickets" component={MyTickets}/>
+
         </Stack.Navigator>
     );
 }

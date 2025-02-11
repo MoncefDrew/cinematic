@@ -1,65 +1,56 @@
-import { Drawer } from "expo-router/drawer";
-import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image, Modal, TextInput } from "react-native";
-import { useState } from "react";
-import { Ticket, sampleTickets } from "@/constants/ticket";
-import { useAuthStore } from "@/api/store/AuthStore"; // Import the tickets
+import React, { useState } from 'react';
+import { Drawer } from 'expo-router/drawer';
+import { Ionicons } from '@expo/vector-icons';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image, Modal, TextInput, Alert } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { useAuthStore } from '@/api/store/AuthStore';
 
 export default function Profile() {
-    // State for toggling visibility of tickets and edit profile modals
     const [showTickets, setShowTickets] = useState(false);
     const [showEditProfile, setShowEditProfile] = useState(false);
-
     const auth = useAuthStore();
-
-    // State for managing form data in the edit profile modal
     const [formData, setFormData] = useState({
         username: auth.user.username,
         email: auth.user.email,
     });
 
-    // State for managing the profile photo
-    const [profilePhoto, setProfilePhoto] = useState();
+    const profilePhoto = auth.user.profilePicture; // Get profile picture from store
 
-    // Function to handle profile photo change
-    const handleChangePhoto = () => {
-        // Add logic to open image picker and update the profile photo
-        // For now, we'll just simulate a photo change
+    const handleChangePhoto = async () => {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert('Permission Denied', 'Sorry, we need camera roll permissions to upload a profile picture.');
+            return;
+        }
+
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 1,
+        });
+
+        if (!result.canceled) {
+            const selectedImage = result.assets[0].uri;
+            auth.updateProfilePicture(selectedImage); // Update profile picture in store
+        }
     };
 
-    // User statistics (e.g., movies watched, reviews written)
     const userStats = {
         moviesWatched: 28,
-        reviewsWritten: 12
+        reviewsWritten: 12,
     };
-
-    /**
-     * Renders a single ticket item.
-     *
-     * @param {Ticket} ticket - The ticket data to render.
-     * @returns JSX.Element - A styled view representing the ticket.
-     */
-    const renderTicket = (ticket: Ticket) => (
-        <View key={ticket.id} style={styles.ticketItem}>
-            <View style={styles.ticketMain}>
-                <Ionicons name="ticket-outline" size={24} color="#10B981" />
-                <View style={styles.ticketInfo}>
-                    <Text style={styles.movieTitle}>{ticket.movieTitle}</Text>
-                    <Text style={styles.ticketDetails}>
-                        {ticket.date} | {ticket.time} | Seat {ticket.seat}
-                    </Text>
-                </View>
-            </View>
-            <Ionicons name="qr-code-outline" size={24} color="#10B981" />
-        </View>
-    );
 
     return (
         <ScrollView style={styles.container}>
             {/* Header Section */}
             <View style={styles.header}>
                 <View style={styles.profileImageContainer}>
-                    <Image source={profilePhoto} style={styles.profileImage} />
+                    {profilePhoto ? (
+                        <Image source={{ uri: profilePhoto }} style={styles.profileImage} />
+                    ) : (
+                        <Ionicons name="person-circle-outline" size={100} color="#10B981" />
+                    )}
                     <TouchableOpacity style={styles.editButton} onPress={() => setShowEditProfile(true)}>
                         <Ionicons name="pencil" size={20} color="#FFF" />
                     </TouchableOpacity>
@@ -72,8 +63,7 @@ export default function Profile() {
             <View style={styles.statsContainer}>
                 {Object.entries(userStats).map(([key, value]) => (
                     <View key={key} style={styles.statItem}>
-                        <Ionicons name={key === 'moviesWatched' ? 'film-outline' : 'star-outline'}
-                                  size={24} color="#10B981" />
+                        <Ionicons name={key === 'moviesWatched' ? 'film-outline' : 'star-outline'} size={24} color="#10B981" />
                         <Text style={styles.statNumber}>{value}</Text>
                         <Text style={styles.statLabel}>
                             {key === 'moviesWatched' ? 'Movies Watched' : 'Reviews'}
@@ -97,19 +87,6 @@ export default function Profile() {
                 </TouchableOpacity>
             </View>
 
-            {/* Tickets Modal */}
-            <Modal visible={showTickets} animationType="slide" transparent>
-                <View style={styles.modalContent}>
-                    <View style={styles.modalHeader}>
-                        <Text style={styles.modalTitle}>My Tickets</Text>
-                        <TouchableOpacity onPress={() => setShowTickets(false)}>
-                            <Ionicons name="close" size={24} color="#FFF" />
-                        </TouchableOpacity>
-                    </View>
-                    {sampleTickets.map(renderTicket)} {/* Use imported tickets */}
-                </View>
-            </Modal>
-
             {/* Edit Profile Modal */}
             <Modal visible={showEditProfile} animationType="slide" transparent>
                 <View style={styles.modalContent}>
@@ -121,7 +98,11 @@ export default function Profile() {
                     </View>
                     <View style={styles.editProfileContainer}>
                         <View style={styles.imageEditContainer}>
-                            <Image source={profilePhoto} style={styles.editProfileImage} />
+                            {profilePhoto ? (
+                                <Image source={{ uri: profilePhoto }} style={styles.editProfileImage} />
+                            ) : (
+                                <Ionicons name="person-circle-outline" size={120} color="#10B981" />
+                            )}
                             <TouchableOpacity style={styles.changePhotoButton} onPress={handleChangePhoto}>
                                 <Ionicons name="camera" size={24} color="#10B981" />
                                 <Text style={styles.changePhotoText}>Change Photo</Text>
@@ -132,7 +113,7 @@ export default function Profile() {
                             <TextInput
                                 style={styles.input}
                                 value={formData.username}
-                                onChangeText={(text) => setFormData({...formData, username: text})}
+                                onChangeText={(text) => setFormData({ ...formData, username: text })}
                                 placeholderTextColor="#94A3B8"
                             />
                         </View>
@@ -141,14 +122,13 @@ export default function Profile() {
                             <TextInput
                                 style={styles.input}
                                 value={formData.email}
-                                onChangeText={(text) => setFormData({...formData, email: text})}
+                                onChangeText={(text) => setFormData({ ...formData, email: text })}
                                 placeholderTextColor="#94A3B8"
                             />
                         </View>
                         <TouchableOpacity
                             style={styles.saveButton}
                             onPress={() => {
-                                // Save changes to AuthStore
                                 auth.updateUser({ username: formData.username, email: formData.email });
                                 setShowEditProfile(false);
                             }}
@@ -161,10 +141,6 @@ export default function Profile() {
         </ScrollView>
     );
 }
-
-/**
- * Styles for the Profile Component
- */
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#111827' },
     header: { alignItems: 'center', padding: 20, paddingTop: 40 },
@@ -183,11 +159,6 @@ const styles = StyleSheet.create({
     modalContent: { backgroundColor: '#111827', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, maxHeight: '80%', marginTop: 'auto', borderWidth: 1, borderColor: '#374151' },
     modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
     modalTitle: { color: '#FFF', fontSize: 20, fontWeight: 'bold', fontFamily: 'Satoshi' },
-    ticketItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#1F2937', padding: 15, borderRadius: 12, marginBottom: 10 },
-    ticketMain: { flexDirection: 'row', alignItems: 'center', flex: 1 },
-    ticketInfo: { marginLeft: 15, flex: 1 },
-    movieTitle: { color: '#FFF', fontSize: 16, fontWeight: 'bold', fontFamily: 'Satoshi' },
-    ticketDetails: { color: '#94A3B8', fontSize: 14, fontFamily: 'Satoshi' },
     editProfileContainer: { padding: 10 },
     imageEditContainer: { alignItems: 'center', marginBottom: 20 },
     editProfileImage: { width: 120, height: 120, borderRadius: 60, marginBottom: 10 },
@@ -197,5 +168,5 @@ const styles = StyleSheet.create({
     inputLabel: { color: '#FFF', marginBottom: 5, fontFamily: 'Satoshi' },
     input: { backgroundColor: '#1F2937', borderRadius: 12, padding: 16, color: '#FFF', fontSize: 16, fontFamily: 'Satoshi', borderWidth: 1, borderColor: '#374151' },
     saveButton: { backgroundColor: '#10B981', padding: 16, borderRadius: 12, alignItems: 'center', marginTop: 20 },
-    saveButtonText: { color: '#FFF', fontSize: 16, fontWeight: 'bold', fontFamily: 'Satoshi' }
+    saveButtonText: { color: '#FFF', fontSize: 16, fontWeight: 'bold', fontFamily: 'Satoshi' },
 });

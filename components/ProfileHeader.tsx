@@ -7,8 +7,7 @@ const ProfileHeader = () => {
     const auth = useAuthStore()
 
     const username = auth.user.username; // Static username
-    const profilePic = require('../assets/images/alucard.jpg'); // Static profile picture
-
+    const profilePic = auth.user.profilePicture
     return (
         <View >
             {/* Circle around the profile picture */}

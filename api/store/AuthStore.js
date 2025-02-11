@@ -8,6 +8,8 @@ export const useAuthStore = create(
             user: null,
             setUser: (user) => set({ user }),
             logout: () => set({ user: null }),
+            updateProfilePicture: (profilePicture) => set((state) => ({ user: { ...state.user, profilePicture } })),
+            updateUser: (userData) => set((state) => ({ user: { ...state.user, ...userData } })),
 
         }),
 

@@ -11,7 +11,7 @@ export const useTicketStore = create(
                 loading: false,
                 error: null,
 
-                createTicket: async (projection_id) => {
+                createTicket: async (projection_id,seatNumber) => {
                 set({ loading: true });
 
                 try {
@@ -22,10 +22,13 @@ export const useTicketStore = create(
                         throw new Error("Missing projection_id or username.");
                     }
 
-                    console.log("Sending request to API...");
                     const { data } = await axios.post('http://localhost:3000/api/ticket/', {
                         projection_id,
                         username,
+                        seat:{
+                            seatNumber , // Convert from seat number to index
+                            hall:2
+                        }
                     });
 
                     console.log("Response from API:", data);
@@ -40,20 +43,41 @@ export const useTicketStore = create(
             },
 
                 fetchTickets: async () => {
-                    set({ loading: true })
+                    set({ loading: true });
+
                     try {
-                        const { data } = await axios.get(`http://localhost:3000/api/ticket/${user.username}`)
-                        set({ tickets: data, error: null })
-                    } catch (error) {
+                        const { user } = useAuthStore.getState(); // Use getState() to access user
+
+                        if (!user || !user.username) {
+                            throw new Error('User not authenticated');
+                        }
+
+                        console.log('Fetching tickets for user:', user.username);
+
+                        const response = await axios.get(
+                            `http://localhost:3000/api/client/${user.username}/tickets`
+                        );
+
+                        console.log('Tickets response:', response.data);
+
+                        if (!response.data || !response.data.tickets) {
+                            throw new Error('Invalid response format');
+                        }
+
                         set({
-                            error: 'Failed to fetch movies',
+                            tickets: response.data.tickets,
+                            error: null
+                        });
+                    } catch (error) {
+                        console.error('Error fetching tickets:', error);
+                        set({
+                            error: error.message || 'Failed to fetch tickets',
                             tickets: []
-                        })
+                        });
                     } finally {
-                        set({ loading: false })
+                        set({ loading: false });
                     }
                 },
-
             }
 
         )
