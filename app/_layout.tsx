@@ -23,21 +23,27 @@ import LogOut from "@/components/LogOut";
 import SignUpPage from './auth/sign-up';
 import SignInPage from './auth/sign-in';
 import TicketPage from "@/app/(tabs)/TicketPage";
+import WelcomeScreen from './welcomescreen';
+import aboutApp from './aboutApp'
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
 // Modern Cinematic Theme Colors
 const CinematicColors = {
-    background: '#0A0A0A',
-    secondary: '#1A1A1A',
-    border: '#2A2A2A',
-    accent: '#E31837', // Cinema red
-    accentSoft: 'rgba(227, 24, 55, 0.15)', // Soft red for active states
+    background: '#0A0B1E', // Deep navy background
+    surface: '#12132D', // Slightly lighter navy for layers
+    primary: '#6366F1', // Electric purple
+    primaryLight: '#818CF8', // Lighter purple for hover states
+    accent: '#4F46E5', // Deep purple accent
+    accentSoft: 'rgba(99, 102, 241, 0.15)', // Soft purple for active states
     text: '#FFFFFF',
-    textSecondary: '#B8B8B8',
-    highlight: '#3E7BFA', // Electric blue for special highlights
-};
+    textSecondary: '#9B9BC0',
+    border: '#1E2048',
+    gradientStart: 'rgba(18, 19, 45, 0.95)',
+    gradientEnd: 'rgba(10, 11, 30, 0.98)',
+    cardBackground: '#181935',
+  };
 
 // Root Layout Component
 export default function RootLayout() {
@@ -263,7 +269,10 @@ export function AuthStack() {
                 headerShown: false,
                 cardStyle: { backgroundColor: CinematicColors.background }
             }}
+            initialRouteName="Welcome"
         >
+            <Stack.Screen name="Welcome" component={WelcomeScreen} />
+            <Stack.Screen name="aboutApp" component={aboutApp} />
             <Stack.Screen name="Landing" component={LandingPage} />
             <Stack.Screen name="SignIn" component={SignInPage} />
             <Stack.Screen name="SignUp" component={SignUpPage} />
