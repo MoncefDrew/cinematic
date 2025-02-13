@@ -5,7 +5,7 @@ import {useAuthStore} from "@/api/store/AuthStore";
 
 const ProfilePic = () => {
     const auth = useAuthStore()
-    const profilePic = auth.user.profilePic
+    const profilePic = auth.user.profilePicture
 
     return (
         <View style={{flexDirection: 'row', alignItems: 'center'}}>

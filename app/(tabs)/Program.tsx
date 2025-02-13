@@ -4,31 +4,30 @@ import { useFonts } from 'expo-font';
 import { useNavigation } from "@react-navigation/native";
 import { useMovieStore } from "@/api/store/moviesStore";
 import { useProjectionStore } from "@/api/store/ProjectionStore";
+import {Movie} from "@/constants/Movie";
+import {LinearGradient} from "expo-linear-gradient";
 
 const WeeklyMovieSchedule = () => {
-    const [loaded] = useFonts({
-        Satoshi: require('../../assets/fonts/Satoshi-Variable.ttf'),
-    });
+    const [loaded] = useFonts({Satoshi: require('../../assets/fonts/Satoshi-Variable.ttf'),});
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedGenre, setSelectedGenre] = useState(null);
     const { movies } = useMovieStore();
     const { projections, fetchProjections } = useProjectionStore();
-
+    const navigation = useNavigation();
     useEffect(() => {
         fetchProjections();
     }, [fetchProjections]);
-
     if (!loaded) return null;
 
-    const isMovieStreaming = (projectionTime) => {
+
+    //checking the streaming state
+    const isMovieStreaming = (projectionTime:any) => {
         const now = new Date();
         const [hours, minutes] = projectionTime.split(':');
         const projectionDate = new Date();
         projectionDate.setHours(parseInt(hours), parseInt(minutes));
-
-        // Movie is considered streaming if it started within the last 2 hours
-        const timeDiff = now.getTime() - projectionDate.getTime();
-        return timeDiff >= 0 && timeDiff <= 2 * 60 * 60 * 1000;
+        // @ts-ignore
+        return now - projectionDate >= 0 && now - projectionDate <= 2 * 60 * 60 * 1000;
     };
 
     const getNextWeekDates = () => {
@@ -42,22 +41,20 @@ const WeeklyMovieSchedule = () => {
                     weekday: 'long',
                     month: 'long',
                     day: 'numeric',
-                    year: 'numeric'
+                    year: 'numeric',
                 }),
                 date: date.toISOString().split('T')[0],
-                dayNumber: date.getDate()
+                dayNumber: date.getDate(),
             };
         });
     };
 
-    const getProjectionsWithMovies = () => {
-        return projections
-            .map(projection => {
-                const matchedMovie = movies.find(movie => movie.film_id === projection.film_id);
-                return matchedMovie ? { ...projection, movie: matchedMovie } : null;
-            })
-            .filter(Boolean);
-    };
+    const getProjectionsWithMovies = () => projections
+        .map(projection => ({
+            ...projection,
+            movie: movies.find(movie => movie.film_id === projection.film_id),
+        }))
+        .filter(projection => projection.movie);
 
     const filteredMovies = getProjectionsWithMovies().filter(projection => {
         const matchesSearch = projection.movie.title.toLowerCase().includes(searchQuery.toLowerCase());
@@ -65,30 +62,66 @@ const WeeklyMovieSchedule = () => {
         return matchesSearch && matchesGenre;
     });
 
-    const getMoviesForDay = (day) =>
-        filteredMovies.filter((projection) => projection.projection_date === day);
+    const getMoviesForDay = (day) => filteredMovies.filter(projection => projection.projection_date === day);
 
-    const renderMovieItem = ({ item, dayName, dayNumber, fullDate }) => {
-        const truncatedDescription = item.movie.description.length > 50
-            ? item.movie.description.substring(0, 70) + '...'
+
+    const travelToMovie = (item) => {
+        const { movie } = item;
+        const {projection_id,start_time,projection_date,duration,seats} = item;
+        // @ts-ignore
+        navigation.navigate('MovieDetails', {fromProgram: true,movie,projection_id,projection_date,start_time,seats,duration });
+    };
+
+
+    const renderMovieItem = ({ item, fullDate }) => {
+        const truncatedDescription = item.movie.description.length > 70
+            ? `${item.movie.description.substring(0, 70)}...`
             : item.movie.description;
-
         const isStreaming = isMovieStreaming(item.start_time);
+        const formatTime = (timeString) => {
+            const [hours, minutes] = timeString.split(':');
+            const hour = parseInt(hours, 10);
+            const period = hour >= 12 ? 'PM' : 'AM';
+            const formattedHour = hour % 12 || 12;
+            return `${formattedHour}:${minutes} ${period}`;
+        };
 
         return (
-            <TouchableOpacity style={styles.movieContainer}>
-                <View style={styles.movieCard}>
-                    <View style={styles.dateMarker}>
-                        <View style={styles.dateInfo}>
-                            <Text style={styles.fullDateText}>{fullDate}</Text>
+            <TouchableOpacity
+                onPress={() => travelToMovie(item)}
+                style={styles.movieContainer}
+            >
+                <LinearGradient
+                    colors={[ '#13122a','#13122a',]}
+                    style={styles.movieCard}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                >
+                    <View style={styles.headerContainer}>
+                        <View style={styles.timeContainer}>
+                            {isStreaming ? (
+                                <View style={styles.streamingContainer}>
+                                    <View style={styles.streamingDot} />
+                                    <Text style={styles.streamingText}>Streaming</Text>
+                                </View>
+                            ) : (
+                                <Text style={styles.movieTime}>{formatTime(item.start_time)}</Text>
+                            )}
                         </View>
-                        {isStreaming && <View style={styles.streamingDot} />}
+                        <Text style={styles.fullDateText}>{fullDate}</Text>
                     </View>
                     <View style={styles.movieContent}>
-                        <Image source={{uri: item.movie.poster_url}} style={styles.poster}/>
+                        <Image
+                            source={{ uri: item.movie.poster_url }}
+                            style={styles.poster}
+                        />
                         <View style={styles.movieInfo}>
-                            <Text style={styles.movieTitle} numberOfLines={1}>{item.movie.title}</Text>
-                            <Text style={styles.movieDescription}>{truncatedDescription}</Text>
+                            <Text style={styles.movieTitle} numberOfLines={1}>
+                                {item.movie.title}
+                            </Text>
+                            <Text style={styles.movieDescription}>
+                                {truncatedDescription}
+                            </Text>
                             <View style={styles.movieDetails}>
                                 <View style={styles.movieMetadata}>
                                     <Text style={styles.metadataText}>{item.movie.duration}</Text>
@@ -96,142 +129,185 @@ const WeeklyMovieSchedule = () => {
                                     <Text style={styles.metadataText}>{item.movie.rating}</Text>
                                 </View>
                                 <View style={styles.timePrice}>
-                                    <Text style={styles.movieTime}>{item.projectionTime}</Text>
                                     <Text style={styles.moviePrice}>100.00 DA</Text>
                                 </View>
                             </View>
                         </View>
                     </View>
-                </View>
+                </LinearGradient>
             </TouchableOpacity>
         );
     };
 
     return (
-        <View style={styles.container}>
+        <LinearGradient
+            colors={['#030314','#030314'  ]}
+            style={styles.container}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+        >
             <View style={styles.header}>
                 <Text style={styles.title}>Weekly Schedule</Text>
-                <Text style={styles.subtitle}>Discover upcoming movies and showtimes for the week ahead</Text>
+                <Text style={styles.subtitle}>
+                    Discover upcoming movies and showtimes for the week ahead
+                </Text>
             </View>
 
-            <TextInput
-                style={styles.searchInput}
-                placeholder="Search movies..."
-                placeholderTextColor="#8899AA"
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-            />
+            <View style={styles.searchContainer}>
+                <TextInput
+                    style={styles.searchInput}
+                    placeholder="Search movies..."
+                    placeholderTextColor="#9290C3"
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                />
+            </View>
 
             <FlatList
                 data={getNextWeekDates()}
                 keyExtractor={(item) => item.date}
                 renderItem={({ item: date }) => {
                     const dayMovies = getMoviesForDay(date.date);
-
                     return dayMovies.length > 0 ? (
-                        <FlatList
-                            data={dayMovies}
-                            keyExtractor={(item) => item.id}
-                            renderItem={({item}) => renderMovieItem({
-                                item,
-                                dayName: date.dayName,
-                                dayNumber: date.dayNumber,
-                                fullDate: date.fullDate
-                            })}
-                            horizontal
-                            showsHorizontalScrollIndicator={false}
-                        />
+                        <View style={styles.dayContainer}>
+                            <Text style={styles.dayText}>{date.fullDate}</Text>
+                            <FlatList
+                                data={dayMovies}
+                                keyExtractor={(item) => item.projection_id}
+                                renderItem={({ item }) => renderMovieItem({ item, fullDate: date.fullDate })}
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerStyle={styles.moviesList}
+                            />
+                        </View>
                     ) : (
-                        <Text style={styles.noMovies}>No movies scheduled for {date.fullDate}</Text>
+                        <Text style={styles.noMovies}>
+                            No movies scheduled for {date.fullDate}
+                        </Text>
                     );
                 }}
             />
-        </View>
+        </LinearGradient>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#111827', // Darker, more sophisticated background
-        paddingHorizontal: 16,
         paddingTop: 24,
+        padding:6
     },
     header: {
+        marginHorizontal: 20,
         marginBottom: 24,
     },
     title: {
-        color: '#fff',
+        color: '#9290C3',
         fontSize: 32,
         fontFamily: 'Satoshi',
         fontWeight: '700',
         marginBottom: 8,
     },
     subtitle: {
-        color: '#94A3B8',
+        color: '#535C91',
         fontSize: 16,
         fontFamily: 'Satoshi',
         lineHeight: 24,
     },
+    searchContainer: {
+        marginHorizontal: 20,
+        marginBottom: 24,
+    },
     searchInput: {
-        backgroundColor: '#1F2937',
+        backgroundColor: 'rgba(27, 26, 85, 0.7)',
         borderRadius: 12,
         padding: 16,
-        color: '#fff',
-        marginBottom: 24,
+        color: '#9290C3',
         fontFamily: 'Satoshi',
         fontSize: 16,
         borderWidth: 1,
-        borderColor: '#374151',
+        borderColor: '#535C91',
+    },
+    dayContainer: {
+        marginBottom: 24,
+    },
+    dayText: {
+        color: '#9290C3',
+        fontSize: 18,
+        fontFamily: 'Satoshi',
+        fontWeight: '600',
+        marginHorizontal: 20,
+        marginBottom: 12,
+    },
+    moviesList: {
+        paddingHorizontal: 20,
     },
     movieContainer: {
         marginRight: 16,
-        marginBottom: 20,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-    },
-    movieCard: {
-        backgroundColor: '#1F2937',
-        width: 340,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: '#374151',
+        marginBottom: 8,
+        borderRadius: 16,
         overflow: 'hidden',
     },
-    dateMarker: {
-        backgroundColor: '#374151',
+    movieCard: {
+        width: 340,
+        borderRadius: 16,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: '#535C91',
+    },
+    headerContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: 12,
+        padding: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(83, 92, 145, 0.3)',
     },
-    dateInfo: {
-        flex: 1,
+    timeContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
-    fullDateText: {
-        color: '#fff',
-        fontFamily: 'Satoshi',
-        fontSize: 14,
-        fontWeight: '600',
+    streamingContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(146, 144, 195, 0.1)',
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 12,
     },
     streamingDot: {
         width: 8,
         height: 8,
         borderRadius: 4,
-        backgroundColor: '#10B981', // Green color for streaming indicator
-        marginLeft: 8,
+        backgroundColor: '#9290C3',
+        marginRight: 6,
+    },
+    streamingText: {
+        color: '#9290C3',
+        fontFamily: 'Satoshi',
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    movieTime: {
+        color: '#9290C3',
+        fontSize: 14,
+        fontFamily: 'Satoshi',
+        fontWeight: '600',
+    },
+    fullDateText: {
+        color: '#9290C3',
+        fontFamily: 'Satoshi',
+        fontSize: 14,
+        fontWeight: '500',
     },
     movieContent: {
         flexDirection: 'row',
         padding: 16,
     },
     poster: {
-        width: 110,
-        height: 160,
-        borderRadius: 8,
+        width: 100,
+        height: 150,
+        borderRadius: 12,
         marginRight: 16,
     },
     movieInfo: {
@@ -239,14 +315,14 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     movieTitle: {
-        color: '#fff',
+        color: '#9290C3',
         fontSize: 20,
         fontFamily: 'Satoshi',
         fontWeight: '700',
         marginBottom: 8,
     },
     movieDescription: {
-        color: '#94A3B8',
+        color: '#535C91',
         fontSize: 14,
         fontFamily: 'Satoshi',
         lineHeight: 20,
@@ -254,48 +330,41 @@ const styles = StyleSheet.create({
     },
     movieDetails: {
         flexDirection: 'column',
+        gap: 8,
     },
     movieMetadata: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 8,
     },
     metadataText: {
-        color: '#94A3B8',
+        color: '#535C91',
         fontSize: 13,
         fontFamily: 'Satoshi',
     },
     metadataDot: {
-        color: '#94A3B8',
+        color: '#535C91',
         marginHorizontal: 8,
     },
     timePrice: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        backgroundColor: '#2D3748',
-        padding: 8,
-        borderRadius: 8,
-    },
-    movieTime: {
-        color: '#fff',
-        fontSize: 14,
-        fontFamily: 'Satoshi',
-        fontWeight: '500',
+        backgroundColor: 'rgba(27, 26, 85, 0.7)',
+        padding: 10,
+        borderRadius: 12,
+        alignSelf: 'flex-start',
     },
     moviePrice: {
-        color: '#10B981', // Changed to match streaming dot color
+        color: '#9290C3',
         fontSize: 16,
         fontFamily: 'Satoshi',
         fontWeight: '700',
     },
     noMovies: {
-        color: '#94A3B8',
+        color: '#535C91',
         fontSize: 14,
         fontFamily: 'Satoshi',
         fontStyle: 'italic',
         textAlign: 'center',
         marginVertical: 16,
+        marginHorizontal: 20,
     },
 });
 

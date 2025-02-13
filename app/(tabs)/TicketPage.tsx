@@ -1,102 +1,107 @@
-import React, {useEffect, useState} from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     Text,
     View,
     StyleSheet,
     StatusBar,
     ImageBackground,
-    Image, TouchableOpacity, Alert,
+    TouchableOpacity,
+    ActivityIndicator,
 } from 'react-native';
 import AppHeader from '@/components/AppHeader';
-import {
-    BORDERRADIUS,
-    COLORS,
-    FONTFAMILY,
-    FONTSIZE,
-    SPACING,
-} from '@/theme/theme';
-import {LinearGradient} from "expo-linear-gradient";
-import CustomIcon from '@/components/CustomIcon';
-import {Ionicons} from "@expo/vector-icons";
-import {useFonts} from "expo-font";
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
+import { useFonts } from 'expo-font';
+import { useSeatStore } from '@/api/store/seatsStore';
+import { useTicketStore } from '@/api/store/TicketStore';
+import {BORDERRADIUS, FONTSIZE, SPACING} from "@/theme/theme";
 
-export default function TicketPage({navigation, route}: any){
-    const [ticketData, setTicketData] = useState<any>(route.params);
-    if (ticketData !== route.params && route.params != undefined) {
-        setTicketData(route.params);
-    }
-
+export default function TicketPage({ navigation, route }: any) {
     const [fontsLoaded] = useFonts({
-        "Poppins-Regular": require("../../assets/fonts/Poppins-Regular.ttf"),
-        "Poppins-Medium": require("../../assets/fonts/Poppins-Medium.ttf"),
-        "Poppins-Bold": require("../../assets/fonts/Poppins-Bold.ttf"),
+        'Poppins-Regular': require('../../assets/fonts/Poppins-Regular.ttf'),
+        'Poppins-Medium': require('../../assets/fonts/Poppins-Medium.ttf'),
+        'Poppins-Bold': require('../../assets/fonts/Poppins-Bold.ttf'),
     });
+    const [ticketData, setTicketData] = useState<any>(route.params);
+    const { createTicket } = useTicketStore();
+    const { reserveSeat } = useSeatStore();
+    const { seatNumber } = route.params.seatDetails;
 
-    if (!fontsLoaded) {
-        return null; // or return a loading indicator
-    }
-    if (ticketData == undefined || ticketData == null) {
+    const [isLoading, setIsLoading] = useState(false); // State to manage loading
+
+    useEffect(() => {
+        if (route.params) {
+            setTicketData(route.params);
+        }
+    }, [route.params]);
+
+    const handleGoBack = useCallback(() => {
+        try {
+            navigation.navigate('ReserveTicket', {
+                projection_id: route?.params.projection_id,
+                movieData: route.params.movie,
+                movie: ticketData?.movieData,
+            });
+        } catch (error) {
+            console.error('Navigation error:', error);
+            navigation.goBack();
+        }
+    }, [navigation, ticketData]);
+
+    const handleSubmit = async () => {
+        if (isLoading) return; // Prevent multiple clicks while loading
+
+        setIsLoading(true); // Start loading
+        try {
+            await submitTicket(); // Call the submit function
+        } catch (error) {
+            console.error('Error submitting ticket:', error);
+        } finally {
+            setIsLoading(false); // Stop loading
+        }
+    };
+
+    const submitTicket = async () => {
+        await createTicket(route.params.projection_id, seatNumber);
+        await reserveSeat(route.params.projection_id, seatNumber);
+        console.log('Ticket created successfully');
+        navigation.navigate('MyTickets'); // Navigate to myTickets after successful submission
+    };
+
+    if (!fontsLoaded || !ticketData) {
         return (
             <View style={styles.container}>
                 <StatusBar hidden />
                 <View style={styles.appHeaderContainer}>
-                    <AppHeader
-                        name="close"
-                        header={'My Tickets'}
-                        action={() => navigation.goBack()}
-                    />
+                    <AppHeader name="back" header={'My Ticket'} action={handleGoBack} />
                 </View>
             </View>
         );
-
     }
+
     return (
-        <View style={styles.container}>
+        <LinearGradient colors={['#030314', '#030314']} style={styles.container} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}>
             <StatusBar hidden />
             <View style={styles.appHeaderContainer}>
-                <AppHeader
-                    name="close"
-                    header={'My Tickets'}
-                    action={() => navigation.goBack()}
-                />
+                <AppHeader name="close" header={'Tickets'} action={handleGoBack} />
             </View>
 
             <View style={styles.ticketContainer}>
-                <ImageBackground
-                    source={{uri: ticketData?.ticketImage}}
-                    style={styles.ticketBGImage}>
-                    <LinearGradient
-                        colors={[COLORS.OrangeRGBA0, COLORS.Orange]}
-                        style={styles.linearGradient}>
-                        <View
-                            style={[
-                                styles.blackCircle,
-                                {position: 'absolute', bottom: -40, left: -40},
-                            ]}></View>
-                        <View
-                            style={[
-                                styles.blackCircle,
-                                {position: 'absolute', bottom: -40, right: -40},
-                            ]}></View>
+                <ImageBackground source={{ uri: ticketData?.ticketImage }} style={styles.ticketBGImage}>
+                    <LinearGradient colors={['rgba(27, 26, 85, 0)', '#1B1A55']} style={styles.linearGradient}>
+                        <View style={[styles.blackCircle, { position: 'absolute', bottom: -40, left: -40 }]} />
+                        <View style={[styles.blackCircle, { position: 'absolute', bottom: -40, right: -40 }]} />
                     </LinearGradient>
                 </ImageBackground>
-                <View style={styles.linear}></View>
+                <View style={styles.linear} />
 
                 <View style={styles.ticketFooter}>
-                    <View
-                        style={[
-                            styles.blackCircle,
-                            {position: 'absolute', top: -40, left: -40},
-                        ]}></View>
-                    <View
-                        style={[
-                            styles.blackCircle,
-                            {position: 'absolute', top: -40, right: -40},
-                        ]}></View>
+                    <View style={[styles.blackCircle, { position: 'absolute', top: -40, left: -40 }]} />
+                    <View style={[styles.blackCircle, { position: 'absolute', top: -40, right: -40 }]} />
                     <View style={styles.ticketDateContainer}>
                         <View style={styles.subtitleContainer}>
-                            <Text style={styles.dateTitle}>11 feb</Text>
-                            <Text style={styles.subtitle}>saturday</Text>
+                            <Text style={styles.dateTitle}>11 Feb</Text>
+                            <Text style={styles.subtitle}>Saturday</Text>
                         </View>
                         <View style={styles.subtitleContainer}>
                             <Ionicons name="time-outline" style={styles.clockIcon} />
@@ -106,60 +111,60 @@ export default function TicketPage({navigation, route}: any){
                     <View style={styles.ticketSeatContainer}>
                         <View style={styles.subtitleContainer}>
                             <Text style={styles.subheading}>Hall</Text>
-                            <Text style={styles.subtitle}>02</Text>
+                            <Text style={styles.subtitle}>{ticketData?.seatDetails?.hall || '02'}</Text>
                         </View>
                         <View style={styles.subtitleContainer}>
                             <Text style={styles.subheading}>Row</Text>
-                            <Text style={styles.subtitle}>04</Text>
+                            <Text style={styles.subtitle}>{ticketData?.seatDetails?.row || 'A'}</Text>
                         </View>
                         <View style={styles.subtitleContainer}>
-                            <Text style={styles.subheading}>Seats</Text>
-                            <Text style={styles.subtitle}>
-                                {ticketData?.seatArray
-                                    .slice(0, 3)
-                                    .map((item: any, index: number, arr: any) => {
-                                        return item + (index == arr.length - 1 ? '' : ', ');
-                                    })}
-                            </Text>
+                            <Text style={styles.subheading}>Seat</Text>
+                            <Text style={styles.subtitle}>{ticketData?.seatDetails?.seatNumber || '1'}</Text>
                         </View>
                     </View>
-
                 </View>
             </View>
 
             <TouchableOpacity
-                style={styles.button}
-                onPress={() => Alert.alert('Cinematic Red Button Clicked!')}
+                style={[styles.button, isLoading && styles.buttonDisabled]} // Disable button style when loading
+                onPress={handleSubmit}
+                disabled={isLoading} // Disable button while loading
             >
-                <Text style={styles.buttonText}>Buy the Ticket</Text>
+                {isLoading ? (
+                    <ActivityIndicator color="#FFFFFF" /> // Show loading spinner
+                ) : (
+                    <Text style={styles.buttonText}>Buy the Ticket</Text> // Show button text
+                )}
             </TouchableOpacity>
-        </View>
+        </LinearGradient>
     );
-};
+}
 
 const styles = StyleSheet.create({
+    container: {
+        display: 'flex',
+        flex: 1,
+    },
     button: {
-        marginHorizontal:80,
-        marginBottom:40,
-        backgroundColor: COLORS.Orange,
-        paddingVertical: 2,
+        backgroundColor: '#13123b',
         borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#535C91',
+        marginHorizontal: 80,
+        marginBottom: 40,
         alignItems: 'center',
+        justifyContent: 'center',
+        height: 50, // Fixed height for consistency
+    },
+    buttonDisabled: {
+        opacity: 0.7, // Reduce opacity when disabled
     },
     buttonText: {
         borderRadius: BORDERRADIUS.radius_25,
-        paddingHorizontal: 10,
         paddingVertical: 10,
-        fontFamily: "Poppins-regular", // Updated to Poppins-SemiBold
+        fontFamily: 'Poppins-Regular',
         fontSize: FONTSIZE.size_16,
-        color: COLORS.White,
-        backgroundColor: COLORS.Orange,
-    },
-
-    container: {
-        display: "flex",
-        flex: 1,
-        backgroundColor: COLORS.Black,
+        color: '#FFFFFF',
     },
     appHeaderContainer: {
         marginHorizontal: SPACING.space_36,
@@ -167,84 +172,78 @@ const styles = StyleSheet.create({
     },
     ticketContainer: {
         flex: 1,
-        justifyContent: "center",
-
+        justifyContent: 'center',
     },
     ticketBGImage: {
-        alignSelf: "center",
-        width: 300,
+        alignSelf: 'center',
+        width: 310,
         aspectRatio: 200 / 300,
         borderTopLeftRadius: BORDERRADIUS.radius_25,
         borderTopRightRadius: BORDERRADIUS.radius_25,
-        overflow: "hidden",
-        justifyContent: "flex-end",
+        overflow: 'hidden',
+        justifyContent: 'flex-end',
     },
     linearGradient: {
-        height: "50%",
+        height: '50%',
     },
     linear: {
-        borderTopColor: COLORS.Black,
+        borderTopColor: '#070F2B',
         borderTopWidth: 3,
-        width: 300,
-        alignSelf: "center",
-        backgroundColor: COLORS.Orange,
-        borderStyle: "dashed",
+        width: 310,
+        alignSelf: 'center',
+        backgroundColor: '#1B1A55',
+        borderStyle: 'dashed',
     },
     ticketFooter: {
-        backgroundColor: COLORS.Orange,
-        width: 300,
-        alignItems: "center",
+        backgroundColor: '#1B1A55',
+        width: 310,
+        alignItems: 'center',
         paddingBottom: SPACING.space_36,
-        alignSelf: "center",
+        alignSelf: 'center',
         borderBottomLeftRadius: BORDERRADIUS.radius_25,
         borderBottomRightRadius: BORDERRADIUS.radius_25,
     },
     ticketDateContainer: {
-        flexDirection: "row",
+        flexDirection: 'row',
         gap: SPACING.space_36,
-        alignItems: "center",
-        justifyContent: "center",
+        alignItems: 'center',
+        justifyContent: 'center',
         marginVertical: SPACING.space_10,
     },
     ticketSeatContainer: {
-        flexDirection: "row",
+        flexDirection: 'row',
         gap: SPACING.space_36,
-        alignItems: "center",
-        justifyContent: "center",
+        alignItems: 'center',
+        justifyContent: 'center',
         marginVertical: SPACING.space_10,
     },
     dateTitle: {
-        fontFamily: "Poppins-Medium", // Updated to Poppins-Medium
+        fontFamily: 'Poppins-Medium',
         fontSize: FONTSIZE.size_24,
-        color: COLORS.White,
+        color: '#9290C3',
     },
     subtitle: {
-        fontFamily: "Poppins-Regular", // Updated to Poppins-Regular
+        fontFamily: 'Poppins-Regular',
         fontSize: FONTSIZE.size_14,
-        color: COLORS.White,
+        color: '#9290C3',
     },
     subheading: {
-        fontFamily: "Poppins-Medium", // Updated to Poppins-Medium
+        fontFamily: 'Poppins-Medium',
         fontSize: FONTSIZE.size_18,
-        color: COLORS.White,
+        color: '#535C91',
     },
     subtitleContainer: {
-        alignItems: "center",
+        alignItems: 'center',
     },
     clockIcon: {
         fontSize: FONTSIZE.size_24,
-        color: COLORS.White,
+        color: '#535C91',
         paddingBottom: SPACING.space_10,
     },
-    barcodeImage: {
-        height: 50,
-        aspectRatio: 158 / 52,
-    },
     blackCircle: {
-        height: 80,
-        width: 80,
+        height: 70,
+        width: 70,
         borderRadius: 80,
-        backgroundColor: COLORS.Black,
+        backgroundColor: '#030314',
     },
 });
-

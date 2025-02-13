@@ -41,14 +41,16 @@ const styles = StyleSheet.create({
         marginRight: 5,
         alignItems: "center",
 
+        maxHeight:150,
+        maxWidth:100,
     },
 
     image: {
         minWidth: 100,
         minHeight: 150, // Poster size
-        borderRadius: 2,
-        borderWidth : 0.5,
-        borderColor : Colors.theme.cardBorder,
+        borderRadius: 8,
+        borderWidth: 1.5,
+        borderColor: '#535C91',
     },
 
 

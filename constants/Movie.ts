@@ -14,15 +14,17 @@ export type RootStackParamList = {
 
 
 export interface Movie {
-    id: string|number;
-    poster_url: string;
-    title: string;
-    cover_url?: string;
-    release_date?: number;
-    description?: string;
-    genre?:string[] | undefined;
-    duration?: number | string;
-    directedBy?: string;
+    cover_url:string;
+    description:string;
+    directedBy:string;
+    duration:string|number;
+    film_id:string;
+    genre:[string];
+    poster_url:string;
+    rating:number|string;
+    release_date:Date|string;
+    title:string;
+
 }
 
 

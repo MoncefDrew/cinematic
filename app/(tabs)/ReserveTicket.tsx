@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import {
     Text,
     View,
@@ -16,83 +16,156 @@ import {
     FONTSIZE,
     SPACING,
 } from '@/theme/theme';
-import {LinearGradient} from "expo-linear-gradient";
+import { LinearGradient } from "expo-linear-gradient";
 import AppHeader from '@/components/AppHeader';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import {useFonts} from "expo-font";
-import {useRouter} from "expo-router";
+import { useFonts } from "expo-font";
+import {useSeatStore} from '@/api/store/seatsStore';
 
-const {width} = Dimensions.get('window');
-const SEAT_SIZE = width * 0.06;
+export default function ReserveTicket({ navigation, route }:any) {
+    const {
+        seats,
+        loading,
+        error,
+        selectedSeat,
+        fetchSeats,
+        selectSeat,
+    } = useSeatStore();
 
-const generateSeats = () => {
-    // Create a more rectangular layout
-    const rows = 6;  // Number of rows (A-F)
-    const seatsPerRow = 8;  // 8 seats per row
-    let rowArray = [];
-    let seatNumber = 1;
+    const [price] = useState(100); // Fixed price state
 
-    for (let i = 0; i < rows; i++) {
-        let columnArray = [];
-        for (let j = 0; j < seatsPerRow; j++) {
-            let seatObject = {
-                number: seatNumber,
-                taken: Boolean(Math.round(Math.random())),
-                selected: false,
-            };
-            columnArray.push(seatObject);
-            seatNumber++;
+    const handleBack = useCallback(() => {
+        try {
+            navigation.navigate('MovieDetails', route.params);
+        } catch (error) {
+            console.error("Navigation error:", error);
+            navigation.goBack();
         }
-        rowArray.push(columnArray);
-    }
-    return rowArray;
-};
-export default function ReserveTicket ({navigation, route}: any){
-    const [price, setPrice] = useState<number>(0);
-    const [twoDSeatArray, setTwoDSeatArray] = useState<any[][]>(generateSeats());
-    const [selectedSeat, setSelectedSeat] = useState<number | null>(null);
+    }, [navigation, route.params]);
+
+    useEffect(() => {
+        const loadSeats = async () => {
+            if (route.params?.projection_id) {
+                console.log('Fetching seats for projection:', route.params.projection_id); // Debug log
+                await fetchSeats(route.params.projection_id);
+            } else {
+                console.log('No projection ID available'); // Debug log
+            }
+        };
+
+        loadSeats();
+    }, [route.params?.projection_id]);
+
+    // Add debug logging for seats state
+    useEffect(() => {
+        console.log('Current seats state:', seats); // Debug log
+    }, [seats]);
+
     const [fontsLoaded] = useFonts({
         "Poppins-Regular": require("../../assets/fonts/Poppins-Regular.ttf"),
         "Poppins-Medium": require("../../assets/fonts/Poppins-Medium.ttf"),
         "Poppins-Bold": require("../../assets/fonts/Poppins-Bold.ttf"),
         "Poppins-SemiBold": require("../../assets/fonts/Poppins-SemiBold.ttf"),
     });
-
-    const router = useRouter();
-
     if (!fontsLoaded) {
-        return null;
+        return (
+            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+                <Text style={{ color: COLORS.White }}>Loading fonts...</Text>
+            </View>
+        );
+    }
+    if (!route.params?.movie) {
+        return (
+            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+                <Text style={{ color: COLORS.White }}>No movie data available</Text>
+            </View>
+        );
     }
 
-    const selectSeat = (index: number, subindex: number, num: number) => {
-        if (!twoDSeatArray[index][subindex].taken) {
-            let temp = [...twoDSeatArray];
-
-            // Deselect previously selected seat
-            if (selectedSeat !== null) {
-                temp = temp.map(row =>
-                    row.map(seat => ({...seat, selected: false}))
-                );
-            }
-
-            // Select new seat
-            temp[index][subindex].selected = !temp[index][subindex].selected;
-            setSelectedSeat(temp[index][subindex].selected ? num : null);
-            setPrice(temp[index][subindex].selected ? 5.0 : 0);
-            setTwoDSeatArray(temp);
+    // Helper function to chunk array into rows
+    const chunks = (array: any[], size: number) => {
+        if (!array) return [];
+        const chunked = [];
+        for (let i = 0; i < array.length; i += size) {
+            chunked.push(array.slice(i, i + size));
         }
+        return chunked;
     };
 
-    const BookSeats = async () => {
+    // ReserveTicket.tsx - Updated renderSeats function
+    const renderSeats = () => {
+        if (!seats || seats.length === 0) {
+            console.log('No seats available to render'); // Debug log
+            return (
+                <View style={[styles.seatMap, { alignItems: 'center', justifyContent: 'center' }]}>
+                    <Text style={{ color: COLORS.White }}>No seats available</Text>
+                </View>
+            );
+        }
+
+        const seatRows = chunks(seats, 8);
+        console.log('Rendered seat rows:', seatRows); // Debug log
+
+        return (
+            <View style={styles.seatMap}>
+                {seatRows.map((row, rowIndex) => (
+                    <View key={rowIndex} style={styles.seatRow}>
+                        <Text style={styles.rowLabel}>{String.fromCharCode(65 + rowIndex)}</Text>
+                        {row.map((seat) => {
+                            const seatIndex = seat.number - 1;
+                            return (
+                                <TouchableOpacity
+                                    key={seat.number}
+                                    onPress={() => selectSeat(seatIndex)}
+                                    disabled={seat.reserved}>
+
+                                    <MaterialIcons
+                                        name="event-seat"
+                                        style={[
+                                            styles.seatIcon,
+                                            seat.reserved ? styles.takenSeat : {},
+                                            seat.selected ? styles.selectedSeat : {},
+                                        ]}
+                                    />
+                                </TouchableOpacity>
+                            );
+                        })}
+                    </View>
+                ))}
+            </View>
+        );
+    };
+
+    // seat choosing
+    const handleBookSeats = async () => {
         if (selectedSeat === null) {
             Alert.alert('Selection Required', 'Please select a seat before proceeding.');
             return;
         }
 
-        navigation.navigate('TicketPage', {
-            seatArray: [selectedSeat],
-            ticketImage: route.params.movie.poster_url,
-        });
+        try {
+            const seatNumber = selectedSeat + 1; // Convert from index to seat number
+
+            const rowIndex = Math.floor(selectedSeat / 8);
+            const rowLetter = String.fromCharCode(65 + rowIndex);
+            const seatInRow = (selectedSeat % 8) + 1;
+
+            navigation.navigate('TicketPage', {
+                projection_id:route?.params.projection_id,
+                seatArray: [seatNumber],
+                ticketImage: route.params.movie.poster_url,
+                movieData: route.params.movie,
+                seatDetails: {
+                    hall: "02",
+                    row: rowLetter,
+                    seatNumber: selectedSeat,
+                    rawSeatNumber: seatNumber
+                },
+                price: price,
+            });
+        } catch (error) {
+            Alert.alert('Error', 'Failed to reserve seat. Please try again.');
+        }
     };
 
     return (
@@ -101,28 +174,24 @@ export default function ReserveTicket ({navigation, route}: any){
             bounces={false}
             showsVerticalScrollIndicator={false}>
             <StatusBar hidden />
-
-            {/* Movie Banner */}
             <View>
                 <ImageBackground
-                    source={{uri: route.params?.movie.cover_url}}
-                    style={styles.ImageBG}>
-                    <LinearGradient
-                        colors={[COLORS.BlackRGB10, COLORS.Black]}
+                    source={{ uri: route.params?.movie.cover_url }}
+                style={styles.ImageBG}>
+                <LinearGradient
+                    colors={[COLORS.BlackRGB10, '#030314']}
                         style={styles.linearGradient}>
                         <View style={styles.appHeaderContainer}>
                             <AppHeader
                                 name="close"
-                                action={() => router.back()}
+                                action={handleBack}
                             />
                         </View>
                     </LinearGradient>
                 </ImageBackground>
             </View>
 
-            {/* Main Content */}
             <View style={styles.mainContainer}>
-                {/* Movie Info Section */}
                 <View style={styles.movieInfoContainer}>
                     <Text style={styles.movieTitle}>{route.params?.movie.title || "Movie Title"}</Text>
                     <View style={styles.movieMetaContainer}>
@@ -130,42 +199,26 @@ export default function ReserveTicket ({navigation, route}: any){
                         <Text style={styles.movieMeta}>•</Text>
                         <Text style={styles.movieMeta}>Hall 1</Text>
                     </View>
-                    <Text style={styles.movieDescription} numberOfLines={2}>
-                        {route.params?.movie.description ||
-                            "Experience the movie in our premium theater with state-of-the-art sound system and comfortable seating."}
-                    </Text>
                 </View>
 
-                {/* Seating Area */}
                 <View style={styles.seatContainer}>
                     <View style={styles.screenContainer}>
                         <View style={styles.screenLine} />
                         <Text style={styles.screenText}>SCREEN</Text>
                     </View>
 
-                    <View style={styles.seatMap}>
-                        {twoDSeatArray?.map((item, index) => (
-                            <View key={index} style={styles.seatRow}>
-                                <Text style={styles.rowLabel}>{String.fromCharCode(65 + index)}</Text>
-                                {item?.map((subitem, subindex) => (
-                                    <TouchableOpacity
-                                        key={subitem.number}
-                                        onPress={() => selectSeat(index, subindex, subitem.number)}>
-                                        <MaterialIcons
-                                            name="event-seat"
-                                            style={[
-                                                styles.seatIcon,
-                                                subitem.taken ? styles.takenSeat : {},
-                                                subitem.selected ? styles.selectedSeat : {},
-                                            ]}
-                                        />
-                                    </TouchableOpacity>
-                                ))}
-                            </View>
-                        ))}
-                    </View>
+                    {loading ? (
+                        <View style={[styles.seatMap, { alignItems: 'center', justifyContent: 'center' }]}>
+                            <Text style={{ color: COLORS.White }}>Loading seats...</Text>
+                        </View>
+                    ) : error ? (
+                        <View style={[styles.seatMap, { alignItems: 'center', justifyContent: 'center' }]}>
+                            <Text style={{ color: COLORS.White }}>{error}</Text>
+                        </View>
+                    ) : (
+                        renderSeats()
+                    )}
 
-                    {/* Seat Legend */}
                     <View style={styles.legendContainer}>
                         <View style={styles.legendItem}>
                             <MaterialIcons name="event-seat" style={styles.legendIcon} />
@@ -182,14 +235,13 @@ export default function ReserveTicket ({navigation, route}: any){
                     </View>
                 </View>
 
-                {/* Price and Booking Section */}
                 <View style={styles.bottomContainer}>
                     <View style={styles.priceContainer}>
                         <Text style={styles.priceLabel}>Total Price</Text>
-                        <Text style={styles.priceAmount}>$ {price.toFixed(2)}</Text>
-                        {selectedSeat && (
+                        <Text style={styles.priceAmount}>{price.toFixed(2)} DA</Text>
+                        {selectedSeat !== null && (
                             <Text style={styles.seatInfo}>
-                                Seat: {String.fromCharCode(65 + Math.floor((selectedSeat-1)/8))}{selectedSeat % 8 || 8}
+                                Seat: {String.fromCharCode(65 + Math.floor(selectedSeat/8))}{(selectedSeat % 8) + 1}
                             </Text>
                         )}
                     </View>
@@ -198,7 +250,7 @@ export default function ReserveTicket ({navigation, route}: any){
                             styles.bookButton,
                             !selectedSeat && styles.disabledButton
                         ]}
-                        onPress={BookSeats}
+                        onPress={handleBookSeats}
                         disabled={!selectedSeat}>
                         <Text style={styles.bookButtonText}>Book Now</Text>
                     </TouchableOpacity>
@@ -206,118 +258,11 @@ export default function ReserveTicket ({navigation, route}: any){
             </View>
         </ScrollView>
     );
-};
-
+}
 const styles = StyleSheet.create({
-    seatRow: {
-        flexDirection: "row",
-        gap: SPACING.space_8,
-        alignItems: 'center',
-        justifyContent: "center",
-    },
-    legendContainer: {
-        flexDirection: "row",
-        justifyContent: "space-evenly",
-        padding: SPACING.space_12,
-        borderTopWidth: 1,
-        borderColor: COLORS.WhiteRGBA15,
-        backgroundColor: COLORS.BlackRGB10,
-    },
-    mainContainer: {
-        padding: SPACING.space_16,
-    },
-    movieInfoContainer: {
-        marginBottom: SPACING.space_24,
-    },
-    movieTitle: {
-        fontFamily: "Poppins-Bold",
-        fontSize: FONTSIZE.size_24,
-        color: COLORS.White,
-        marginBottom: SPACING.space_8,
-    },
-    movieMetaContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: SPACING.space_10,
-        marginBottom: SPACING.space_8,
-    },
-    movieMeta: {
-        fontFamily: "Poppins-Regular",
-        fontSize: FONTSIZE.size_14,
-        color: COLORS.WhiteRGBA50,
-    },
-    movieDescription: {
-        fontFamily: "Poppins-Regular",
-        fontSize: FONTSIZE.size_14,
-        color: COLORS.WhiteRGBA75,
-    },
-    seatContainer: {
-        backgroundColor: COLORS.BlackRGB10,
-        borderRadius: BORDERRADIUS.radius_25,
-        borderWidth: 1,
-        borderColor: COLORS.WhiteRGBA15,
-        overflow: 'hidden',
-    },
-    screenContainer: {
-        alignItems: 'center',
-        paddingVertical: SPACING.space_20,
-        backgroundColor: COLORS.BlackRGB10,
-        borderBottomWidth: 1,
-        borderColor: COLORS.WhiteRGBA15,
-    },
-    screenLine: {
-        width: '70%',
-        height: 4,
-        backgroundColor: COLORS.WhiteRGBA50,
-        borderRadius: 2,
-    },
-    screenText: {
-        fontFamily: "Poppins-Regular",
-        fontSize: FONTSIZE.size_12,
-        color: COLORS.WhiteRGBA50,
-        marginTop: SPACING.space_10,
-    },
-    seatMap: {
-        gap: SPACING.space_8,
-        padding: SPACING.space_20,
-
-    },
-
-    rowLabel: {
-        fontFamily: "Poppins-Medium",
-        fontSize: FONTSIZE.size_12,
-        color: COLORS.White,
-        width: 16,
-        marginRight: SPACING.space_8,
-    },
-    seatIcon: {
-        fontSize: FONTSIZE.size_20,  // Reduced size
-        color: COLORS.White,
-    },
-    takenSeat: {
-        color: COLORS.Grey,
-        opacity: 0.5,
-    },
-    selectedSeat: {
-        color: COLORS.Orange,
-    },
-
-    legendItem: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: SPACING.space_8,
-    },
-    legendIcon: {
-        fontSize: FONTSIZE.size_20,
-        color: COLORS.White,
-    },
-    disabledButton: {
-        backgroundColor: COLORS.Grey,
-        opacity: 0.5,
-    },
     container: {
         flex: 1,
-        backgroundColor: COLORS.Black,
+        backgroundColor: '#030314',
     },
     ImageBG: {
         width: "100%",
@@ -329,33 +274,140 @@ const styles = StyleSheet.create({
     appHeaderContainer: {
         marginHorizontal: SPACING.space_36,
         marginTop: SPACING.space_20 * 2,
+        padding:12,
     },
+    mainContainer: {
+        padding: SPACING.space_16,
+        margin:16,
 
-    screenIndicator: {
+    },
+    movieInfoContainer: {
+        marginBottom: SPACING.space_24,
+    },
+    movieTitle: {
+        fontFamily: "Poppins-Bold",
+        fontSize: FONTSIZE.size_24,
+        color: '#9290C3',
+        marginBottom: SPACING.space_8,
+    },
+    movieMetaContainer: {
+        flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: SPACING.space_36,
+        gap: SPACING.space_10,
+        marginBottom: SPACING.space_8,
     },
-
-    sectionTitle: {
-        fontFamily: "Poppins-SemiBold",
-        fontSize: FONTSIZE.size_18,
-        color: COLORS.White,
-        marginBottom: SPACING.space_15,
+    movieMeta: {
+        fontFamily: "Poppins-Regular",
+        fontSize: FONTSIZE.size_14,
+        color: '#9290C3',
+        opacity: 0.7,
     },
+    movieDescription: {
+        fontFamily: "Poppins-Regular",
+        fontSize: FONTSIZE.size_14,
+        color: '#9290C3',
+        opacity: 0.75,
+    },
+    seatContainer: {
+        backgroundColor: '#1B1A55',
+        borderRadius: BORDERRADIUS.radius_25,
+        borderWidth: 1,
+        borderColor: '#535C91',
+        overflow: 'hidden',
+    },
+    screenContainer: {
+        alignItems: 'center',
+        paddingVertical: SPACING.space_20,
+        backgroundColor: '#070F2B',
+        borderBottomWidth: 1,
+        borderColor: '#535C91',
+    },
+    screenLine: {
+        width: '70%',
+        height: 4,
+        backgroundColor: '#9290C3',
+        borderRadius: 2,
+    },
+    screenText: {
+        fontFamily: "Poppins-Regular",
+        fontSize: FONTSIZE.size_12,
+        color: '#9290C3',
+        marginTop: SPACING.space_10,
+    },
+    seatMap: {
+        gap: SPACING.space_8,
+        padding: SPACING.space_20,
+        alignItems: 'center',
+    },
+    seatRow: {
+        flexDirection: 'row',
+        gap: SPACING.space_2,
+        marginBottom: SPACING.space_2,
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+    },
+    rowLabel: {
+        fontFamily: "Poppins-Medium",
+        fontSize: FONTSIZE.size_12,
+        color: '#9290C3',
+        width: 20,
+        textAlign: 'center',
+        marginRight: SPACING.space_12,
+    },
+    seat: {
+        width: 32,
+        height: 32,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    seatIcon: {
+        fontSize: FONTSIZE.size_24,
+        color: '#9290C3',
+        textAlign: 'center',
+        width: 32,
+        height: 32,
+    },
+    takenSeat: {
+        color: '#363b5e',
+        opacity: 0.5,
+    },
+    selectedSeat: {
+        color: '#cfcfda',
+    },
+    legendContainer: {
 
+        flexDirection: "row",
+        justifyContent: "space-evenly",
+        padding: SPACING.space_12,
+        borderTopWidth: 1,
+        borderColor: '#535C91',
+        backgroundColor: '#1B1A55',
+    },
+    legendItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: SPACING.space_8,
+    },
+    legendIcon: {
+        fontSize: FONTSIZE.size_20,
+        color: '#9290C3',
+    },
     legendText: {
         fontFamily: "Poppins-Regular",
         fontSize: FONTSIZE.size_12,
-        color: COLORS.White,
+        color: '#9290C3',
     },
     bottomContainer: {
+        borderRadius: BORDERRADIUS.radius_25,
+        borderWidth: 1,
+        borderColor: '#535C91',
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
         marginTop: SPACING.space_24,
-        backgroundColor: COLORS.DarkGrey,
+        backgroundColor: '#1B1A55',
         padding: SPACING.space_20,
-        borderRadius: BORDERRADIUS.radius_25,
     },
     priceContainer: {
         alignItems: "flex-start",
@@ -363,28 +415,46 @@ const styles = StyleSheet.create({
     priceLabel: {
         fontFamily: "Poppins-Regular",
         fontSize: FONTSIZE.size_14,
-        color: COLORS.WhiteRGBA50,
+        color: '#9290C3',
+        opacity: 0.7,
     },
     priceAmount: {
         fontFamily: "Poppins-Bold",
         fontSize: FONTSIZE.size_24,
-        color: COLORS.White,
+        color: '#9290C3',
     },
     seatInfo: {
         fontFamily: "Poppins-Regular",
         fontSize: FONTSIZE.size_12,
-        color: COLORS.Orange,
+        color: '#535C91',
         marginTop: 4,
     },
     bookButton: {
-        backgroundColor: COLORS.Orange,
+        backgroundColor: '#13123b',
         paddingHorizontal: 30,
         paddingVertical: 10,
         borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#535C91',
     },
     bookButtonText: {
         fontFamily: "Poppins-SemiBold",
         fontSize: FONTSIZE.size_16,
-        color: COLORS.White,
+        color: '#d6d5f3',
+    },
+    disabledButton: {
+        backgroundColor: '#1B1A55',
+        opacity: 0.5,
+
+    },
+    screenIndicator: {
+        alignItems: 'center',
+        marginBottom: SPACING.space_36,
+    },
+    sectionTitle: {
+        fontFamily: "Poppins-SemiBold",
+        fontSize: FONTSIZE.size_18,
+        color: '#9290C3',
+        marginBottom: SPACING.space_15,
     },
 });
