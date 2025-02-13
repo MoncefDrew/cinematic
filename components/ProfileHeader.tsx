@@ -18,14 +18,14 @@ const ProfileHeader = () => {
     // Handle case when user data isn't available
     if (!user) {
         return (
-            <View style={{ padding: 16 }}>
+            <View >
                 <Text style={{ color: Colors.theme.textSecondary }}>Loading profile...</Text>
             </View>
         );
     }
 
     return (
-        <View style={{ padding: 16 }}>
+        <View >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <View
                     style={{
