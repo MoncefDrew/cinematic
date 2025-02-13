@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { StyleSheet, View, Text, TouchableOpacity, Alert, Animated } from "react-native";
 import ProfileHeader from "@/components/ProfileHeader";
 import { MoviePoll } from "@/constants/MoviePoll";
-import { moviesVotes } from "../constants/Movie";
+import { moviesVotes } from "@/constants/Movie";
 import { Colors } from "@/constants/Colors";
 
 export default function Poll() {
