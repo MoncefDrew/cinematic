@@ -1,363 +1,237 @@
-import { supabase } from "@/lib/supabase";
-import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { useState, useEffect } from "react";
-import {
-    KeyboardAvoidingView,
+
+    import React, {useEffect, useState} from "react";
+    import {
+    View,
+    Text,
     StyleSheet,
     TextInput,
     TouchableOpacity,
-    View,
-    Text,
-    Platform,
+    ImageBackground,
+    Image, Alert,
     Animated,
 } from "react-native";
-import { LinearGradient } from 'expo-linear-gradient';
-import Toast from 'react-native-toast-message';
+    import { useNavigation } from "@react-navigation/native";
+    import { Ionicons } from "@expo/vector-icons";
+    import {LinearGradient} from "expo-linear-gradient";
+    import {useMovieStore} from "@/api/store/moviesStore";
+    import {supabase} from "@/lib/supabase";
 
-const Colors = {
-    background: "#111827",
-    cardBackground: "#1E293B",
-    textPrimary: "#FFFFFF",
-    textSecondary: "#B8B8B8",
-    buttonPrimary: "#324b63",
-    border: "#334155",
-    link: "#00F0FF",
-    inputPlaceholder: "#6B7280",
-    error: "#ef4444",
-    success: "#22c55e",
-};
-
-const toastConfig = {
-    error: (props) => (
-        <View style={[{
-            minHeight: 60,
-            width: '90%',
-            backgroundColor: Colors.cardBackground,
-            borderRadius: 8,
-            padding: 16,
-            flexDirection: 'row',
-            alignItems: 'center',
-            borderLeftWidth: 4,
-            borderLeftColor: '#ff0000',
-            shadowColor: '#000',
-            shadowOffset: {
-                width: 0,
-                height: 2,
-            },
-            shadowOpacity: 0.25,
-            shadowRadius: 3.84,
-            elevation: 5,
-        }]}>
-            <Ionicons name="alert-circle" size={24} color="#ff0000" />
-            <View style={{ marginLeft: 12, flex: 1 }}>
-                <Text style={{ color: Colors.textPrimary, fontSize: 16, fontWeight: 'bold' }}>
-                    {props.text1}
-                </Text>
-                {props.text2 && (
-                    <Text style={{ color: '#ff0000', fontSize: 14, marginTop: 4 }}>
-                        {props.text2}
-                    </Text>
-                )}
-            </View>
-        </View>
-    ),
-    success: (props) => (
-        <View style={[{
-            minHeight: 60,
-            width: '90%',
-            backgroundColor: Colors.cardBackground,
-            borderRadius: 8,
-            padding: 16,
-            flexDirection: 'row',
-            alignItems: 'center',
-            borderLeftWidth: 4,
-            borderLeftColor: Colors.success,
-            shadowColor: '#000',
-            shadowOffset: {
-                width: 0,
-                height: 2,
-            },
-            shadowOpacity: 0.25,
-            shadowRadius: 3.84,
-            elevation: 5,
-        }]}>
-            <Ionicons name="checkmark-circle" size={24} color={Colors.success} />
-            <View style={{ marginLeft: 12, flex: 1 }}>
-                <Text style={{ color: Colors.textPrimary, fontSize: 16, fontWeight: 'bold' }}>
-                    {props.text1}
-                </Text>
-                {props.text2 && (
-                    <Text style={{ color: Colors.success, fontSize: 14, marginTop: 4 }}>
-                        {props.text2}
-                    </Text>
-                )}
-            </View>
-        </View>
-    ),
-};
-
-export default function SignInPage() {
-    const [loading, setLoading] = useState(false);
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [emailError, setEmailError] = useState("");
-    const [passwordError, setPasswordError] = useState("");
-    const buttonScale = new Animated.Value(1);
-
-    const validateEmail = (email: string) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!email) {
-            setEmailError("Email is required");
-            showToast("error", "Email is required");
-            return false;
-        }
-        if (!emailRegex.test(email)) {
-            setEmailError("Please enter a valid email address");
-            showToast("error", "Please enter a valid email address");
-            return false;
-        }
-        setEmailError("");
-        return true;
+    const CinematicColors = {
+        background: '#0A0B1E',
+        surface: '#12132D',
+        primary: '#6366F1',
+        primaryLight: '#818CF8',
+        accent: '#4F46E5',
+        accentSoft: 'rgba(99, 102, 241, 0.15)',
+        text: '#FFFFFF',
+        textSecondary: '#9B9BC0',
+        border: '#1E2048',
+        gradientStart: 'rgba(18, 19, 45, 0.95)',
+        gradientEnd: 'rgba(10, 11, 30, 0.98)',
+        cardBackground: '#181935',
+        error: '#EF4444',
+        success: '#10B981',
     };
 
-    const validatePassword = (password: string | any[]) => {
-        if (!password) {
-            setPasswordError("Password is required");
-            showToast("error", "Password is required");
-            return false;
-        }
-        if (password.length < 8) {
-            setPasswordError("Password must be at least 8 characters");
-            showToast("error", "Password must be at least 8 characters");
-            return false;
-        }
-        setPasswordError("");
-        return true;
-    };
-
-    const showToast = (type: string, message: string) => {
-        Toast.show({
-            type: type,
-            text1: type === 'error' ? 'Error' : 'Success',
-            text2: message,
-            position: 'top',
-            visibilityTime: 3000,
-            autoHide: true,
-            topOffset: 50,
-        });
-    };
-
-    async function signInWithEmail() {
-        const isEmailValid = validateEmail(email);
-        const isPasswordValid = validatePassword(password);
-
-        if (!isEmailValid || !isPasswordValid) {
-            return;
+    export default function SignInPage() {
+        const navigation = useNavigation();
+        const buttonScale = new Animated.Value(1); // For button animation
+        const [email, setEmail] = useState("");
+        const [password, setPassword] = useState("");
+        const [loading, setLoading] = useState(false);
+        const featuredMovie =   {
+            film_id: '11ed03be-ecfb-4219-9b7c-a8f9a71511cf',
+            title: 'American Psycho',
+            rating: 7.4,
+            release_date: '2000-04-13',
+            description: 'A wealthy New York investment banking executive hides his alternate psychopathic ego from his co-workers and friends as he escalates deeper into his illogical, gratuitous fantasies.',
+            poster_url: 'https://image.tmdb.org/t/p/w500/9uGHEgsiUXjCNq8wdq4r49YL8A1.jpg',
+            cover_url: 'https://image.tmdb.org/t/p/w500/rRwD4MoBlkBXWQ6PDnbKRSU5dDu.jpg',
+            genre: 'Thriller, Drama, Crime',
+            duration: 'N/A',
+            directedBy: 'Mary Harron',
+            created_at: '2025-02-09T21:39:15.364512+00:00'
         }
 
-        setLoading(true);
-        try {
+        async function signInWithEmail() {
+            setLoading(true);
             const { error } = await supabase.auth.signInWithPassword({
                 email: email,
                 password: password,
             });
-            
-            if (error) {
-                showToast("error", error.message);
-            }
-        } catch (error) {
-            showToast("error", "An unexpected error occurred");
-        } finally {
+            if (error) Alert.alert(error.message);
             setLoading(false);
         }
+        // Button press animation
+        const animateButton = () => {
+            Animated.sequence([
+                Animated.timing(buttonScale, {
+                    toValue: 0.95,
+                    duration: 100,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(buttonScale, {
+                    toValue: 1,
+                    duration: 100,
+                    useNativeDriver: true,
+                }),
+            ]).start();
+        };
+
+        return (
+            <View style={styles.container}>
+                <View style={styles.poster_}>
+                    <Image source={{uri: featuredMovie.cover_url}} style={styles.poster}/>
+                    <LinearGradient
+                        colors={["transparent", "#0a0b1e"]} // Dark gradient
+                        style={styles.lineargrad}
+                    />
+                </View>
+
+                <View style={styles.overlay}>
+                    <View style={styles.content}>
+                        <Text style={styles.title}>Sign in to Cinematic</Text>
+
+                        <View style={styles.inputContainer}>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Email"
+                                placeholderTextColor={CinematicColors.textSecondary}
+                                value={email}
+                                onChangeText={setEmail}
+                                autoCapitalize="none"
+                            />
+                        </View>
+
+                        <View style={styles.inputContainer}>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Password"
+                                placeholderTextColor={CinematicColors.textSecondary}
+                                value={password}
+                                onChangeText={setPassword}
+                                secureTextEntry
+                            />
+                        </View>
+
+                        {/* Sign In Button */}
+                        <TouchableOpacity
+                            style={styles.signInButton}
+                            onPress={() => {
+                                animateButton();
+                                signInWithEmail();
+                            }}
+                            disabled={loading}
+                        >
+                            <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
+                                <Text style={styles.signInButtonText}>
+                                    {loading ? "Signing In..." : "Sign In"}
+                                </Text>
+                            </Animated.View>
+                        </TouchableOpacity>
+
+                        <View style={styles.footer}>
+                            <TouchableOpacity
+                                style={styles.footerButton}
+                                onPress={() => navigation.navigate('SignUp')} // Replace 'SignUp' with your sign-up route
+                            >
+                                <Text style={styles.footerButtonText}>JOIN</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={styles.footerButton}
+                                onPress={() => navigation.navigate('ResetPassword')} // Replace 'ResetPassword' with your reset password route
+                            >
+                                <Text style={styles.footerButtonText}>RESET PASSWORD</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </View>
+        );
     }
 
-    const animateButton = () => {
-        Animated.sequence([
-            Animated.timing(buttonScale, {
-                toValue: 0.95,
-                duration: 100,
-                useNativeDriver: true,
-            }),
-            Animated.timing(buttonScale, {
-                toValue: 1,
-                duration: 100,
-                useNativeDriver: true,
-            }),
-        ]).start();
-    };
+    const styles = StyleSheet.create({
 
-    return (
-        <KeyboardAvoidingView 
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            style={styles.keyboardAvoid}
-        >
-            <LinearGradient 
-                colors={['#111827', '#223344']} 
-                style={styles.container}
-            >
-                <Text style={styles.title}>Welcome Back</Text>
-                <Text style={styles.subtitle}>Sign in to your Cinematic account</Text>
+        lineargrad: {
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            top: 0,
+            bottom: 0
+        },
+        container: {
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+        },
+        poster_:{
+            width:'100%',
+            height:'60%'
+        },
+        poster:{
+            width:'100%',
+            height:'100%'
+        },
+        overlay: {
+            flex: 1,
+            width: '100%',
+            backgroundColor: 'rgba(10, 11, 30, 0.7)', // Semi-transparent overlay
+            justifyContent: "center",
+            alignItems: "center",
 
-                <View style={styles.inputContainer}>
-                    <Ionicons name="mail-outline" size={20} color={Colors.textSecondary} style={styles.inputIcon} />
-                    <TextInput
-                        style={[styles.input, emailError && styles.inputError]}
-                        placeholder="Email"
-                        placeholderTextColor={Colors.inputPlaceholder}
-                        value={email}
-                        onChangeText={(text) => {
-                            setEmail(text);
-                            setEmailError("");
-                        }}
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                    />
-                </View>
-                {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
 
-                <View style={styles.inputContainer}>
-                    <Ionicons name="lock-closed-outline" size={20} color={Colors.textSecondary} style={styles.inputIcon} />
-                    <TextInput
-                        style={[styles.input, passwordError && styles.inputError]}
-                        placeholder="Password"
-                        placeholderTextColor={Colors.inputPlaceholder}
-                        value={password}
-                        onChangeText={(text) => {
-                            setPassword(text);
-                            setPasswordError("");
-                        }}
-                        secureTextEntry
-                    />
-                </View>
-                {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
-
-                <TouchableOpacity
-                    style={[styles.signInButton, loading && styles.signInButtonDisabled]}
-                    onPress={() => {
-                        animateButton();
-                        signInWithEmail();
-                    }}
-                    disabled={loading}
-                >
-                    <Animated.View style={{ transform: [{ scale: buttonScale }], flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
-                        <Text style={styles.signInButtonText}>{loading ? "Signing In..." : "Sign In"}</Text>
-                        <Ionicons name="log-in" size={20} color="white" style={styles.icon} />
-                    </Animated.View>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.forgotPasswordContainer}>
-                    <Text style={styles.forgotPasswordText}>Forgot your password?</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.goBackButton} onPress={() => router.back()}>
-                    <Ionicons name="arrow-back-outline" size={20} color={Colors.textPrimary} />
-                    <Text style={styles.goBackButtonText}>Go Back</Text>
-                </TouchableOpacity>
-
-                <Toast config={toastConfig} />
-            </LinearGradient>
-        </KeyboardAvoidingView>
-    );
-}
-
-const styles = StyleSheet.create({
-    keyboardAvoid: {
-        flex: 1,
-    },
-    container: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        paddingHorizontal: 20,
-    },
-    title: {
-        fontSize: 32,
-        fontWeight: "bold",
-        color: Colors.textPrimary,
-        marginBottom: 10,
-    },
-    subtitle: {
-        fontSize: 16,
-        color: Colors.textSecondary,
-        marginBottom: 30,
-    },
-    inputContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        width: "100%",
-        marginBottom: 5,
-        backgroundColor: Colors.cardBackground,
-        borderRadius: 10,
-        borderWidth: 1,
-        borderColor: Colors.border,
-        paddingHorizontal: 15,
-        paddingVertical: 10,
-    },
-    inputIcon: {
-        marginRight: 10,
-    },
-    input: {
-        flex: 1,
-        color: Colors.textPrimary,
-        fontSize: 16,
-    },
-    inputError: {
-        borderColor: Colors.error,
-    },
-    errorText: {
-        color: Colors.error,
-        fontSize: 12,
-        marginBottom: 10,
-        alignSelf: 'flex-start',
-        marginLeft: 15,
-    },
-    signInButton: {
-        backgroundColor: Colors.buttonPrimary,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 15,
-        borderRadius: 10,
-        width: "90%",
-        maxWidth: 350,
-        marginTop: 10,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-        elevation: 5,
-    },
-    signInButtonDisabled: {
-        opacity: 0.7,
-    },
-    signInButtonText: {
-        color: "white",
-        fontSize: 18,
-        fontWeight: "600",
-        marginRight: 10,
-    },
-    icon: {
-        marginLeft: 5,
-    },
-    forgotPasswordContainer: {
-        marginTop: 15,
-    },
-    forgotPasswordText: {
-        color: Colors.link,
-        fontSize: 14,
-        textDecorationLine: "underline",
-    },
-    goBackButton: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginTop: 20,
-    },
-    goBackButtonText: {
-        color: Colors.textPrimary,
-        fontSize: 16,
-        fontWeight: "bold",
-        marginLeft: 5,
-    },
-});
+        },
+        content: {
+            width: '90%',
+            maxWidth: 400,
+        },
+        title: {
+            fontSize: 24,
+            fontWeight: '200',
+            color: CinematicColors.text,
+            marginBottom: 10,
+        },
+        inputContainer: {
+            width: '100%',
+            marginBottom: 16,
+        },
+        input: {
+            width: '100%',
+            paddingVertical: 12,
+            paddingHorizontal: 16,
+            backgroundColor: CinematicColors.cardBackground,
+            color: CinematicColors.text,
+            fontSize: 16,
+        },
+        signInButton: {
+            width: '100%',
+            paddingVertical: 14,
+            backgroundColor: CinematicColors.primary,
+            borderRadius: 8,
+            alignItems: "center",
+            justifyContent: "center",
+            marginTop: 16,
+        },
+        signInButtonText: {
+            color: CinematicColors.text,
+            fontSize: 16,
+            fontWeight: "bold",
+        },
+        footer: {
+            flexDirection: "row",
+            justifyContent: "space-between",
+            width: '100%',
+            marginTop: 24,
+        },
+        footerButton: {
+            paddingVertical: 12,
+            paddingHorizontal: 16,
+        },
+        footerButtonText: {
+            color: CinematicColors.primaryLight,
+            fontSize: 14,
+            fontWeight: "600",
+            textDecorationLine: "underline",
+        },
+    });

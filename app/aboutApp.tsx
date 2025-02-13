@@ -62,54 +62,73 @@ const About = () => {
         animated: true
       });
     } else {
-      navigation.navigate('Landing' as never);
+      navigation.navigate('SignUp' as never); // Navigate to Sign Up page
     }
   };
 
+  const handleAlreadySignedIn = () => {
+    navigation.navigate('SignIn' as never); // Navigate to Sign In page
+  };
+
   return (
-    <View style={styles.container}>
-      <ScrollView
-        ref={scrollRef}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onScroll={handleScroll}
-        scrollEventThrottle={16}
-      >
-        {slides.map((slide, index) => (
-          <View key={index} style={styles.slide}>
-            <View style={styles.card}>
-              <Ionicons name={slide.icon as any} size={60} color={Colors.primary} />
-              <Text style={styles.title}>{slide.title}</Text>
-              <Text style={styles.description}>{slide.description}</Text>
-            </View>
-          </View>
-        ))}
-      </ScrollView>
-
-      <View style={styles.footer}>
-        <View style={styles.pagination}>
-          {slides.map((_, index) => (
-            <View
-              key={index}
-              style={[
-                styles.paginationDot,
-                index === currentIndex && styles.paginationDotActive,
-              ]}
-            />
-          ))}
-        </View>
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={handleNext}
+      <View style={styles.container}>
+        <ScrollView
+            ref={scrollRef}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            onScroll={handleScroll}
+            scrollEventThrottle={16}
         >
-          <Text style={styles.buttonText}>
-            {currentIndex === slides.length - 1 ? 'Get Started' : 'Next'}
-          </Text>
-        </TouchableOpacity>
+          {slides.map((slide, index) => (
+              <View key={index} style={styles.slide}>
+                <View style={styles.card}>
+                  <Ionicons name={slide.icon as any} size={60} color={Colors.primary} />
+                  <Text style={styles.title}>{slide.title}</Text>
+                  <Text style={styles.description}>{slide.description}</Text>
+                </View>
+              </View>
+          ))}
+        </ScrollView>
+
+        <View style={styles.footer}>
+          <View style={styles.pagination}>
+            {slides.map((_, index) => (
+                <View
+                    key={index}
+                    style={[
+                      styles.paginationDot,
+                      index === currentIndex && styles.paginationDotActive,
+                    ]}
+                />
+            ))}
+          </View>
+
+          {currentIndex === slides.length - 1 ? (
+              <>
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={handleNext}
+                >
+                  <Text style={styles.buttonText}>Get Started</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.button, styles.alreadySignedInButton]}
+                    onPress={handleAlreadySignedIn}
+                >
+                  <Text style={styles.buttonText}>Already Signed In</Text>
+                </TouchableOpacity>
+              </>
+          ) : (
+              <TouchableOpacity
+                  style={styles.button}
+                  onPress={handleNext}
+              >
+                <Text style={styles.buttonText}>Next</Text>
+              </TouchableOpacity>
+          )}
+        </View>
       </View>
-    </View>
   );
 };
 
@@ -187,6 +206,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     borderRadius: 12,
     alignItems: 'center',
+    marginBottom: 10,
+  },
+  alreadySignedInButton: {
+    backgroundColor: Colors.accent,
   },
   buttonText: {
     color: Colors.text,

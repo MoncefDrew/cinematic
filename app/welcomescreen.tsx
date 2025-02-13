@@ -44,7 +44,7 @@ export default function SplashScreen() {
     const timer = setTimeout(() => {
       // @ts-ignore
       navigation.navigate('aboutApp');
-    }, 6000);
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, []);

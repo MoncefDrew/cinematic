@@ -5,7 +5,7 @@ import {useAuthStore} from "@/api/store/AuthStore";
 
 const ProfilePic = () => {
     const auth = useAuthStore()
-    const profilePic = auth.user.photo_profile
+    const profilePic =  null
 
     return (
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -24,7 +24,6 @@ const ProfilePic = () => {
                 }}
             >
                 <Image
-                    source={profilePic}
                     style={{width: '100%', height: '100%', borderRadius: 50}} // Make the image fully cover the circle
                 />
             </View>
