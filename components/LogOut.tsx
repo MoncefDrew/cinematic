@@ -27,7 +27,7 @@ export default function LogOut(props: any) {
             Alert.alert("Error", error.message);
         } else {
             setShowConfirmation(false);
-            props.navigation.navigate("Landing");
+            props.navigation.navigate("LandingPage");
         }
     };
 
