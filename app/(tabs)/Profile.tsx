@@ -8,13 +8,13 @@ import { useAuthStore } from '@/api/store/AuthStore';
 export default function Profile() {
     const [showTickets, setShowTickets] = useState(false);
     const [showEditProfile, setShowEditProfile] = useState(false);
-    const auth = useAuthStore();
+    const {user,updateProfilePicture,updateUser} = useAuthStore();
     const [formData, setFormData] = useState({
-        username: auth.user.username,
-        email: auth.user.email,
+        username: user.username,
+        email:user.email,
     });
 
-    const profilePhoto = auth.user.profilePicture; // Get profile picture from store
+    const profilePhoto =user.profilePicture; // Get profile picture from store
 
     const handleChangePhoto = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -32,7 +32,7 @@ export default function Profile() {
 
         if (!result.canceled) {
             const selectedImage = result.assets[0].uri;
-            auth.updateProfilePicture(selectedImage); // Update profile picture in store
+            updateProfilePicture(selectedImage); // Update profile picture in store
         }
     };
 
@@ -129,7 +129,7 @@ export default function Profile() {
                         <TouchableOpacity
                             style={styles.saveButton}
                             onPress={() => {
-                                auth.updateUser({ username: formData.username, email: formData.email });
+                                updateUser({ username: formData.username, email: formData.email });
                                 setShowEditProfile(false);
                             }}
                         >

@@ -1,49 +1,87 @@
 import React from 'react';
-import {View, Text, Image, TouchableOpacity} from 'react-native';
+import { View, Text, Image, ActivityIndicator } from 'react-native';
 import { Colors } from "@/constants/Colors";
-import {useAuthStore} from "@/api/store/AuthStore";
+import { useAuthStore } from "@/api/store/AuthStore";
 
 const ProfileHeader = () => {
-    const auth = useAuthStore()
+    const { user, loading } = useAuthStore();
 
-    const username = auth.user.username; // Static username
-    const profilePic = auth.user.profilePicture
+    // Loading state
+    if (loading) {
+        return (
+            <View style={{ padding: 16, flexDirection: 'row', alignItems: 'center' }}>
+                <ActivityIndicator size="small" color={Colors.theme.tabIconDefault} />
+            </View>
+        );
+    }
+
+    // Handle case when user data isn't available
+    if (!user) {
+        return (
+            <View style={{ padding: 16 }}>
+                <Text style={{ color: Colors.theme.textSecondary }}>Loading profile...</Text>
+            </View>
+        );
+    }
+
     return (
-        <View >
-            {/* Circle around the profile picture */}
-            <View style={{ flexDirection: 'row',alignItems: 'center', }}>
+        <View style={{ padding: 16 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <View
                     style={{
-                        width: 50, // Container size
-                        height: 50, // Container size
-                        borderRadius: 50, // Half of the width/height to make it circular
-                        borderWidth: 1, // Border width around the profile picture
-                        borderColor: Colors.theme.tabIconDefault, // Border color
-                        justifyContent: 'center', // Center the image inside the container
-                        overflow: 'hidden', // Ensure the image is clipped within the circle
+                        width: 50,
+                        height: 50,
+                        borderRadius: 25,
+                        borderWidth: 1,
+                        borderColor: Colors.theme.tabIconDefault,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        overflow: 'hidden',
+                        backgroundColor: Colors.theme.background,
                     }}
                 >
-                    <Image
-                        source={profilePic}
-                        style={{ width: '100%', height: '100%', borderRadius: 50 }} // Make the image fully cover the circle
-                    />
-
-
+                    {user.photo_profile ? (
+                        <Image
+                            source={{ uri: user.photo_profile }}
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                borderRadius: 25,
+                            }}
+                        />
+                    ) : (
+                        // Fallback to displaying first letter of username
+                        <Text style={{
+                            fontSize: 20,
+                            fontWeight: 'bold',
+                        }}>
+                            {user.username ? user.username.charAt(0).toUpperCase() : '?'}
+                        </Text>
+                    )}
                 </View>
 
-                {/* Username text */}
-                <Text
-                    style={{
-                        marginLeft: 20, // Space between image and text
-                        color: Colors.theme.BigTitle, // Set text color
-                        fontSize: 18, // Adjust font size
-                        fontWeight: 'bold', // Optional: Make the text bold
-                    }}
-                >
-                    {username}
-                </Text>
+                <View style={{ marginLeft: 16, flex: 1 }}>
+                    <Text
+                        style={{
+                            color: Colors.theme.BigTitle,
+                            fontSize: 18,
+                            fontWeight: '600',
+                        }}
+                        numberOfLines={1}
+                    >
+                        {user.username || 'User'}
+                    </Text>
+                    <Text
+                        style={{
+                            color: Colors.theme.textSecondary,
+                            fontSize: 14,
+                        }}
+                        numberOfLines={1}
+                    >
+                        {user.email}
+                    </Text>
+                </View>
             </View>
-
         </View>
     );
 };

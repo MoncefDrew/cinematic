@@ -31,4 +31,4 @@ const ProfilePic = () => {
         </View>
     )
 }
-    export default ProfilePic;
+export default ProfilePic;
