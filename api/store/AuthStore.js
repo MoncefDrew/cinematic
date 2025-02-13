@@ -22,6 +22,7 @@ export const useAuthStore = create((set, get) => ({
                 .eq('email', currentUser.email)
                 .single();
 
+            const {username,email,photo_profil} = data
             if (error) {
                 console.error('Error fetching user info:', error.message);
                 return null;
@@ -30,9 +31,9 @@ export const useAuthStore = create((set, get) => ({
             // Update store with user info
             set({
                 user: {
-                    username: data.username,
-                    photo_profile: data.photo_profile,
-                    email: data.email
+                    username: username,
+                    photo_profile: photo_profil,
+                    email: email
                 },
                 loading: false
             });

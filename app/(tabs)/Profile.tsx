@@ -1,20 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Drawer } from 'expo-router/drawer';
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image, Modal, TextInput, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuthStore } from '@/api/store/AuthStore';
+import { useRouter } from 'expo-router'; // Import router for navigation
 
 export default function Profile() {
+    const router = useRouter();
     const [showTickets, setShowTickets] = useState(false);
     const [showEditProfile, setShowEditProfile] = useState(false);
-    const {user,updateProfilePicture,updateUser} = useAuthStore();
+    const { user, updateProfilePicture, updateUser } = useAuthStore();
     const [formData, setFormData] = useState({
-        username: user.username,
-        email:user.email,
+        username: '',
+        email: '',
     });
 
-    const profilePhoto =user.profilePicture; // Get profile picture from store
+    // Update formData when user data changes
+    useEffect(() => {
+        if (user) {
+            setFormData({
+                username: user.username || '',
+                email: user.email || '',
+            });
+        } else {
+            // Redirect to LandingPage if user is not authenticated
+            // @ts-ignore
+            router.replace('/LandingPage');
+        }
+    }, [user]);
+
+    // Guard clause for when user is null
+    if (!user) {
+        return null; // Or return a loading component
+    }
+
+    const profilePhoto = user.photo_profile;
 
     const handleChangePhoto = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -32,7 +53,7 @@ export default function Profile() {
 
         if (!result.canceled) {
             const selectedImage = result.assets[0].uri;
-            updateProfilePicture(selectedImage); // Update profile picture in store
+            updateProfilePicture(selectedImage);
         }
     };
 
