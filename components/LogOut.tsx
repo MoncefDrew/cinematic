@@ -3,6 +3,7 @@ import { Modal, StyleSheet, TouchableOpacity, View, TouchableWithoutFeedback, Al
 import React, { useState } from "react";
 import { Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import {useNavigation} from "expo-router";
 
 // Matching the cinematic theme colors
 const CinematicColors = {
@@ -20,14 +21,15 @@ const CinematicColors = {
 
 export default function LogOut(props: any) {
     const [showConfirmation, setShowConfirmation] = useState(false);
-
+    const navigation = useNavigation()
     const handleLogout = async () => {
         const { error } = await supabase.auth.signOut();
         if (error) {
             Alert.alert("Error", error.message);
         } else {
             setShowConfirmation(false);
-            props.navigation.navigate("LandingPage");
+            // @ts-ignore
+            navigation.navigate("SignIn");
         }
     };
 
@@ -35,17 +37,14 @@ export default function LogOut(props: any) {
         <>
             <TouchableOpacity
                 onPress={() => setShowConfirmation(true)}
-                style={styles.buttonContainer}
                 activeOpacity={0.7}
+                style={styles.menuItem}
             >
-                <View style={styles.buttonContent}>
-                    <View style={styles.iconContainer}>
-                        <Ionicons name="log-out-outline" color={CinematicColors.danger} size={24} />
-                    </View>
-                    <View style={styles.textContainer}>
-                        <Text style={styles.buttonText}>Sign Out</Text>
-                    </View>
-                </View>
+                    <Ionicons name="log-out" size={24} color="red" />
+                    <Text style={styles.menuText}>Sign Out</Text>
+                    <Ionicons name="chevron-forward" size={24} color={CinematicColors.primary} />
+
+
             </TouchableOpacity>
 
             <Modal
@@ -94,16 +93,22 @@ export default function LogOut(props: any) {
 }
 
 const styles = StyleSheet.create({
-    buttonContainer: {
-        backgroundColor: CinematicColors.cardBackground,
-        paddingVertical: 14,
-        paddingHorizontal: 20,
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: CinematicColors.border,
-        marginHorizontal: 16,
-        marginTop: 8,
+    menuItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: CinematicColors.surface,
+        padding: 16,
+        borderRadius: 12,
+        marginBottom: 12,
     },
+    menuText: {
+        color: CinematicColors.text,
+        fontSize: 16,
+        flex: 1,
+        marginLeft: 15,
+        fontFamily: 'Satoshi',
+    },
+
     buttonContent: {
         flexDirection: "row",
         alignItems: "center",

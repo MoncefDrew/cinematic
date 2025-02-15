@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
     View,
     Text,
@@ -10,52 +10,74 @@ import {
     TouchableWithoutFeedback,
     KeyboardAvoidingView,
     Animated, // Import Animated
-
 } from "react-native";
-import {useNavigation, useRouter} from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
 import MovieCard from "@/components/MovieCard";
-import {Ionicons} from "@expo/vector-icons";
-import {RouteProp} from "@react-navigation/native";
-import {RootStackParamList, Movie} from "@/constants/Movie";
-import {LinearGradient} from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
+import { RouteProp } from "@react-navigation/native";
+import { RootStackParamList, Movie } from "@/constants/Movie";
+import { LinearGradient } from "expo-linear-gradient";
 import ProfilePic from "@/components/ProfilePic";
-import {StackNavigationProp} from "@react-navigation/stack";
-
+import { StackNavigationProp } from "@react-navigation/stack";
 
 type MovieDetailsRouteProp = RouteProp<RootStackParamList, "MovieDetails">;
-type NavigationProp = StackNavigationProp<RootStackParamList, 'Popular'>;
+type NavigationProp = StackNavigationProp<RootStackParamList, "Popular">;
 type MovieDetailsProps = {
     route: MovieDetailsRouteProp;
 };
 
-
-export default function MovieDetails({route}: any) {
+export default function MovieDetails({ route }: any) {
     const router = useRouter();
-    const {movie,seats,projection_id} = route.params;
+    const { movie, seats, projection_id } = route.params;
     const navigation = useNavigation<NavigationProp>();
     const [userRating, setUserRating] = useState(0);
     const [isModalVisible, setModalVisible] = useState(false);
     const modalY = useRef(new Animated.Value(300)).current;
-    const { projection_date, start_time, end_time} = route.params;
+    const fadeAnim = useRef(new Animated.Value(0)).current; // Initial opacity 0 for fade-in
+    const { projection_date, start_time, end_time } = route.params;
     const [canReserve, setCanReserve] = useState(false);
     const [timeRemaining, setTimeRemaining] = useState('');
 
-
-    //refreshes the start time and projection
+    // Trigger fade-in animation when the component mounts
     useEffect(() => {
-        if (showReserveButton){
+        Animated.timing(fadeAnim, {
+            toValue: 1, // End opacity
+            duration: 1000, // Duration of the fade-in effect
+            useNativeDriver: true,
+        }).start();
+    }, []);
 
+    // Modal fade-out animation
+    const toggleModal = () => {
+        if (isModalVisible) {
+            // Fade out the modal
+            Animated.timing(modalY, {
+                toValue: 300,
+                duration: 300,
+                useNativeDriver: true,
+            }).start(() => setModalVisible(false)); // Hide modal after animation
+        } else {
+            setModalVisible(true); // Show modal first
+            // Slide up
+            Animated.timing(modalY, {
+                toValue: 0,
+                duration: 300,
+                useNativeDriver: true,
+            }).start();
+        }
+    };
+
+    // Check reservation availability
+    useEffect(() => {
+        if (showReserveButton) {
             checkReservationAvailability();
             const timer = setInterval(checkReservationAvailability, 60000);
             return () => clearInterval(timer);
         }
     }, [projection_date, start_time]);
 
-
     const showReserveButton = route.params?.fromProgram || false;
 
-
-    //check Reservation Availability
     const checkReservationAvailability = () => {
         const [hours, minutes, seconds] = start_time.split(':');
         const projectionDate = new Date(projection_date);
@@ -75,36 +97,13 @@ export default function MovieDetails({route}: any) {
         }
     };
 
-
-
-    //options modal
-    const toggleModal = () => {
-        if (isModalVisible) {
-            // Slide down
-            Animated.timing(modalY, {
-                toValue: 300,
-                duration: 300,
-                useNativeDriver: true,
-            }).start(() => setModalVisible(false)); // Hide modal after animation
-        } else {
-            setModalVisible(true); // Show modal first
-            // Slide up
-            Animated.timing(modalY, {
-                toValue: 0,
-                duration: 300,
-                useNativeDriver: true,
-            }).start();
-        }
-    };
-
-
     // Render stars function (unchanged)
     const renderStars = (rating: number) => {
         return [...Array(5)].map((_, index) => (
             <TouchableOpacity
                 key={index}
                 onPress={() => setUserRating(index + 1)}
-                style={{margin:10}}
+                style={{ margin: 10 }}
             >
                 <Ionicons
                     name={index < rating ? "star" : "star-outline"}
@@ -114,7 +113,6 @@ export default function MovieDetails({route}: any) {
             </TouchableOpacity>
         ));
     };
-
 
     return (
         <ScrollView style={styles.container}>
@@ -135,7 +133,7 @@ export default function MovieDetails({route}: any) {
 
             {/* Cover with Gradient */}
             <View style={styles.coverContainer}>
-                <Image source={{uri: movie.cover_url}} style={styles.cover}/>
+                <Image source={{ uri: movie.cover_url }} style={styles.cover} />
                 <LinearGradient
                     colors={["transparent", "#030314"]} // Dark gradient
                     style={styles.lineargrad}
@@ -143,37 +141,36 @@ export default function MovieDetails({route}: any) {
             </View>
 
             {/* Movie Information */}
-            <View style={styles.detailsContainer}>
-                <View style={[styles.movieInfos, {flex: 1}]}>
-                    <Text style={[styles.title, {fontFamily: "Satoshi"}]}>
+            <Animated.View style={[styles.detailsContainer, { opacity: fadeAnim }]}>
+                <View style={[styles.movieInfos, { flex: 1 }]}>
+                    <Text style={[styles.title, { fontFamily: "Satoshi" }]}>
                         {movie.title}
                     </Text>
                     <Text style={styles.directedBy}>DIRECTED BY</Text>
                     <Text
-                        style={[styles.directedByperson, {fontFamily: "Satoshi"}]}
-                    >
+                        style={[styles.directedByperson, { fontFamily: "Satoshi" }]}>
                         {movie.directedBy}
                     </Text>
-                    <Text style={[styles.directedBy, {fontFamily: "Satoshi"}]}>
+                    <Text style={[styles.directedBy, { fontFamily: "Satoshi" }]}>
                         {movie.dateReleased} • {movie.projectionTime}{" "}
-                        <Text style={{fontFamily: "Satoshi"}}>TRAILER</Text>
+                        <Text style={{ fontFamily: "Satoshi" }}>TRAILER</Text>
                     </Text>
                 </View>
                 <View style={styles.cardContainer}>
-                    <MovieCard movie={movie}/>
+                    <MovieCard movie={movie} />
                 </View>
-            </View>
+            </Animated.View>
 
             {/* Description */}
-            <View style={styles.disContainer}>
+            <Animated.View style={[styles.disContainer, { opacity: fadeAnim }]}>
                 <Text style={styles.titleDescription}>DESCRIPTION</Text>
                 <Text style={styles.description}>{movie.description}</Text>
-            </View>
+            </Animated.View>
 
-            <View style={styles.separator}/>
+            <View style={styles.separator} />
 
             {/* AD Section */}
-            <View style={styles.adSection}>
+            <Animated.View style={[styles.adSection, { opacity: fadeAnim }]}>
                 <Image
                     source={{
                         uri: "https://pubandbar.com/perch/resources/header-image-1-w1200h600.png",
@@ -184,50 +181,61 @@ export default function MovieDetails({route}: any) {
                 <TouchableOpacity style={styles.removeAdButton}>
                     <Text style={styles.directedBy}>REMOVE ADS</Text>
                 </TouchableOpacity>
-            </View>
+            </Animated.View>
 
-            <View style={styles.separator}/>
+            <View style={styles.separator} />
 
             {/* Rating Section */}
-            <View style={styles.ratingSection}>
+            <Animated.View style={[styles.ratingSection, { opacity: fadeAnim }]}>
                 <Text style={styles.ratingTitle}>Ratings</Text>
                 <View style={styles.starsContainer}>
-                    <Ionicons name="star" size={15} color="#FFD700"/>
-                    <Ionicons name="star" size={15} color="#FFD700"/>
-                    <Ionicons name="star" size={15} color="#FFD700"/>
+                    <Ionicons name="star" size={15} color="#FFD700" />
+                    <Ionicons name="star" size={15} color="#FFD700" />
+                    <Ionicons name="star" size={15} color="#FFD700" />
                 </View>
                 <Text style={styles.ratingTitle}>{movie.Evaluation}</Text>
-            </View>
+            </Animated.View>
 
-            <View style={styles.separator}/>
+            <View style={styles.separator} />
 
             {/* Rate, log, and review action */}
             <TouchableOpacity onPress={toggleModal}>
                 <View style={styles.rate}>
                     <View style={styles.containerRate}>
-                        <ProfilePic/>
-                        <Text style={{color: "#919cd7", paddingHorizontal: 18,paddingVertical:2}}>
+                        <ProfilePic />
+                        <Text
+                            style={{
+                                color: "#919cd7",
+                                paddingHorizontal: 18,
+                                paddingVertical: 2,
+                            }}>
                             Rate, reserve, add to list + more
                         </Text>
-                        <Ionicons name="ellipsis-horizontal" color="#919cd7" size={17}/>
+                        <Ionicons name="ellipsis-horizontal" color="#919cd7" size={17} />
                     </View>
                 </View>
             </TouchableOpacity>
-            <View style={styles.separator}/>
+
+            <View style={styles.separator} />
 
             {/* Go Back Button */}
             <TouchableOpacity onPress={() => router.back()}>
                 <View style={styles.rate}>
-                    <Text style={{color: "white"}}>Go Back to Popular</Text>
+                    <Text style={{ color: "white" }}>Go Back to Popular</Text>
                 </View>
             </TouchableOpacity>
 
             {/* Modal */}
-            <Modal visible={isModalVisible} transparent animationType="none" onRequestClose={toggleModal}>
+            <Modal
+                visible={isModalVisible}
+                transparent
+                animationType="none"
+                onRequestClose={toggleModal}>
                 <TouchableWithoutFeedback onPress={toggleModal}>
                     <View style={styles.modalOverlay}>
                         <KeyboardAvoidingView style={styles.bottomModal} behavior="padding">
-                            <Animated.View style={[styles.modalContainer, {transform: [{translateY: modalY}]}]}>
+                            <Animated.View
+                                style={[styles.modalContainer, { transform: [{ translateY: modalY }] }]}>
                                 <Text style={styles.modalTitle}>What would you like to do?</Text>
 
                                 <View style={styles.modalRatingSection}>
@@ -240,15 +248,14 @@ export default function MovieDetails({route}: any) {
                                         onPress={() => {
                                             if (canReserve) {
                                                 toggleModal();
-                                                navigation.navigate("ReserveTicket", {movie,seats,projection_id});
+                                                navigation.navigate("ReserveTicket", { movie, seats, projection_id });
                                             }
                                         }}
                                         style={[styles.reserveTicket, !canReserve && styles.disabledButton]}
-                                        disabled={!canReserve}
-                                    >
-                                        <Ionicons name='ticket' size={25} color='white'/>
+                                        disabled={!canReserve}>
+                                        <Ionicons name="ticket" size={25} color="white" />
                                         <Text style={styles.modalButtonText}>
-                                            {canReserve ? 'Reserve Ticket' : timeRemaining}
+                                            {canReserve ? "Reserve Ticket" : timeRemaining}
                                         </Text>
                                     </TouchableOpacity>
                                 )}
@@ -257,8 +264,9 @@ export default function MovieDetails({route}: any) {
                                     <Text style={styles.modalButtonText}>Mark as Watched</Text>
                                 </TouchableOpacity>
 
-                                <TouchableOpacity style={[styles.modalButton, styles.closeButton]}
-                                                  onPress={toggleModal}>
+                                <TouchableOpacity
+                                    style={[styles.modalButton, styles.closeButton]}
+                                    onPress={toggleModal}>
                                     <Text style={styles.modalButtonText}>Confirm</Text>
                                 </TouchableOpacity>
                             </Animated.View>
@@ -268,8 +276,7 @@ export default function MovieDetails({route}: any) {
             </Modal>
         </ScrollView>
     );
-};
-
+}
 const styles = StyleSheet.create({
     modalContainer: {
         width: "100%",

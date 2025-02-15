@@ -72,19 +72,15 @@ export default function TicketPage({ navigation, route }: any) {
         return (
             <View style={styles.container}>
                 <StatusBar hidden />
-                <View style={styles.appHeaderContainer}>
-                    <AppHeader name="back" header={'My Ticket'} action={handleGoBack} />
-                </View>
+                    <AppHeader name="back" header={'My Ticket'} action={handleGoBack} transparent={true} />
             </View>
         );
     }
 
     return (
-        <LinearGradient colors={['#030314', '#030314']} style={styles.container} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}>
+        <LinearGradient colors={['#02040a', '#030314']} style={styles.container} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}>
             <StatusBar hidden />
-            <View style={styles.appHeaderContainer}>
-                <AppHeader name="close" header={'Tickets'} action={handleGoBack} />
-            </View>
+                <AppHeader name="close" header={'Tickets'} action={handleGoBack} transparent={true}/>
 
             <View style={styles.ticketContainer}>
                 <ImageBackground source={{ uri: ticketData?.ticketImage }} style={styles.ticketBGImage}>

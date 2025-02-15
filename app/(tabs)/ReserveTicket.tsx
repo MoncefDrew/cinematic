@@ -8,7 +8,7 @@ import {
     ImageBackground,
     TouchableOpacity,
     Dimensions,
-    Alert,
+    Alert, Animated,
 } from 'react-native';
 import {
     BORDERRADIUS,
@@ -21,6 +21,7 @@ import AppHeader from '@/components/AppHeader';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useFonts } from "expo-font";
 import {useSeatStore} from '@/api/store/seatsStore';
+import {Easing} from "react-native-reanimated";
 
 export default function ReserveTicket({ navigation, route }:any) {
     const {
@@ -31,6 +32,37 @@ export default function ReserveTicket({ navigation, route }:any) {
         fetchSeats,
         selectSeat,
     } = useSeatStore();
+    const fadeAnim = useState(new Animated.Value(0))[0];
+
+    useEffect(() => {
+        // Fade-in animation
+        Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 500,
+            easing: Easing.out(Easing.ease),
+            useNativeDriver: true
+        }).start();
+
+        // Cleanup function for fade-out animation
+        return () => {
+            Animated.timing(fadeAnim, {
+                toValue: 0,
+                duration: 500,
+                easing: Easing.out(Easing.ease),
+                useNativeDriver: true
+            }).start();
+        };
+    }, []);
+
+    // Helper function to chunk array into rows
+    const chunks = (array: any[], size: number) => {
+        if (!array) return [];
+        const chunked = [];
+        for (let i = 0; i < array.length; i += size) {
+            chunked.push(array.slice(i, i + size));
+        }
+        return chunked;
+    };
 
     const [price] = useState(100); // Fixed price state
 
@@ -81,16 +113,6 @@ export default function ReserveTicket({ navigation, route }:any) {
             </View>
         );
     }
-
-    // Helper function to chunk array into rows
-    const chunks = (array: any[], size: number) => {
-        if (!array) return [];
-        const chunked = [];
-        for (let i = 0; i < array.length; i += size) {
-            chunked.push(array.slice(i, i + size));
-        }
-        return chunked;
-    };
 
     // ReserveTicket.tsx - Updated renderSeats function
     const renderSeats = () => {
@@ -174,24 +196,25 @@ export default function ReserveTicket({ navigation, route }:any) {
             bounces={false}
             showsVerticalScrollIndicator={false}>
             <StatusBar hidden />
-            <View>
+
+            <Animated.View style={{ opacity: fadeAnim }}>
                 <ImageBackground
                     source={{ uri: route.params?.movie.cover_url }}
-                style={styles.ImageBG}>
-                <LinearGradient
-                    colors={[COLORS.BlackRGB10, '#030314']}
+                    style={styles.ImageBG}>
+                    <LinearGradient
+                        colors={[COLORS.BlackRGB10, '#030314']}
                         style={styles.linearGradient}>
-                        <View style={styles.appHeaderContainer}>
-                            <AppHeader
-                                name="close"
-                                action={handleBack}
-                            />
-                        </View>
+                        <AppHeader
+                            name="arrow-back"
+                            action={handleBack}
+                            header="Reserve Seat"
+                            transparent={true}
+                        />
                     </LinearGradient>
                 </ImageBackground>
-            </View>
+            </Animated.View>
 
-            <View style={styles.mainContainer}>
+            <Animated.View style={[styles.mainContainer, { opacity: fadeAnim }]}>
                 <View style={styles.movieInfoContainer}>
                     <Text style={styles.movieTitle}>{route.params?.movie.title || "Movie Title"}</Text>
                     <View style={styles.movieMetaContainer}>
@@ -255,10 +278,11 @@ export default function ReserveTicket({ navigation, route }:any) {
                         <Text style={styles.bookButtonText}>Book Now</Text>
                     </TouchableOpacity>
                 </View>
-            </View>
+            </Animated.View>
         </ScrollView>
     );
 }
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -279,7 +303,6 @@ const styles = StyleSheet.create({
     mainContainer: {
         padding: SPACING.space_16,
         margin:16,
-
     },
     movieInfoContainer: {
         marginBottom: SPACING.space_24,
@@ -376,7 +399,6 @@ const styles = StyleSheet.create({
         color: '#cfcfda',
     },
     legendContainer: {
-
         flexDirection: "row",
         justifyContent: "space-evenly",
         padding: SPACING.space_12,
@@ -445,7 +467,6 @@ const styles = StyleSheet.create({
     disabledButton: {
         backgroundColor: '#1B1A55',
         opacity: 0.5,
-
     },
     screenIndicator: {
         alignItems: 'center',

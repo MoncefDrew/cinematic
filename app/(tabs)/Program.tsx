@@ -1,18 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, FlatList, TouchableOpacity, TextInput } from 'react-native';
-import { useFonts } from 'expo-font';
-import { useNavigation } from "@react-navigation/native";
-import { useMovieStore } from "@/api/store/moviesStore";
-import { useProjectionStore } from "@/api/store/ProjectionStore";
+import React, {useState, useEffect} from 'react';
+import {View, Text, Image, StyleSheet, FlatList, TouchableOpacity, TextInput, StatusBar} from 'react-native';
+import {useFonts} from 'expo-font';
+import {useNavigation} from "@react-navigation/native";
+import {useMovieStore} from "@/api/store/moviesStore";
+import {useProjectionStore} from "@/api/store/ProjectionStore";
 import {Movie} from "@/constants/Movie";
 import {LinearGradient} from "expo-linear-gradient";
+import AppHeader from "@/components/AppHeader";
+import {SPACING} from "@/theme/theme";
 
 const WeeklyMovieSchedule = () => {
     const [loaded] = useFonts({Satoshi: require('../../assets/fonts/Satoshi-Variable.ttf'),});
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedGenre, setSelectedGenre] = useState(null);
-    const { movies } = useMovieStore();
-    const { projections, fetchProjections } = useProjectionStore();
+    const {movies} = useMovieStore();
+    const {projections, fetchProjections} = useProjectionStore();
     const navigation = useNavigation();
     useEffect(() => {
         fetchProjections();
@@ -21,7 +23,7 @@ const WeeklyMovieSchedule = () => {
 
 
     //checking the streaming state
-    const isMovieStreaming = (projectionTime:any) => {
+    const isMovieStreaming = (projectionTime: any) => {
         const now = new Date();
         const [hours, minutes] = projectionTime.split(':');
         const projectionDate = new Date();
@@ -32,11 +34,11 @@ const WeeklyMovieSchedule = () => {
 
     const getNextWeekDates = () => {
         const today = new Date();
-        return Array.from({ length: 7 }).map((_, index) => {
+        return Array.from({length: 7}).map((_, index) => {
             const date = new Date(today);
             date.setDate(today.getDate() + index);
             return {
-                dayName: date.toLocaleDateString('en-US', { weekday: 'long' }),
+                dayName: date.toLocaleDateString('en-US', {weekday: 'long'}),
                 fullDate: date.toLocaleDateString('en-US', {
                     weekday: 'long',
                     month: 'long',
@@ -66,14 +68,22 @@ const WeeklyMovieSchedule = () => {
 
 
     const travelToMovie = (item) => {
-        const { movie } = item;
-        const {projection_id,start_time,projection_date,duration,seats} = item;
+        const {movie} = item;
+        const {projection_id, start_time, projection_date, duration, seats} = item;
         // @ts-ignore
-        navigation.navigate('MovieDetails', {fromProgram: true,movie,projection_id,projection_date,start_time,seats,duration });
+        navigation.navigate('MovieDetails', {
+            fromProgram: true,
+            movie,
+            projection_id,
+            projection_date,
+            start_time,
+            seats,
+            duration
+        });
     };
 
 
-    const renderMovieItem = ({ item, fullDate }) => {
+    const renderMovieItem = ({item, fullDate}) => {
         const truncatedDescription = item.movie.description.length > 70
             ? `${item.movie.description.substring(0, 70)}...`
             : item.movie.description;
@@ -92,16 +102,16 @@ const WeeklyMovieSchedule = () => {
                 style={styles.movieContainer}
             >
                 <LinearGradient
-                    colors={[ '#13122a','#13122a',]}
+                    colors={['#13122a', '#13122a',]}
                     style={styles.movieCard}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
+                    start={{x: 0, y: 0}}
+                    end={{x: 1, y: 1}}
                 >
                     <View style={styles.headerContainer}>
                         <View style={styles.timeContainer}>
                             {isStreaming ? (
                                 <View style={styles.streamingContainer}>
-                                    <View style={styles.streamingDot} />
+                                    <View style={styles.streamingDot}/>
                                     <Text style={styles.streamingText}>Streaming</Text>
                                 </View>
                             ) : (
@@ -112,7 +122,7 @@ const WeeklyMovieSchedule = () => {
                     </View>
                     <View style={styles.movieContent}>
                         <Image
-                            source={{ uri: item.movie.poster_url }}
+                            source={{uri: item.movie.poster_url}}
                             style={styles.poster}
                         />
                         <View style={styles.movieInfo}>
@@ -140,14 +150,21 @@ const WeeklyMovieSchedule = () => {
     };
 
     return (
+        <>
+
         <LinearGradient
-            colors={['#030314','#030314'  ]}
+            colors={['#02040a', '#030314']}
             style={styles.container}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
+            start={{x: 0, y: 0}}
+            end={{x: 0, y: 1}}
         >
+            <AppHeader
+                header={'Movie Calendar'}
+                name='home' transparent={false}
+            />
+            <StatusBar hidden/>
+
             <View style={styles.header}>
-                <Text style={styles.title}>Weekly Schedule</Text>
                 <Text style={styles.subtitle}>
                     Discover upcoming movies and showtimes for the week ahead
                 </Text>
@@ -166,7 +183,7 @@ const WeeklyMovieSchedule = () => {
             <FlatList
                 data={getNextWeekDates()}
                 keyExtractor={(item) => item.date}
-                renderItem={({ item: date }) => {
+                renderItem={({item: date}) => {
                     const dayMovies = getMoviesForDay(date.date);
                     return dayMovies.length > 0 ? (
                         <View style={styles.dayContainer}>
@@ -174,7 +191,7 @@ const WeeklyMovieSchedule = () => {
                             <FlatList
                                 data={dayMovies}
                                 keyExtractor={(item) => item.projection_id}
-                                renderItem={({ item }) => renderMovieItem({ item, fullDate: date.fullDate })}
+                                renderItem={({item}) => renderMovieItem({item, fullDate: date.fullDate})}
                                 horizontal
                                 showsHorizontalScrollIndicator={false}
                                 contentContainerStyle={styles.moviesList}
@@ -188,14 +205,18 @@ const WeeklyMovieSchedule = () => {
                 }}
             />
         </LinearGradient>
+        </>
     );
 };
 
 const styles = StyleSheet.create({
+    appHeaderContainer: {
+        marginHorizontal: SPACING.space_36,
+        marginBottom: SPACING.space_10 * 2,
+    },
     container: {
         flex: 1,
-        paddingTop: 24,
-        padding:6
+        paddingHorizontal: 6
     },
     header: {
         marginHorizontal: 20,

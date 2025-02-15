@@ -1,10 +1,12 @@
 import React, { useEffect } from "react";
-import { FlatList, Text, View, StyleSheet, ScrollView } from "react-native";
+import {FlatList, Text, View, StyleSheet, ScrollView, StatusBar} from "react-native";
 import MovieCard from "@/components/MovieCard";
 import { useFonts } from "expo-font";
 import { useMovieStore } from '@/api/store/moviesStore';
 import { LinearGradient } from 'expo-linear-gradient';
 import FeaturedMovie from "@/components/featuredMovie";
+import AppHeader from "@/components/AppHeader";
+import {SPACING} from "@/theme/theme";
 
 export default function Popular() {
     const {
@@ -30,56 +32,69 @@ export default function Popular() {
     }
 
     return (
-        <LinearGradient
-            colors={['#02040a', '#030314']}
-            style={styles.container}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-        >
-            <ScrollView contentContainerStyle={styles.scrollContent}>
-                <View style={styles.content}>
-                    <View style={styles.welcome}>
-                        <Text style={styles.title}>Welcome to Cinematic</Text>
-                        <Text style={styles.subtitle}>
-                            You can navigate popular movies and book a ticket for your favorite
-                            movie if you have a chance to. Hurry up now!
-                        </Text>
-                    </View>
+        <>
 
-                    {/* Featured Movie Section */}
-                    {featuredMovie && <FeaturedMovie movie={featuredMovie} />}
-
-                    {/* Popular Movies Section */}
-                    <Text style={styles.sectionTitle}>Popular Movies</Text>
-                    {loading ? (
-                        <Text style={styles.loadingText}>Loading...</Text>
-                    ) : error ? (
-                        <Text style={styles.errorText}>{error}</Text>
-                    ) : (
-                        <View style={styles.listContainer}>
-                            <FlatList
-                                data={movies}
-                                horizontal
-                                showsHorizontalScrollIndicator={false}
-                                keyExtractor={(item) => item.film_id}
-                                renderItem={({ item }) => <MovieCard movie={item} />}
-                            />
-                            <LinearGradient
-                                colors={['transparent', '#02040a']}
-                                start={{ x: 0, y: 0 }}
-                                end={{ x: 1, y: 0 }}
-                                style={styles.gradientOverlay}
-                            />
+            <LinearGradient
+                colors={['#02040a', '#030314']}
+                style={styles.container}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+            >
+                <StatusBar hidden />
+                    <AppHeader
+                        header={'Popular'}
+                        transparent={true}
+                    />
+                <ScrollView contentContainerStyle={styles.scrollContent}>
+                    <View style={styles.content}>
+                        <View style={styles.welcome}>
+                            <Text style={styles.title}>Welcome to Cinematic</Text>
+                            <Text style={styles.subtitle}>
+                                You can navigate popular movies and book a ticket for your favorite
+                                movie if you have a chance to. Hurry up now!
+                            </Text>
                         </View>
-                    )}
-                </View>
-            </ScrollView>
-        </LinearGradient>
+
+                        {/* Featured Movie Section */}
+                        {featuredMovie && <FeaturedMovie movie={featuredMovie} />}
+
+                        {/* Popular Movies Section */}
+                        <Text style={styles.sectionTitle}>Popular Movies</Text>
+                        {loading ? (
+                            <Text style={styles.loadingText}>Loading...</Text>
+                        ) : error ? (
+                            <Text style={styles.errorText}>{error}</Text>
+                        ) : (
+                            <View style={styles.listContainer}>
+                                <FlatList
+                                    data={movies}
+                                    horizontal
+                                    showsHorizontalScrollIndicator={false}
+                                    keyExtractor={(item) => item.film_id}
+                                    renderItem={({ item }) => <MovieCard movie={item} />}
+                                />
+                                <LinearGradient
+                                    colors={['transparent', '#02040a']}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 0 }}
+                                    style={styles.gradientOverlay}
+                                />
+                            </View>
+                        )}
+                    </View>
+                </ScrollView>
+            </LinearGradient>
+
+        </>
+
     );
 }
 
 const styles = StyleSheet.create({
-
+    appHeaderContainer: {
+        marginHorizontal: SPACING.space_36,
+        marginTop: SPACING.space_10 * 2,
+    },
     listContainer: {
         position: 'relative',
     },
