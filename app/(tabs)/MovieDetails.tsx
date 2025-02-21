@@ -19,6 +19,8 @@ import { RootStackParamList, Movie } from "@/constants/Movie";
 import { LinearGradient } from "expo-linear-gradient";
 import ProfilePic from "@/components/ProfilePic";
 import { StackNavigationProp } from "@react-navigation/stack";
+import {supabase} from "@/lib/supabase";
+import {useAuthStore} from "@/api/store/AuthStore";
 
 type MovieDetailsRouteProp = RouteProp<RootStackParamList, "MovieDetails">;
 type NavigationProp = StackNavigationProp<RootStackParamList, "Popular">;
@@ -37,7 +39,7 @@ export default function MovieDetails({ route }: any) {
     const { projection_date, start_time, end_time } = route.params;
     const [canReserve, setCanReserve] = useState(false);
     const [timeRemaining, setTimeRemaining] = useState('');
-
+    const {user} = useAuthStore()
     // Trigger fade-in animation when the component mounts
     useEffect(() => {
         Animated.timing(fadeAnim, {
@@ -78,22 +80,36 @@ export default function MovieDetails({ route }: any) {
 
     const showReserveButton = route.params?.fromProgram || false;
 
-    const checkReservationAvailability = () => {
+    const checkReservationAvailability = async () => {
         const [hours, minutes, seconds] = start_time.split(':');
         const projectionDate = new Date(projection_date);
         projectionDate.setHours(Number(hours), Number(minutes), 0);
         const now = new Date();
         const diffHours = (projectionDate.getTime() - now.getTime()) / (1000 * 60 * 60);
-        setCanReserve(diffHours <= 24 && diffHours > 0);
-        if (diffHours > 24) {
-            const days = Math.floor(diffHours / 24);
-            setTimeRemaining(`Opens in ${days} days`);
-        } else if (diffHours > 0) {
-            const hours = Math.floor(diffHours);
-            const minutes = Math.floor((diffHours - hours) * 60);
-            setTimeRemaining(`${hours}h ${minutes}m remaining`);
+
+        // Check if the user has already reserved a ticket for this projection
+        const { data: existingTicket, error } = await supabase
+            .from('ticket')
+            .select('*')
+            .eq('username', user?.username) // Assuming username is stored in Supabase auth
+            .eq('projection_id', projection_id)
+            .single();
+
+        if (existingTicket) {
+            setCanReserve(false);
+            setTimeRemaining('You have already reserved a ticket for this projection.');
         } else {
-            setTimeRemaining('Projection ended');
+            setCanReserve(diffHours <= 24 && diffHours > 0);
+            if (diffHours > 24) {
+                const days = Math.floor(diffHours / 24);
+                setTimeRemaining(`Opens in ${days} days`);
+            } else if (diffHours > 0) {
+                const hours = Math.floor(diffHours);
+                const minutes = Math.floor((diffHours - hours) * 60);
+                setTimeRemaining(`${hours}h ${minutes}m remaining`);
+            } else {
+                setTimeRemaining('Projection ended');
+            }
         }
     };
 
@@ -199,7 +215,7 @@ export default function MovieDetails({ route }: any) {
             <View style={styles.separator} />
 
             {/* Rate, log, and review action */}
-            <TouchableOpacity onPress={toggleModal}>
+            <TouchableOpacity onPress={toggleModal} >
                 <View style={styles.rate}>
                     <View style={styles.containerRate}>
                         <ProfilePic />
@@ -219,7 +235,7 @@ export default function MovieDetails({ route }: any) {
             <View style={styles.separator} />
 
             {/* Go Back Button */}
-            <TouchableOpacity onPress={() => router.back()}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
                 <View style={styles.rate}>
                     <Text style={{ color: "white" }}>Go Back to Popular</Text>
                 </View>
@@ -243,12 +259,13 @@ export default function MovieDetails({ route }: any) {
                                     <View style={styles.starsContainer}>{renderStars(userRating)}</View>
                                 </View>
 
+
                                 {showReserveButton && (
                                     <TouchableOpacity
                                         onPress={() => {
                                             if (canReserve) {
                                                 toggleModal();
-                                                navigation.navigate("ReserveTicket", { movie, seats, projection_id });
+                                                navigation.navigate("ReserveTicket", { movie, seats, projection_id,projection_date,start_time });
                                             }
                                         }}
                                         style={[styles.reserveTicket, !canReserve && styles.disabledButton]}
@@ -413,10 +430,8 @@ const styles = StyleSheet.create({
             borderRadius: 8,
             borderWidth: 1,
             borderColor: '#535C91',
-            paddingVertical: 22,
             paddingHorizontal: 20,
             alignItems: 'center',
-            alignSelf: 'flex-start', // Align button to the left
             elevation: 3, // Add shadow for Android
             shadowColor: '#000', // Add shadow for iOS
             shadowOffset: { width: 0, height: 2 },

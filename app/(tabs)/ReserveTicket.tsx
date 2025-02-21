@@ -174,6 +174,8 @@ export default function ReserveTicket({ navigation, route }:any) {
 
             navigation.navigate('TicketPage', {
                 projection_id:route?.params.projection_id,
+                projection_time : route?.params.start_time,
+                projection_date: route?.params.projection_date,
                 seatArray: [seatNumber],
                 ticketImage: route.params.movie.poster_url,
                 movieData: route.params.movie,
@@ -195,7 +197,6 @@ export default function ReserveTicket({ navigation, route }:any) {
             style={styles.container}
             bounces={false}
             showsVerticalScrollIndicator={false}>
-            <StatusBar hidden />
 
             <Animated.View style={{ opacity: fadeAnim }}>
                 <ImageBackground
@@ -218,7 +219,7 @@ export default function ReserveTicket({ navigation, route }:any) {
                 <View style={styles.movieInfoContainer}>
                     <Text style={styles.movieTitle}>{route.params?.movie.title || "Movie Title"}</Text>
                     <View style={styles.movieMetaContainer}>
-                        <Text style={styles.movieMeta}>Today, 7:00 PM</Text>
+                        <Text style={styles.movieMeta}>{route.params.projection_date}</Text>
                         <Text style={styles.movieMeta}>•</Text>
                         <Text style={styles.movieMeta}>Hall 1</Text>
                     </View>

@@ -1,85 +1,104 @@
-import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
-import axios from 'axios'
-import {useAuthStore} from "./AuthStore";
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import { supabase } from '@/lib/supabase';
+import { useAuthStore } from './AuthStore';
 
 // Create the store
 export const useTicketStore = create(
     persist(
         (set) => ({
-                tickets: [],
-                loading: false,
-                error: null,
+            tickets: [],
+            loading: false,
+            error: null,
 
-                createTicket: async (projection_id,seatNumber) => {
+            // Create a new ticket
+            createTicket: async (projection_id, seatNumber) => {
                 set({ loading: true });
-
                 try {
-                    const { user } = useAuthStore.getState(); // Ensure correct Zustand method
+                    const { user } = useAuthStore.getState(); // Get the current user
                     const username = user?.username;
 
                     if (!projection_id || !username) {
-                        throw new Error("Missing projection_id or username.");
+                        throw new Error('Missing projection_id or username.');
                     }
 
-                    const { data } = await axios.post('http://localhost:3000/api/ticket/', {
-                        projection_id,
-                        username,
-                        seat:{
-                            seatNumber , // Convert from seat number to index
-                            hall:2
-                        }
-                    });
+                    // Insert the ticket into the Supabase table
+                    const { data, error } = await supabase
+                        .from('ticket')
+                        .insert([
+                            {
+                                projection_id,
+                                username,
+                                seat: {
+                                    seatNumber,
+                                    hall: 2, // Assuming hall is always 2
+                                },
+                            },
+                        ])
+                        .select(); // Return the inserted data
 
-                    console.log("Response from API:", data);
+                    if (error) throw error;
 
-                    set({ tickets: data, error: null });
+                    // Update the local state with the new ticket
+                    set((state) => ({
+                        tickets: [...state.tickets, ...data],
+                        error: null,
+                    }));
                 } catch (error) {
-                    console.error("Error creating ticket:", error.message);
+                    console.error('Error creating ticket:', error.message);
                     set({ error: error.message });
                 } finally {
                     set({ loading: false });
                 }
             },
 
-                fetchTickets: async () => {
-                    set({ loading: true });
+            // Fetch tickets for the current user
+            fetchTickets: async () => {
+                set({ loading: true, error: null });
+                try {
+                    const { user } = useAuthStore.getState(); // Get the current user
+                    const username = user?.username;
 
-                    try {
-                        const { user } = useAuthStore.getState(); // Use getState() to access user
-
-                        if (!user || !user.username) {
-                            throw new Error('User not authenticated');
-                        }
-
-                        console.log('Fetching tickets for user:', user.username);
-
-                        const response = await axios.get(
-                            `http://localhost:3000/api/client/${user.username}/tickets`
-                        );
-
-                        console.log('Tickets response:', response.data);
-
-                        if (!response.data || !response.data.tickets) {
-                            throw new Error('Invalid response format');
-                        }
-
-                        set({
-                            tickets: response.data.tickets,
-                            error: null
-                        });
-                    } catch (error) {
-                        console.error('Error fetching tickets:', error);
-                        set({
-                            error: error.message || 'Failed to fetch tickets',
-                            tickets: []
-                        });
-                    } finally {
-                        set({ loading: false });
+                    if (!username) {
+                        throw new Error('User not authenticated');
                     }
-                },
-            }
 
-        )
-)
-)
+                    // Fetch tickets with embedded projection and film data
+                    const { data, error } = await supabase
+                        .from('ticket')
+                        .select(`
+                            *,
+                            projection:projection_id (
+                                film_id,
+                                projection_date,
+                                start_time,
+                                duration,
+                                poster_url,
+                                film:film_id (
+                                    title
+                                )
+                            )
+                        `)
+                        .eq('username', username);
+
+                    if (error) throw error;
+
+                    // Update the local state with the fetched tickets
+                    set({ tickets: data, error: null });
+                } catch (error) {
+                    console.error('Error fetching tickets:', error);
+                    set({
+                        error: error.message || 'Failed to fetch tickets',
+                        tickets: [],
+                    });
+                } finally {
+                    set({ loading: false });
+                }
+            },
+        }),
+        {
+            name: 'ticket-storage', // Name of the item in localStorage
+            partialize: (state) => ({ tickets: state.tickets }), // Persist only tickets
+        }
+    )
+);

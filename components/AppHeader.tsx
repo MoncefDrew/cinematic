@@ -9,11 +9,11 @@ import Animated, { useSharedValue, withTiming, Easing } from 'react-native-reani
 const CinematicColors = {
     background: '#0A0B1E',
     surface: '#12132D',
-    primary: '#6366F1',
+    primary: '#bcbee5',
     primaryLight: '#818CF8',
     accent: '#4F46E5',
     accentSoft: 'rgba(99, 102, 241, 0.15)',
-    text: '#9B9BC0',
+    text: 'rgba(217,217,234,0.91)',
     textSecondary: '#9B9BC0',
     border: '#1E2048',
     cardBackground: '#181935',
@@ -37,6 +37,7 @@ export default function AppHeader({ name, header, action }: AppHeaderProps) {
     const opacity = useSharedValue(1); // Shared value for opacity animation
 
     const navigateWithAnimation = (route: string) => {
+
         // Fade out animation
         opacity.value = withTiming(0, {
             duration: 300,
@@ -86,7 +87,7 @@ export default function AppHeader({ name, header, action }: AppHeaderProps) {
                     style={styles.iconButton}
                 >
                     <Ionicons
-                        name="settings-outline"
+                        name="person"
                         size={24}
                         color={CinematicColors.primary}
                     />
