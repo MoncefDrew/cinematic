@@ -31,12 +31,12 @@ export default function Activity({ navigation }) {
 
     const renderPollItem = (poll) => {
         const totalVotes = poll.movies.reduce((sum, movie) => sum + (movie.votes || 0), 0);
-
+    console.log(poll)
         return (
             <View key={poll.id} style={styles.pollCard}>
                 <Text style={styles.pollTitle}>{poll.title || 'Untitled Poll'}</Text>
                 <Text style={styles.pollSubtitle}>
-                    Ends on {new Date(poll.projectionDate).toLocaleDateString()} at {poll.projectionTime}
+                    Ends on {new Date(poll.ProjectionDate).toLocaleDateString()} at {poll.ProjectionTime}
                 </Text>
 
                 {poll.movies.map((movie) => (
