@@ -3,6 +3,8 @@ import { TouchableOpacity, Text, View, StyleSheet, Dimensions, Image } from 'rea
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFonts } from "expo-font";
 import {BORDERRADIUS, FONTSIZE} from "@/theme/theme";
+import {useRouter} from "expo-router";
+import {useNavigation} from "@react-navigation/native";
 
 // @ts-ignore
 export default function FeaturedMovie({ movie }) {
@@ -14,6 +16,12 @@ export default function FeaturedMovie({ movie }) {
         return null; // Return null or a loading indicator if fonts are not loaded
     }
 
+    const navigation = useNavigation()
+    function navigate (){
+        console.log('navigating')
+        navigation.navigate('/Activity')
+    }
+    const router = useRouter()
     return (
         <View style={styles.featuredMovieContainer}>
             <Image
@@ -32,7 +40,7 @@ export default function FeaturedMovie({ movie }) {
                 <Text style={styles.featuredMovieDescription}>
                     {movie.description.substring(0, 100)}...
                 </Text>
-                <TouchableOpacity style={styles.featuredMovieButton}>
+                <TouchableOpacity style={styles.featuredMovieButton} onPress={()=> navigate()}>
                     <Text style={styles.featuredMovieButtonText}>Book Now</Text>
                 </TouchableOpacity>
             </View>

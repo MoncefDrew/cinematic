@@ -96,7 +96,7 @@ export default function TicketPage({ navigation, route }: any) {
         try {
             // Run operations concurrently
             await Promise.all([
-                createTicket(route.params.projection_id, seatNumber),
+                createTicket(route.params.projection_id, seatNumber,route.params.movieData.title),
                 reserveSeat(route.params.projection_id, seatNumber)
             ]);
 

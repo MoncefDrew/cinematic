@@ -265,6 +265,7 @@ export default function MovieDetails({ route }: any) {
                                         onPress={() => {
                                             if (canReserve) {
                                                 toggleModal();
+                                                // @ts-ignore
                                                 navigation.navigate("ReserveTicket", { movie, seats, projection_id,projection_date,start_time });
                                             }
                                         }}

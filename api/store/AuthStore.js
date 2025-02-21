@@ -18,11 +18,11 @@ export const useAuthStore = create((set, get) => ({
             // Fetch user info from client table
             const { data, error } = await supabase
                 .from('client')
-                .select('username, photo_profil, email')
+                .select('username, photo_profil, email,client_id')
                 .eq('email', currentUser.email)
                 .single();
 
-            const {username,email,photo_profil} = data
+            const {username,email,photo_profil,client_id} = data
             if (error) {
                 console.error('Error fetching user info:', error.message);
                 return null;
@@ -33,7 +33,8 @@ export const useAuthStore = create((set, get) => ({
                 user: {
                     username: username,
                     photo_profile: photo_profil,
-                    email: email
+                    email: email,
+                    user_id:client_id
                 },
                 loading: false
             });

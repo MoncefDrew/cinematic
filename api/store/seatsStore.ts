@@ -1,6 +1,7 @@
 // seatStore.ts
 import {create} from 'zustand';
 import axios from 'axios';
+import {supabase} from "@/lib/supabase";
 
 interface Seat {
     taken: boolean;
@@ -27,13 +28,22 @@ export const  useSeatStore = create<SeatStore>((set, get) => ({
     fetchSeats: async (projectionId: string) => {
         set({ loading: true, error: null });
         try {
-            const response = await axios.get(`http://localhost:3000/api/projection/${projectionId}/seats`);
-            const seatsData = response.data[0].seats.map((seat: Seat) => ({
+            const { data, error } = await supabase
+                .from('projection')
+                .select('seats')
+                .eq('projection_id', projectionId);
+
+            if (error) throw error;
+
+            // Assuming data[0].seats contains the array of seats
+            const seatsData = data[0].seats.map((seat: Seat) => ({
                 ...seat,
                 selected: false
             }));
+
             set({ seats: seatsData, loading: false });
         } catch (error) {
+            console.error('Error fetching seats:', error);
             set({ error: 'Failed to fetch seats', loading: false });
         }
     },

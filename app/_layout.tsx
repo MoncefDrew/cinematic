@@ -22,6 +22,7 @@ import SignUpPage from './auth/sign-up';
 import SignInPage from './auth/sign-in';
 import LandingPage from "@/app/auth";
 import MyTickets from './(tabs)/myTickets'
+import Activity from "@/app/(tabs)/Activity";
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -70,6 +71,19 @@ function TabNavigator() {
                     tabBarIcon: ({ focused }) => (
                         <Ionicons
                             name="home"
+                            size={28}
+                            color={focused ? CinematicColors.primary : CinematicColors.textSecondary}
+                        />
+                    ),
+                }}
+            />
+            <Tab.Screen
+                name="Activity"
+                component={Activity}
+                options={{
+                    tabBarIcon: ({ focused }) => (
+                        <Ionicons
+                            name="podium"
                             size={28}
                             color={focused ? CinematicColors.primary : CinematicColors.textSecondary}
                         />
@@ -161,6 +175,7 @@ function MainStack() {
             <Stack.Screen name="ReserveTicket" component={ReserveTicket} />
             <Stack.Screen name="TicketPage" component={TicketPage} />
             <Stack.Screen name="myTickets" component={MyTickets}/>
+            <Stack.Screen name="Activity" component={Activity}/>
 
         </Stack.Navigator>
     );

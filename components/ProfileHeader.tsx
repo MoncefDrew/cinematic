@@ -5,6 +5,7 @@ import { useAuthStore } from "@/api/store/AuthStore";
 
 const ProfileHeader = () => {
     const { user, loading } = useAuthStore();
+    const profilePic = require('../assets/images/Screenshot 2025-02-21 202802.png'); // Static profile picture
 
     // Loading state
     if (loading) {
@@ -40,9 +41,9 @@ const ProfileHeader = () => {
                         backgroundColor: Colors.theme.background,
                     }}
                 >
-                    {user.photo_profile ? (
+                    {profilePic ? (
                         <Image
-                            source={{ uri: user.photo_profile }}
+                            source={{ uri: profilePic }}
                             style={{
                                 width: '100%',
                                 height: '100%',

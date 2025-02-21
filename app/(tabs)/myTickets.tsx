@@ -18,6 +18,9 @@ import AppHeader from '@/components/AppHeader';
 import { BORDERRADIUS, FONTSIZE, SPACING } from "@/theme/theme";
 import { useTicketStore } from "@/api/store/TicketStore";
 
+const TICKET_WIDTH =  250 ;
+
+// @ts-ignore
 export default function MyTickets({ navigation }) {
     const { tickets, fetchTickets } = useTicketStore();
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -26,6 +29,7 @@ export default function MyTickets({ navigation }) {
     const scrollViewRef = useRef(null);
     const { width } = useWindowDimensions();
 
+
     const TICKET_WIDTH = width < 768 ? width * 0.75 : width * 0.5;
 
     useEffect(() => {
@@ -33,6 +37,7 @@ export default function MyTickets({ navigation }) {
             try {
                 await fetchTickets();
             } catch (err) {
+                // @ts-ignore
                 setError(err.message);
             } finally {
                 setLoading(false);
@@ -42,23 +47,25 @@ export default function MyTickets({ navigation }) {
         loadTickets();
     }, [fetchTickets]);
 
-    const handleScroll = (event) => {
+    const handleScroll = (event: { nativeEvent: { contentOffset: { x: any; }; }; }) => {
         const contentOffset = event.nativeEvent.contentOffset.x;
         const index = Math.round(contentOffset / (TICKET_WIDTH + 40));
         setCurrentIndex(index);
     };
 
-    const scrollToTicket = (index) => {
+    const scrollToTicket = (index: React.Key | null | undefined) => {
         if (scrollViewRef.current) {
-            scrollViewRef.current.scrollTo({
-                x: index * (TICKET_WIDTH + 40) + 20,
+            // @ts-ignore
+            scrollViewRef.current.scrollToOffset({
+            // @ts-ignore
+                offset: index * (TICKET_WIDTH + 40) + 20,
                 animated: true
             });
         }
     };
 
     // Format date to show day and date
-    const getFormattedDate = (dateString) => {
+    const getFormattedDate = (dateString: any) => {
         try {
             const rawDate =dateString ;
             if (!rawDate) return { day: 'N/A', date: '' };
@@ -84,12 +91,11 @@ export default function MyTickets({ navigation }) {
     };
 
     // Format time to include AM/PM
-    const getFormattedTime = (ticket) => {
+    const getFormattedTime = (ticket: { ticket_id?: any; projection: any; seat?: { rowNumber: any; seatNumber: any; }; }) => {
         try {
             const timeStr = ticket?.projection?.start_time;
             if (!timeStr) return 'N/A';
 
-            // Handle HH:MM format
             const [hoursStr, minutesStr] = timeStr.split(':');
             if (!hoursStr || !minutesStr) return timeStr;
 
@@ -100,7 +106,7 @@ export default function MyTickets({ navigation }) {
 
             // Convert to 12-hour format with AM/PM
             const period = hours >= 12 ? 'PM' : 'AM';
-            const hours12 = hours % 12 || 12; // Convert 0 to 12
+            const hours12 = hours % 12 || 12;
 
             return `${hours12}:${minutesStr.padStart(2, '0')} ${period}`;
         } catch (error) {
@@ -112,14 +118,14 @@ export default function MyTickets({ navigation }) {
 
 
 
-    const renderTicket = (ticket, index) => (
+    const renderTicket = (ticket: { ticket_id: any; projection: { poster_url: any; movie: { title: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined; }; projection_date: any; hall_number: any; }; seat: { rowNumber: any; seatNumber: any; }; }, index: any) => (
         <TouchableOpacity
             key={ticket?.ticket_id || index}
             style={styles.ticketWrapper}
         >
             <View style={[styles.ticketContainer, { width: TICKET_WIDTH }]}>
                 <ImageBackground
-                    source={{ uri: ticket?.projection?.poster_url || 'https://via.placeholder.com/300x400' }}
+                    source={{ uri: ticket?.projection?.poster_url  }}
                     style={[styles.ticketBGImage, { width: TICKET_WIDTH }]}
                 >
                     <LinearGradient
@@ -129,7 +135,19 @@ export default function MyTickets({ navigation }) {
 
                         <View style={[styles.blackCircle, styles.bottomLeftCircle]} />
                         <View style={[styles.blackCircle, styles.bottomRightCircle]} />
-
+                        <View style={{
+                            position: 'absolute', // Position the container absolutely
+                            bottom: 0, // Align to the bottom
+                            left: 0, // Stretch across the screen
+                            right: 0,
+                            alignItems: 'center', // Center the content horizontally
+                            padding: 20,
+                        }}>
+                            <Text style={{fontFamily: 'Poppins',
+                                fontSize: 24,
+                                textAlign:'center',
+                                color: '#b0aed2',}}>{ticket?.projection?.movie?.title}</Text>
+                        </View>
                     </LinearGradient>
                 </ImageBackground>
 
@@ -221,15 +239,18 @@ export default function MyTickets({ navigation }) {
                 <AppHeader header={'My tickets'} name="close"  transparent={true}/>
 
                 <View style={styles.pagination}>
-                    {tickets?.map((_, index) => (
-                        <View
+                    {tickets?.map((_: any, index: React.Key | null | undefined) => (
+                        <TouchableOpacity
                             key={index}
-                            style={[
-                                styles.paginationDot,
-                                index === currentIndex && styles.paginationDotActive
-                            ]}
-                            onTouchEnd={() => scrollToTicket(index)}
-                        />
+                            onPress={() => scrollToTicket(index)}
+                        >
+                            <View
+                                style={[
+                                    styles.paginationDot,
+                                    index === currentIndex && styles.paginationDotActive
+                                ]}
+                            />
+                        </TouchableOpacity>
                     ))}
                 </View>
 
@@ -237,15 +258,16 @@ export default function MyTickets({ navigation }) {
                     <ScrollView
                         ref={scrollViewRef}
                         horizontal
-                        pagingEnabled
                         showsHorizontalScrollIndicator={false}
                         contentContainerStyle={styles.scrollContainer}
                         onScroll={handleScroll}
                         scrollEventThrottle={16}
                         decelerationRate="fast"
                         snapToInterval={TICKET_WIDTH + 40}
+                        snapToAlignment="center"
+                        disableIntervalMomentum={true}
                     >
-                        {tickets.map((ticket, index) => renderTicket(ticket, index))}
+                        {tickets.map((ticket: any, index: any) => renderTicket(ticket, index))}
                     </ScrollView>
                 ) : (
                     <View style={styles.noTicketsContainer}>
@@ -268,6 +290,17 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#030314',
     },
+    scrollContainer: {
+        alignItems: 'center',
+        paddingBottom: 20,
+        paddingHorizontal: 20,
+        alignSelf:'flex-start',
+    },
+    ticketWrapper: {
+        width: TICKET_WIDTH,
+        marginHorizontal: 50,
+        alignItems: 'center',
+    },
     container: {
         flex: 1,
         backgroundColor: '#030314',
@@ -287,22 +320,11 @@ const styles = StyleSheet.create({
         fontSize: FONTSIZE.size_18,
         color: '#9290C3',
     },
-    scrollContainer: {
-        alignItems: 'center',
-        paddingBottom: 20,
-        flex:1,
-        alignSelf:'flex-start',
-        marginHorizontal: 28,
 
-    },
-    ticketWrapper: {
-        paddingHorizontal:50,
-        flex:1,
-        alignSelf:'flex-start'
-    },
     ticketContainer: {
         justifyContent: 'center',
         alignItems: 'center',
+        marginHorizontal:20
     },
     ticketBGImage: {
         aspectRatio: 200 / 300,
