@@ -10,31 +10,26 @@ export const useAuthStore = create((set, get) => ({
     getUserInfo: async () => {
         try {
             set({ loading: true });
-
-            // Get current user
             const { data: { user: currentUser } } = await supabase.auth.getUser();
             if (!currentUser) return null;
 
-            // Fetch user info from client table
             const { data, error } = await supabase
                 .from('client')
-                .select('username, photo_profil, email,client_id')
+                .select('username, photo_profil, email, client_id')
                 .eq('email', currentUser.email)
                 .single();
 
-            const {username,email,photo_profil,client_id} = data
             if (error) {
                 console.error('Error fetching user info:', error.message);
                 return null;
             }
 
-            // Update store with user info
             set({
                 user: {
-                    username: username,
-                    photo_profile: photo_profil,
-                    email: email,
-                    user_id:client_id
+                    username: data.username,
+                    photo_profile: data.photo_profil,
+                    email: data.email,
+                    user_id: data.client_id
                 },
                 loading: false
             });
@@ -47,16 +42,86 @@ export const useAuthStore = create((set, get) => ({
         }
     },
 
-    setSession: (session) => {
+    updateProfilePicture: async (photoUri) => {
+        try {
+            set({ loading: true });
+            const user = get().user;
+            if (!user) throw new Error('No user found');
+
+            // Generate unique file name
+            const fileExt = photoUri.split('.').pop();
+            const fileName = `${user.user_id}-${Date.now()}.${fileExt}`;
+            const filePath = `profile_pictures/${fileName}`;
+
+            // Convert the local file URI to a Blob
+            const response = await fetch(photoUri);
+            const blob = await response.blob();
+
+            // Upload image to Supabase Storage
+            const { error: uploadError } = await supabase.storage
+                .from('profiles')
+                .upload(filePath, blob, {
+                    contentType: 'image/jpeg', // Adjust based on your needs
+                });
+
+            if (uploadError) throw uploadError;
+
+            // Get public URL for the uploaded image
+            const { data: { publicUrl } } = supabase.storage
+                .from('profiles')
+                .getPublicUrl(filePath);
+
+            // Update user profile in database
+            const { error: updateError } = await supabase
+                .from('client')
+                .update({ photo_profil: publicUrl })
+                .eq('client_id', user.user_id);
+
+            if (updateError) throw updateError;
+
+            // Update local state
+            set(state => ({
+                user: { ...state.user, photo_profile: publicUrl },
+                loading: false
+            }));
+
+            return publicUrl;
+        } catch (error) {
+            console.error('Error updating profile picture:', error);
+            set({ loading: false });
+            throw error;
+        }
+    },    setSession: (session) => {
         set({
             session,
             initialized: true,
-            // Clear user info if session is null
             user: session ? get().user : null
         });
     },
-    updateProfilePicture: (profilePicture) => set((state) => ({ user: { ...state.user, profilePicture } })),
-    updateUser: (userData) => set((state) => ({ user: { ...state.user, ...userData } })),
+
+    updateUser: async (userData) => {
+        try {
+            set({ loading: true });
+            const user = get().user;
+            if (!user) throw new Error('No user found');
+
+            const { error } = await supabase
+                .from('client')
+                .update(userData)
+                .eq('client_id', user.user_id);
+
+            if (error) throw error;
+
+            set(state => ({
+                user: { ...state.user, ...userData },
+                loading: false
+            }));
+        } catch (error) {
+            console.error('Error updating user:', error);
+            set({ loading: false });
+            throw error;
+        }
+    },
 
     signOut: async () => {
         try {
@@ -77,8 +142,6 @@ export const useAuthStore = create((set, get) => ({
 // Initialize auth state listener
 supabase.auth.onAuthStateChange((event, session) => {
     useAuthStore.getState().setSession(session);
-
-    // Fetch user info if session exists
     if (session) {
         useAuthStore.getState().getUserInfo();
     }

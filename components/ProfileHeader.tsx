@@ -5,9 +5,7 @@ import { useAuthStore } from "@/api/store/AuthStore";
 
 const ProfileHeader = () => {
     const { user, loading } = useAuthStore();
-    const profilePic = require('../assets/images/Screenshot 2025-02-21 202802.png'); // Static profile picture
 
-    // Loading state
     if (loading) {
         return (
             <View style={{ padding: 16, flexDirection: 'row', alignItems: 'center' }}>
@@ -16,17 +14,16 @@ const ProfileHeader = () => {
         );
     }
 
-    // Handle case when user data isn't available
     if (!user) {
         return (
-            <View >
+            <View>
                 <Text style={{ color: Colors.theme.textSecondary }}>Loading profile...</Text>
             </View>
         );
     }
 
     return (
-        <View >
+        <View>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <View
                     style={{
@@ -41,20 +38,21 @@ const ProfileHeader = () => {
                         backgroundColor: Colors.theme.background,
                     }}
                 >
-                    {profilePic ? (
+                    {user.photo_profile ? (
                         <Image
-                            source={{ uri: profilePic }}
+                            source={{ uri: user.photo_profile }}
                             style={{
                                 width: '100%',
                                 height: '100%',
                                 borderRadius: 25,
                             }}
+                            defaultSource={require('@/assets/default-avatar.png')}
                         />
                     ) : (
-                        // Fallback to displaying first letter of username
                         <Text style={{
                             fontSize: 20,
                             fontWeight: 'bold',
+                            color: 'white',
                         }}>
                             {user.username ? user.username.charAt(0).toUpperCase() : '?'}
                         </Text>

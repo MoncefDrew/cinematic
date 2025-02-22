@@ -37,6 +37,7 @@ export default function Profile() {
             setFormData({
                 username: user.username || '',
                 email: user.email || '',
+
             });
         } else {
             router.replace('/welcomescreen');
@@ -48,32 +49,36 @@ export default function Profile() {
     const profilePhoto = user.photo_profile;
 
     const handleChangePhoto = async () => {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== 'granted') {
-            Alert.alert('Permission Denied', 'Sorry, we need camera roll permissions to upload a profile picture.');
-            return;
-        }
+        try {
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert('Permission Denied', 'Sorry, we need camera roll permissions to upload a profile picture.');
+                return;
+            }
 
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [1, 1],
-            quality: 1,
-        });
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ['images', 'videos'],
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 1,
+            });
 
-        if (!result.canceled) {
-            const selectedImage = result.assets[0].uri;
-            updateProfilePicture(selectedImage);
+            if (!result.canceled) {
+                const selectedImage = result.assets[0].uri;
+                console.log('Selected Image URI:', selectedImage); // Log the URI
+                await updateProfilePicture(selectedImage);
+                Alert.alert('Success', 'Profile picture updated successfully!');
+            }
+        } catch (error) {
+            console.error('Error updating profile picture:', error);
+            Alert.alert('Error', 'Failed to update profile picture. Please check your network connection and try again.');
         }
     };
-
     const userStats = {
         moviesWatched: 28,
         reviewsWritten: 12,
         favoriteMovies: 8,
     };
-
-
 
     return (
         <>
@@ -83,115 +88,119 @@ export default function Profile() {
                 start={{x: 0, y: 0}}
                 end={{x: 0, y: 1}}
             >
-            <AppHeader name={'home'} header='Profile' transparent={true}/>
-            <ScrollView style={styles.scrollContainer}>
-                {/* Profile Section */}
-                <View style={styles.profileSection}>
-                    <View style={styles.profileImageContainer}>
-                        {profilePhoto ? (
-                            <Image source={{ uri: profilePhoto }} style={styles.profileImage} />
-                        ) : (
-                            <View style={styles.placeholderImage}>
-                                <Ionicons name="person" size={50} color={CinematicColors.primary} />
-                            </View>
-                        )}
-                        <TouchableOpacity style={styles.editPhotoButton} onPress={handleChangePhoto}>
-                            <Ionicons name="camera" size={20} color={CinematicColors.text} />
-                        </TouchableOpacity>
-                    </View>
-                    <Text style={styles.username}>{formData.username}</Text>
-                    <Text style={styles.email}>{formData.email}</Text>
-                </View>
-
-                {/* Stats Section */}
-                <View style={styles.statsContainer}>
-                    {Object.entries(userStats).map(([key, value]) => (
-                        <View key={key} style={styles.statItem}>
-                            <View style={styles.statIconContainer}>
-                                <Ionicons
-                                    name={
-                                        key === 'moviesWatched' ? 'film' :
-                                            key === 'reviewsWritten' ? 'star' : 'heart'
-                                    }
-                                    size={24}
-                                    color={CinematicColors.primary}
-                                />
-                            </View>
-                            <Text style={styles.statNumber}>{value}</Text>
-                            <Text style={styles.statLabel}>
-                                {key === 'moviesWatched' ? 'Watched' :
-                                    key === 'reviewsWritten' ? 'Reviews' : 'Favorites'}
-                            </Text>
-                        </View>
-                    ))}
-                </View>
-
-                {/* Menu Options */}
-                <View style={styles.menuContainer}>
-                    <Link href="/myTickets" asChild>
-                        <TouchableOpacity style={styles.menuItem}>
-                            <Ionicons name="ticket" size={24} color={CinematicColors.primary} />
-                            <Text style={styles.menuText}>My Tickets</Text>
-                            <Ionicons name="chevron-forward" size={24} color={CinematicColors.primary} />
-                        </TouchableOpacity>
-                    </Link>
-
-                    <Link href="/Watchlist" asChild>
-                        <TouchableOpacity style={styles.menuItem}>
-                            <Ionicons name="bookmark" size={24} color={CinematicColors.primary} />
-                            <Text style={styles.menuText}>Watchlist</Text>
-                            <Ionicons name="chevron-forward" size={24} color={CinematicColors.primary} />
-                        </TouchableOpacity>
-                    </Link>
-
-
-                    <LogOut/>
-
-                </View>
-            </ScrollView>
-
-            {/* Edit Profile Modal */}
-            <Modal visible={showEditProfile} animationType="slide" transparent>
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                        <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>Edit Profile</Text>
-                            <TouchableOpacity onPress={() => setShowEditProfile(false)}>
-                                <Ionicons name="close" size={24} color={CinematicColors.text} />
+                <AppHeader name={'home'} header='Profile' transparent={true}/>
+                <ScrollView style={styles.scrollContainer}>
+                    {/* Profile Section */}
+                    <View style={styles.profileSection}>
+                        <View style={styles.profileImageContainer}>
+                            {profilePhoto ? (
+                                <Image source={{ uri: profilePhoto }} style={styles.profileImage} />
+                            ) : (
+                                <View style={styles.placeholderImage}>
+                                    <Ionicons name="person" size={50} color={CinematicColors.primary} />
+                                </View>
+                            )}
+                            <TouchableOpacity style={styles.editPhotoButton} onPress={handleChangePhoto}>
+                                <Ionicons name="camera" size={20} color={CinematicColors.text} />
                             </TouchableOpacity>
                         </View>
-                        <ScrollView style={styles.modalScrollContent}>
-                            <View style={styles.inputContainer}>
-                                <Text style={styles.inputLabel}>Username</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    value={formData.username}
-                                    onChangeText={(text) => setFormData({ ...formData, username: text })}
-                                    placeholderTextColor={CinematicColors.textSecondary}
-                                />
-                            </View>
-                            <View style={styles.inputContainer}>
-                                <Text style={styles.inputLabel}>Email</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    value={formData.email}
-                                    onChangeText={(text) => setFormData({ ...formData, email: text })}
-                                    placeholderTextColor={CinematicColors.textSecondary}
-                                />
-                            </View>
-                            <TouchableOpacity
-                                style={styles.saveButton}
-                                onPress={() => {
-                                    updateUser({ username: formData.username, email: formData.email });
-                                    setShowEditProfile(false);
-                                }}
-                            >
-                                <Text style={styles.saveButtonText}>Save Changes</Text>
-                            </TouchableOpacity>
-                        </ScrollView>
+                        <Text style={styles.username}>{formData.username}</Text>
+                        <Text style={styles.email}>{formData.email}</Text>
+                        <TouchableOpacity
+                            style={styles.editProfileButton}
+                            onPress={() => setShowEditProfile(true)}
+                        >
+                            <Text style={styles.editProfileButtonText}>Edit Profile</Text>
+                        </TouchableOpacity>
                     </View>
-                </View>
-            </Modal>
+
+                    {/* Stats Section */}
+                    <View style={styles.statsContainer}>
+                        {Object.entries(userStats).map(([key, value]) => (
+                            <View key={key} style={styles.statItem}>
+                                <View style={styles.statIconContainer}>
+                                    <Ionicons
+                                        name={
+                                            key === 'moviesWatched' ? 'film' :
+                                                key === 'reviewsWritten' ? 'star' : 'heart'
+                                        }
+                                        size={24}
+                                        color={CinematicColors.primary}
+                                    />
+                                </View>
+                                <Text style={styles.statNumber}>{value}</Text>
+                                <Text style={styles.statLabel}>
+                                    {key === 'moviesWatched' ? 'Watched' :
+                                        key === 'reviewsWritten' ? 'Reviews' : 'Favorites'}
+                                </Text>
+                            </View>
+                        ))}
+                    </View>
+
+                    {/* Menu Options */}
+                    <View style={styles.menuContainer}>
+                        <Link href="/myTickets" asChild>
+                            <TouchableOpacity style={styles.menuItem}>
+                                <Ionicons name="ticket" size={24} color={CinematicColors.primary} />
+                                <Text style={styles.menuText}>My Tickets</Text>
+                                <Ionicons name="chevron-forward" size={24} color={CinematicColors.primary} />
+                            </TouchableOpacity>
+                        </Link>
+
+                        <Link href="/Watchlist" asChild>
+                            <TouchableOpacity style={styles.menuItem}>
+                                <Ionicons name="bookmark" size={24} color={CinematicColors.primary} />
+                                <Text style={styles.menuText}>Watchlist</Text>
+                                <Ionicons name="chevron-forward" size={24} color={CinematicColors.primary} />
+                            </TouchableOpacity>
+                        </Link>
+
+                        <LogOut/>
+                    </View>
+                </ScrollView>
+
+                {/* Edit Profile Modal */}
+                <Modal visible={showEditProfile} animationType="slide" transparent>
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.modalContent}>
+                            <View style={styles.modalHeader}>
+                                <Text style={styles.modalTitle}>Edit Profile</Text>
+                                <TouchableOpacity onPress={() => setShowEditProfile(false)}>
+                                    <Ionicons name="close" size={24} color={CinematicColors.text} />
+                                </TouchableOpacity>
+                            </View>
+                            <ScrollView style={styles.modalScrollContent}>
+                                <View style={styles.inputContainer}>
+                                    <Text style={styles.inputLabel}>Username</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        value={formData.username}
+                                        onChangeText={(text) => setFormData({ ...formData, username: text })}
+                                        placeholderTextColor={CinematicColors.textSecondary}
+                                    />
+                                </View>
+                                <View style={styles.inputContainer}>
+                                    <Text style={styles.inputLabel}>Email</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        value={formData.email}
+                                        onChangeText={(text) => setFormData({ ...formData, email: text })}
+                                        placeholderTextColor={CinematicColors.textSecondary}
+                                    />
+                                </View>
+                                <TouchableOpacity
+                                    style={styles.saveButton}
+                                    onPress={() => {
+                                        updateUser({ username: formData.username, email: formData.email });
+                                        setShowEditProfile(false);
+                                    }}
+                                >
+                                    <Text style={styles.saveButtonText}>Save Changes</Text>
+                                </TouchableOpacity>
+                            </ScrollView>
+                        </View>
+                    </View>
+                </Modal>
             </LinearGradient>
         </>
     );
@@ -263,6 +272,19 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontFamily: 'Satoshi',
         marginTop: 5,
+    },
+    editProfileButton: {
+        backgroundColor: CinematicColors.primary,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 12,
+        marginTop: 15,
+    },
+    editProfileButtonText: {
+        color: CinematicColors.text,
+        fontSize: 16,
+        fontWeight: 'bold',
+        fontFamily: 'Satoshi',
     },
     statsContainer: {
         flexDirection: 'row',
