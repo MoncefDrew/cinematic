@@ -46,7 +46,7 @@ const ProfileHeader = () => {
                                 height: '100%',
                                 borderRadius: 25,
                             }}
-                            defaultSource={require('@/assets/default-avatar.png')}
+                            defaultSource={require('@/assets/images/Screenshot 2025-02-21 202802.png')}
                         />
                     ) : (
                         <Text style={{

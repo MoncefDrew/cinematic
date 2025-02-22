@@ -11,7 +11,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { BORDERRADIUS, FONTSIZE, SPACING } from "@/theme/theme";
 
-const Ticket = ({ ticket, width, onPress, getFormattedDate, getFormattedTime }) => {
+const Ticket = ({ ticket, width, onPress, getFormattedDate, getFormattedTime }:any) => {
     return (
         <TouchableOpacity
             style={styles.ticketWrapper}

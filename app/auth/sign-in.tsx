@@ -1,98 +1,95 @@
-
-    import React, {useEffect, useState} from "react";
-    import {
+import React, { useEffect, useState } from "react";
+import {
     View,
     Text,
     StyleSheet,
     TextInput,
     TouchableOpacity,
-    ImageBackground,
-    Image, Alert,
+    Image,
+    Alert,
     Animated,
+    KeyboardAvoidingView,
+    Platform,
+    Dimensions,
 } from "react-native";
-    import { useNavigation } from "@react-navigation/native";
-    import { Ionicons } from "@expo/vector-icons";
-    import {LinearGradient} from "expo-linear-gradient";
-    import {useMovieStore} from "@/api/store/moviesStore";
-    import {supabase} from "@/lib/supabase";
+import { useNavigation } from "@react-navigation/native";
+import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
+import { supabase } from "@/lib/supabase";
+import {useMovieStore} from "@/api/store/moviesStore";
 
-    const CinematicColors = {
-        background: '#0A0B1E',
-        surface: '#12132D',
-        primary: '#6366F1',
-        primaryLight: '#818CF8',
-        accent: '#4F46E5',
-        accentSoft: 'rgba(99, 102, 241, 0.15)',
-        text: '#FFFFFF',
-        textSecondary: '#9B9BC0',
-        border: '#1E2048',
-        gradientStart: 'rgba(18, 19, 45, 0.95)',
-        gradientEnd: 'rgba(10, 11, 30, 0.98)',
-        cardBackground: '#181935',
-        error: '#EF4444',
-        success: '#10B981',
-    };
+const { width, height } = Dimensions.get('window');
 
-    export default function SignInPage() {
-        const navigation = useNavigation();
-        const buttonScale = new Animated.Value(1); // For button animation
-        const [email, setEmail] = useState("");
-        const [password, setPassword] = useState("");
-        const [loading, setLoading] = useState(false);
-        const featuredMovie =   {
-            film_id: '11ed03be-ecfb-4219-9b7c-a8f9a71511cf',
-            title: 'American Psycho',
-            rating: 7.4,
-            release_date: '2000-04-13',
-            description: 'A wealthy New York investment banking executive hides his alternate psychopathic ego from his co-workers and friends as he escalates deeper into his illogical, gratuitous fantasies.',
-            poster_url: 'https://image.tmdb.org/t/p/w500/9uGHEgsiUXjCNq8wdq4r49YL8A1.jpg',
-            cover_url: 'https://image.tmdb.org/t/p/w500/rRwD4MoBlkBXWQ6PDnbKRSU5dDu.jpg',
-            genre: 'Thriller, Drama, Crime',
-            duration: 'N/A',
-            directedBy: 'Mary Harron',
-            created_at: '2025-02-09T21:39:15.364512+00:00'
-        }
+const CinematicColors = {
+    background: '#070815',
+    surface: '#12132D',
+    primary: '#6366F1',
+    primaryLight: '#818CF8',
+    accent: '#4F46E5',
+    accentSoft: 'rgba(99, 102, 241, 0.15)',
+    text: '#FFFFFF',
+    textSecondary: '#9B9BC0',
+    border: '#1E2048',
+    gradientStart: 'rgba(18, 19, 45, 0.95)',
+    gradientEnd: 'rgba(10, 11, 30, 0.98)',
+    cardBackground: '#181935',
+    error: '#EF4444',
+    success: '#10B981',
+};
 
-        async function signInWithEmail() {
-            setLoading(true);
-            const { error } = await supabase.auth.signInWithPassword({
-                email: email,
-                password: password,
-            });
-            if (error) Alert.alert(error.message);
-            setLoading(false);
-        }
-        // Button press animation
-        const animateButton = () => {
-            Animated.sequence([
-                Animated.timing(buttonScale, {
-                    toValue: 0.95,
-                    duration: 100,
-                    useNativeDriver: true,
-                }),
-                Animated.timing(buttonScale, {
-                    toValue: 1,
-                    duration: 100,
-                    useNativeDriver: true,
-                }),
-            ]).start();
-        };
+export default function SignInPage() {
+    const navigation = useNavigation();
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
+    const {featuredMovie} = useMovieStore()
 
-        return (
-            <View style={styles.container}>
-                <View style={styles.poster_}>
-                    <Image source={{uri: featuredMovie.cover_url}} style={styles.poster}/>
-                    <LinearGradient
-                        colors={["transparent", "#0a0b1e"]} // Dark gradient
-                        style={styles.lineargrad}
-                    />
-                </View>
 
-                <View style={styles.overlay}>
-                    <View style={styles.content}>
-                        <Text style={styles.title}>Sign in to Cinematic</Text>
+    async function signInWithEmail() {
+        setLoading(true);
+        const { error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        });
+        if (error) Alert.alert(error.message);
+        setLoading(false);
+    }
 
-                        <View style={styles.inputContainer}>
+    return (
+        <View style={styles.container}>
+            {/* Background Image Container */}
+            <View style={styles.backgroundContainer}>
+                <Image
+                    source={{ uri: featuredMovie.poster_url }}
+                    style={styles.backgroundImage}
+                />
+                <LinearGradient
+                    colors={[
+                        'transparent',
+                        CinematicColors.background,
+                        CinematicColors.background
+                    ]}
+                    style={styles.gradient}
+                />
+            </View>
+
+            {/* Content Container */}
+            <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                style={styles.contentContainer}
+            >
+                <View style={styles.content}>
+                    <Text style={styles.title}>Welcome to Cinematic</Text>
+                    <Text style={styles.subtitle}>Your gateway to endless entertainment</Text>
+
+                    <View style={styles.inputContainer}>
+                        <View style={styles.inputWrapper}>
+                            <Ionicons
+                                name="mail-outline"
+                                size={20}
+                                color={CinematicColors.primaryLight}
+                                style={styles.icon}
+                            />
                             <TextInput
                                 style={styles.input}
                                 placeholder="Email"
@@ -103,7 +100,13 @@
                             />
                         </View>
 
-                        <View style={styles.inputContainer}>
+                        <View style={styles.inputWrapper}>
+                            <Ionicons
+                                name="lock-closed-outline"
+                                size={20}
+                                color={CinematicColors.primaryLight}
+                                style={styles.icon}
+                            />
                             <TextInput
                                 style={styles.input}
                                 placeholder="Password"
@@ -113,125 +116,140 @@
                                 secureTextEntry
                             />
                         </View>
+                    </View>
 
-                        {/* Sign In Button */}
-                        <TouchableOpacity
-                            style={styles.signInButton}
-                            onPress={() => {
-                                animateButton();
-                                signInWithEmail();
-                            }}
-                            disabled={loading}
+                    <TouchableOpacity
+                        style={styles.signInButton}
+                        onPress={signInWithEmail}
+                        disabled={loading}
+                    >
+                        <LinearGradient
+                            colors={[CinematicColors.primary, CinematicColors.accent]}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            style={styles.buttonGradient}
                         >
-                            <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
-                                <Text style={styles.signInButtonText}>
-                                    {loading ? "Signing In..." : "Sign In"}
-                                </Text>
-                            </Animated.View>
+                            <Text style={styles.signInButtonText}>
+                                {loading ? "Signing In..." : "Sign In"}
+                            </Text>
+                        </LinearGradient>
+                    </TouchableOpacity>
+
+                    <View style={styles.footer}>
+                        <TouchableOpacity
+                            onPress={() => navigation.navigate('SignUp')}
+                        >
+                            <Text style={styles.footerText}>Create Account</Text>
                         </TouchableOpacity>
 
-                        <View style={styles.footer}>
-                            <TouchableOpacity
-                                style={styles.footerButton}
-                                onPress={() => navigation.navigate('SignUp')} // Replace 'SignUp' with your sign-up route
-                            >
-                                <Text style={styles.footerButtonText}>JOIN</Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                style={styles.footerButton}
-                                onPress={() => navigation.navigate('ResetPassword')} // Replace 'ResetPassword' with your reset password route
-                            >
-                                <Text style={styles.footerButtonText}>RESET PASSWORD</Text>
-                            </TouchableOpacity>
-                        </View>
+                        <TouchableOpacity
+                            onPress={() => navigation.navigate('ResetPassword')}
+                        >
+                            <Text style={styles.footerText}>Reset Password</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
-            </View>
-        );
-    }
+            </KeyboardAvoidingView>
+        </View>
+    );
+}
 
-    const styles = StyleSheet.create({
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: CinematicColors.background,
+    },
+    backgroundContainer: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+    },
+    backgroundImage: {
+        width: '100%',
+        height: '100%',
+        resizeMode: 'cover',
+    },
+    gradient: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+    },
+    contentContainer: {
+        flex: 1,
+        justifyContent: 'flex-end',
+        zIndex: 1,
+    },
+    content: {
+        padding: 24,
+        paddingBottom: 40,
+    },
+    title: {
+        fontSize: 32,
+        fontWeight: 'bold',
+        color: '#776ea1',
+        marginBottom: 8,
+        fontFamily: 'Satoshi',
+    },
+    subtitle: {
+        fontSize: 16,
+        color: CinematicColors.textSecondary,
+        marginBottom: 32,
+        fontFamily: 'Satoshi',
+    },
+    inputContainer: {
+        gap: 16,
+        marginBottom: 24,
+    },
+    inputWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(24, 25, 53, 0.8)',
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: CinematicColors.border,
+        height: 56,
+        paddingHorizontal: 16,
+    },
+    icon: {
+        marginRight: 12,
+    },
+    input: {
+        flex: 1,
+        color: CinematicColors.text,
+        fontSize: 16,
+        fontFamily: 'Satoshi',
+    },
+    signInButton: {
+        height: 56,
+        borderRadius: 12,
+        overflow: 'hidden',
+        marginBottom: 24,
+    },
+    buttonGradient: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    signInButtonText: {
+        color: CinematicColors.text,
+        fontSize: 16,
+        fontWeight: 'bold',
+        fontFamily: 'Satoshi',
+    },
+    footer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingTop: 8,
 
-        lineargrad: {
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            top: 0,
-            bottom: 0
-        },
-        container: {
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-        },
-        poster_:{
-            width:'100%',
-            height:'60%'
-        },
-        poster:{
-            width:'100%',
-            height:'100%'
-        },
-        overlay: {
-            flex: 1,
-            width: '100%',
-            backgroundColor: 'rgba(10, 11, 30, 0.7)', // Semi-transparent overlay
-            justifyContent: "center",
-            alignItems: "center",
-
-
-        },
-        content: {
-            width: '90%',
-            maxWidth: 400,
-        },
-        title: {
-            fontSize: 24,
-            fontWeight: '200',
-            color: CinematicColors.text,
-            marginBottom: 10,
-        },
-        inputContainer: {
-            width: '100%',
-            marginBottom: 16,
-        },
-        input: {
-            width: '100%',
-            paddingVertical: 12,
-            paddingHorizontal: 16,
-            backgroundColor: CinematicColors.cardBackground,
-            color: CinematicColors.text,
-            fontSize: 16,
-        },
-        signInButton: {
-            width: '100%',
-            paddingVertical: 14,
-            backgroundColor: CinematicColors.primary,
-            borderRadius: 8,
-            alignItems: "center",
-            justifyContent: "center",
-            marginTop: 16,
-        },
-        signInButtonText: {
-            color: CinematicColors.text,
-            fontSize: 16,
-            fontWeight: "bold",
-        },
-        footer: {
-            flexDirection: "row",
-            justifyContent: "space-between",
-            width: '100%',
-            marginTop: 24,
-        },
-        footerButton: {
-            paddingVertical: 12,
-            paddingHorizontal: 16,
-        },
-        footerButtonText: {
-            color: CinematicColors.primaryLight,
-            fontSize: 14,
-            fontWeight: "600",
-            textDecorationLine: "underline",
-        },
-    });
+    },
+    footerText: {
+        color: CinematicColors.primaryLight,
+        fontSize: 14,
+        fontWeight: '600',
+        fontFamily: 'Satoshi',
+    },
+});

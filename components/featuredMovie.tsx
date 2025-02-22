@@ -7,7 +7,7 @@ import {useRouter} from "expo-router";
 import {useNavigation} from "@react-navigation/native";
 
 // @ts-ignore
-export default function FeaturedMovie({ movie }) {
+export default function FeaturedMovie({ movie }:any) {
     const [loaded] = useFonts({
         Satoshi: require("@/assets/fonts/Satoshi-Variable.ttf"),
     });
@@ -19,6 +19,7 @@ export default function FeaturedMovie({ movie }) {
     const navigation = useNavigation()
     function navigate (){
         console.log('navigating')
+        // @ts-ignore
         navigation.navigate('MovieDetails',{movie})
     }
     const router = useRouter()

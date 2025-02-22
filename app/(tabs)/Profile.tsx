@@ -46,7 +46,9 @@ export default function Profile() {
 
     if (!user) return null;
 
+
     const profilePhoto = user.photo_profile;
+
 
     const handleChangePhoto = async () => {
         try {
