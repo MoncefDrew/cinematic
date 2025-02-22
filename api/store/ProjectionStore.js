@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { createClient } from '@supabase/supabase-js';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Initialize Supabase client
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL
@@ -108,6 +109,7 @@ export const useProjectionStore = create(
         }),
         {
             name: 'projection-storage', // Name of the item in localStorage
+            getStorage: () => AsyncStorage, // Use AsyncStorage as the storage mechanism
             partialize: (state) => ({ projections: state.projections }), // Persist only projections
         }
     )

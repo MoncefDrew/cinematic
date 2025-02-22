@@ -2,18 +2,19 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { createClient } from '@supabase/supabase-js';
 
-
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Create the store
 export const useMovieStore = create(
     persist(
-        (set) => ({
+        (set, get) => ({
             movies: [],
+            popularMovies : [],
             featuredMovie: null,
             filteredMovies: [],
+            moviesByGenre: {},
+            selectedGenre: null,
             loading: false,
             error: null,
 
@@ -41,19 +42,80 @@ export const useMovieStore = create(
                         .from('film')
                         .select('*')
                         .order('rating', { ascending: false })
+                        .limit(10)
+
+                    if (error) throw error;
+
+                    set({ popularMovies: data, error: null });
+                } catch (error) {
+                    set({ error: 'Failed to fetch popular movies', popularMovies: [] });
+                } finally {
+                    set({ loading: false });
+                }
+            },
+
+            fetchMoviesByGenre: async (genre) => {
+                set({ loading: true });
+                try {
+                    const { data, error } = await supabase
+                        .from('film')
+                        .select('*')
+                        .contains('genre', [genre])
+                        .order('rating', { ascending: false });
+
+                    if (error) throw error;
+
+                    // Update moviesByGenre with the new data
+                    set(state => ({
+                        moviesByGenre: {
+                            ...state.moviesByGenre,
+                            [genre]: data
+                        },
+                        selectedGenre: genre,
+                        error: null
+                    }));
+
+                    return data;
+                } catch (error) {
+                    set({ error: `Failed to fetch ${genre} movies` });
+                    return [];
+                } finally {
+                    set({ loading: false });
+                }
+            },
+
+            fetchPopularByGenre: async (genre) => {
+                set({ loading: true });
+                try {
+                    const { data, error } = await supabase
+                        .from('film')
+                        .select('*')
+                        .contains('genre', [genre])
+                        .order('rating', { ascending: false })
                         .limit(10);
 
                     if (error) throw error;
 
-                    set({ movies: data, error: null });
+                    // Update moviesByGenre with the new data
+                    set(state => ({
+                        moviesByGenre: {
+                            ...state.moviesByGenre,
+                            [genre]: data
+                        },
+                        error: null
+                    }));
+
+                    return data;
                 } catch (error) {
-                    set({ error: 'Failed to fetch popular movies', movies: [] });
+                    set({ error: `Failed to fetch popular ${genre} movies` });
+                    return [];
                 } finally {
                     set({ loading: false });
                 }
             },
 
             setFilteredMovies: (movies) => set({ filteredMovies: movies }),
+
 
             fetchFeaturedMovie: async () => {
                 set({ loading: true });
@@ -74,11 +136,19 @@ export const useMovieStore = create(
                 }
             },
 
-            clearMovies: () => set({ movies: [] }),
+            clearMovies: () => set({
+                movies: [],
+                moviesByGenre: {},
+                selectedGenre: null
+            }),
         }),
         {
             name: 'movie-storage',
-            partialize: (state) => ({ movies: state.movies }),
+            partialize: (state) => ({
+                movies: state.movies,
+                moviesByGenre: state.moviesByGenre,
+                selectedGenre: state.selectedGenre
+            }),
         }
     )
 );

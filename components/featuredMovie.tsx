@@ -19,7 +19,7 @@ export default function FeaturedMovie({ movie }) {
     const navigation = useNavigation()
     function navigate (){
         console.log('navigating')
-        navigation.navigate('/Activity')
+        navigation.navigate('MovieDetails',{movie})
     }
     const router = useRouter()
     return (
@@ -41,7 +41,7 @@ export default function FeaturedMovie({ movie }) {
                     {movie.description.substring(0, 100)}...
                 </Text>
                 <TouchableOpacity style={styles.featuredMovieButton} onPress={()=> navigate()}>
-                    <Text style={styles.featuredMovieButtonText}>Book Now</Text>
+                    <Text style={styles.featuredMovieButtonText}>Check Now</Text>
                 </TouchableOpacity>
             </View>
         </View>

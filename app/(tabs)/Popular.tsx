@@ -13,6 +13,7 @@ export default function Popular() {
         movies,
         loading,
         error,
+        popularMovies,
         fetchFeaturedMovie,
         fetchPopular,
         featuredMovie,
@@ -44,7 +45,7 @@ export default function Popular() {
                     <AppHeader
                         header={'Popular'}
                         transparent={true}
-                    />
+                     name={'home'}/>
                 <ScrollView contentContainerStyle={styles.scrollContent}>
                     <View style={styles.content}>
                         <View style={styles.welcome}>
@@ -67,7 +68,7 @@ export default function Popular() {
                         ) : (
                             <View style={styles.listContainer}>
                                 <FlatList
-                                    data={movies}
+                                    data={popularMovies}
                                     horizontal
                                     showsHorizontalScrollIndicator={false}
                                     keyExtractor={(item) => item.film_id}

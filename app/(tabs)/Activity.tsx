@@ -1,3 +1,5 @@
+
+
 import React, { useEffect, useState } from 'react';
 import {
     View,
@@ -14,37 +16,88 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import AppHeader from '@/components/AppHeader';
 import { useMoviePollStore } from '@/api/store/MoviePollStore';
-import {useAuthStore} from "@/api/store/AuthStore";
+import { useAuthStore } from "@/api/store/AuthStore";
 
 export default function Activity({ navigation }) {
     const [selectedPollIndex, setSelectedPollIndex] = useState(0);
     const { polls, fetchPolls, submitVote, loading, error } = useMoviePollStore();
     const user = useAuthStore((state) => state.user);
 
+    // Fetch polls only once when the component mounts
     useEffect(() => {
-        fetchPolls(user); // Pass `user` to fetchPolls
+        fetchPolls(user);
     }, [fetchPolls, user]);
 
+
+    // Component to display the countdown timer
+    const CountdownTimer = ({ poll }) => {
+        const [remainingTime, setRemainingTime] = useState(getRemainingTime(poll));
+
+        useEffect(() => {
+            const interval = setInterval(() => {
+                const newRemainingTime = getRemainingTime(poll);
+                setRemainingTime(newRemainingTime);
+
+                if (!newRemainingTime.isActive) {
+                    clearInterval(interval); // Stop the timer when the poll ends
+                }
+            }, 1000);
+
+            return () => clearInterval(interval); // Cleanup interval on unmount
+        }, [poll]);
+
+        return (
+            <Text style={styles.countdownText}>
+                {remainingTime.isActive
+                    ? `${remainingTime.hours}h ${remainingTime.minutes}m ${remainingTime.seconds}s remaining`
+                    : "Poll ended"}
+            </Text>
+        );
+    };
+
+    // Function to calculate the remaining time for the poll
+    const getRemainingTime = (poll) => {
+        const now = new Date();
+        const pollCreationTime = new Date(poll.date_created); // Ensure `date_created` is a valid date string
+        const pollEndTime = new Date(pollCreationTime.getTime() + poll.timelapse * 60 * 60 * 1000);
+        const remainingTime = pollEndTime - now;
+
+        if (remainingTime <= 0) return { hours: 0, minutes: 0, seconds: 0, isActive: false };
+
+        const hours = Math.floor(remainingTime / (1000 * 60 * 60));
+        const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
+        return { hours, minutes, seconds, isActive: true };
+    };
     const handleVote = async (pollId, filmId) => {
         await submitVote(pollId, filmId, user); // Pass `user` to submitVote
     };
 
     const renderPollItem = (poll) => {
         const totalVotes = poll.movies.reduce((sum, movie) => sum + (movie.votes || 0), 0);
-    console.log(poll)
+        const isActive = getRemainingTime(poll).isActive; // Check if the poll is still active
+
         return (
             <View key={poll.id} style={styles.pollCard}>
                 <Text style={styles.pollTitle}>{poll.title || 'Untitled Poll'}</Text>
                 <Text style={styles.pollSubtitle}>
-                    Ends on {new Date(poll.ProjectionDate).toLocaleDateString()} at {poll.ProjectionTime}
+                    TO BE PROJECTED IN
+                    <Text style={{color : '#c6c4f3' ,fontFamily: 'Poppins',
+                        fontSize: 14,}}>  {new Date(poll.ProjectionDate).toLocaleDateString()}</Text>
+                    <Text>   AT</Text>
+                    <Text style={{color:'#c6c4f3',fontFamily: 'Poppins',
+                        fontSize: 14}}>   {poll.ProjectionTime} .</Text>
                 </Text>
 
                 {poll.movies.map((movie) => (
                     <TouchableOpacity
                         key={movie.film_id}
-                        style={styles.movieOption}
+                        style={[
+                            styles.movieOption,
+                            (!isActive || poll.userVoted) && styles.disabledOption, // Disable style if poll is inactive or user has voted
+                        ]}
                         onPress={() => handleVote(poll.id, movie.film_id)}
-                        disabled={poll.userVoted}
+                        disabled={!isActive || poll.userVoted} // Disable if poll is inactive or user has voted
                     >
                         <Image
                             source={{ uri: movie.poster_url || 'https://via.placeholder.com/150' }}
@@ -62,6 +115,9 @@ export default function Activity({ navigation }) {
                         )}
                     </TouchableOpacity>
                 ))}
+
+                {/* Countdown Timer */}
+                <CountdownTimer poll={poll} />
 
                 <View style={styles.pollFooter}>
                     <Text style={styles.pollVotesText}>
@@ -99,8 +155,10 @@ export default function Activity({ navigation }) {
         return (
             <SafeAreaView style={styles.safeArea}>
                 <LinearGradient
-                    colors={['#0A0B1E', '#12132D']}
+                    colors={['#02040a', '#030314']}
                     style={styles.container}
+                    start={{x: 0, y: 0}}
+                    end={{x: 0, y: 1}}
                 >
                     <AppHeader header={'Movie Polls'} name="Home" transparent={true} />
                     <View style={styles.loadingContainer}>
@@ -115,8 +173,10 @@ export default function Activity({ navigation }) {
         return (
             <SafeAreaView style={styles.safeArea}>
                 <LinearGradient
-                    colors={['#0A0B1E', '#12132D']}
+                    colors={['#02040a', '#030314']}
                     style={styles.container}
+                    start={{x: 0, y: 0}}
+                    end={{x: 0, y: 1}}
                 >
                     <AppHeader header={'Movie Polls'} name="Home" transparent={true} />
                     <View style={styles.errorContainer}>
@@ -130,8 +190,10 @@ export default function Activity({ navigation }) {
     return (
         <SafeAreaView style={styles.safeArea}>
             <LinearGradient
-                colors={['#0A0B1E', '#12132D']}
+                colors={['#02040a', '#030314']}
                 style={styles.container}
+                start={{x: 0, y: 0}}
+                end={{x: 0, y: 1}}
             >
                 <AppHeader header={'Movie Polls'} name="close" transparent={true} />
 
@@ -217,25 +279,26 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
     pollCard: {
+        borderRadius: 16,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: '#535C91',
         width: Dimensions.get('window').width - 40,
         marginHorizontal: 20,
         backgroundColor: '#181935',
-        borderRadius: 20,
         padding: 20,
         marginBottom: 20,
-        borderWidth: 1,
-        borderColor: '#1E2048',
     },
     pollTitle: {
         fontFamily: 'Poppins',
         fontSize: 22,
         fontWeight: '700',
-        color: '#FFFFFF',
+        color: '#c6c4f3',
         marginBottom: 8,
     },
     pollSubtitle: {
         fontFamily: 'Poppins',
-        fontSize: 14,
+        fontSize: 15,
         color: '#9B9BC0',
         marginBottom: 24,
     },
@@ -248,6 +311,9 @@ const styles = StyleSheet.create({
         marginBottom: 12,
         borderWidth: 1,
         borderColor: '#1E2048',
+    },
+    disabledOption: {
+        opacity: 0.5, // Dim the option if the poll is inactive or user has voted
     },
     movieImage: {
         width: 60,
@@ -301,5 +367,12 @@ const styles = StyleSheet.create({
     paginationDotActive: {
         backgroundColor: '#6366F1',
         width: 24,
+    },
+    countdownText: {
+        fontFamily: 'Poppins',
+        fontSize: 14,
+        color: '#9B9BC0',
+        textAlign: 'center',
+        marginTop: 16,
     },
 });
