@@ -22,15 +22,7 @@ const WeeklyMovieSchedule = () => {
     if (!loaded) return null;
 
 
-    //checking the streaming state
-    const isMovieStreaming = (projectionTime: any) => {
-        const now = new Date();
-        const [hours, minutes] = projectionTime.split(':');
-        const projectionDate = new Date();
-        projectionDate.setHours(parseInt(hours), parseInt(minutes));
-        // @ts-ignore
-        return now - projectionDate >= 0 && now - projectionDate <= 2 * 60 * 60 * 1000;
-    };
+
 
     const getNextWeekDates = () => {
         const today = new Date();
@@ -82,12 +74,26 @@ const WeeklyMovieSchedule = () => {
         });
     };
 
+    //checking the streaming state
+    const isMovieStreaming = (projectionTime: string, projectionDate: string) => {
+        const now = new Date();
+
+        const [hours, minutes] = projectionTime.split(':');
+        const showtime = new Date(projectionDate);
+        showtime.setHours(parseInt(hours), parseInt(minutes));
+
+        const timeDifference = now.getTime() - showtime.getTime();
+
+        return timeDifference >= 0 && timeDifference <= 2 * 60 * 60 * 1000;
+    };
 
     const renderMovieItem = ({item, fullDate}) => {
         const truncatedDescription = item.movie.description.length > 70
             ? `${item.movie.description.substring(0, 70)}...`
             : item.movie.description;
-        const isStreaming = isMovieStreaming(item.start_time);
+
+        const isStreaming = isMovieStreaming(item.start_time, item.projection_date);
+
         const formatTime = (timeString) => {
             const [hours, minutes] = timeString.split(':');
             const hour = parseInt(hours, 10);
@@ -95,6 +101,7 @@ const WeeklyMovieSchedule = () => {
             const formattedHour = hour % 12 || 12;
             return `${formattedHour}:${minutes} ${period}`;
         };
+
 
         return (
             <TouchableOpacity
@@ -291,7 +298,7 @@ const styles = StyleSheet.create({
     streamingContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: 'rgba(146, 144, 195, 0.1)',
+        backgroundColor: 'rgba(34, 197, 94, 0.1)', // Light green background with opacity
         paddingHorizontal: 10,
         paddingVertical: 4,
         borderRadius: 12,
@@ -300,14 +307,14 @@ const styles = StyleSheet.create({
         width: 8,
         height: 8,
         borderRadius: 4,
-        backgroundColor: '#9290C3',
+        backgroundColor: '#22C55E', // Solid light green
         marginRight: 6,
     },
     streamingText: {
-        color: '#9290C3',
+        color: '#22C55E', // Light green text
         fontFamily: 'Satoshi',
         fontSize: 14,
-        fontWeight: '600',
+        fontWeight: '500',
     },
     movieTime: {
         color: '#9290C3',

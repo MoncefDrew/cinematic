@@ -21,7 +21,7 @@ import {useMovieStore} from "@/api/store/moviesStore";
 const { width, height } = Dimensions.get('window');
 
 const CinematicColors = {
-    background: '#070815',
+    background: '#0A0B1E',
     surface: '#12132D',
     primary: '#6366F1',
     primaryLight: '#818CF8',
@@ -42,8 +42,9 @@ export default function SignInPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
-    const {featuredMovie} = useMovieStore()
-
+    const featuredMovie = {
+        cover_url: 'https://image.tmdb.org/t/p/original/9PqD3wSIjntyJDBzMNuxuKHwpUD.jpg'
+    };
 
     async function signInWithEmail() {
         setLoading(true);
@@ -60,7 +61,7 @@ export default function SignInPage() {
             {/* Background Image Container */}
             <View style={styles.backgroundContainer}>
                 <Image
-                    source={{ uri: featuredMovie.poster_url }}
+                    source={{ uri: featuredMovie.cover_url }}
                     style={styles.backgroundImage}
                 />
                 <LinearGradient

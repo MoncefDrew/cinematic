@@ -16,16 +16,21 @@ import { useAuthStore } from "@/api/store/AuthStore";
 import Toast from 'react-native-toast-message';
 
 const Colors = {
-    background: "#111827",
-    cardBackground: "#1E293B",
-    textPrimary: "#FFFFFF",
-    textSecondary: "#B8B8B8",
-    buttonPrimary: "#324b63",
-    border: "#334155",
-    link: "#00F0FF",
-    inputPlaceholder: "#6B7280",
-    error: "#ef4444",
-    success: "#22c55e",
+    background: '#0A0B1E',
+    surface: '#12132D',
+    primary: '#6366F1',
+    primaryLight: '#818CF8',
+    accent: '#4F46E5',
+    accentSoft: 'rgba(99, 102, 241, 0.15)',
+    text: 'hsl(278, 14.30%, 84.90%)',
+    textSecondary: '#9B9BC0',
+    border: '#1E2048',
+    gradientStart: 'rgba(18, 19, 45, 0.95)',
+    gradientEnd: 'rgba(10, 11, 30, 0.98)',
+    cardBackground: '#181935',
+    error: '#EF4444',
+    success: '#10B981',
+
 };
 
 // Custom Toast Configuration
@@ -40,7 +45,7 @@ const toastConfig = {
             flexDirection: 'row',
             alignItems: 'center',
             borderLeftWidth: 4,
-            borderLeftColor: '#ff0000',
+            borderLeftColor: Colors.error,
             shadowColor: '#000',
             shadowOffset: {
                 width: 0,
@@ -50,13 +55,13 @@ const toastConfig = {
             shadowRadius: 3.84,
             elevation: 5,
         }]}>
-            <Ionicons name="alert-circle" size={24} color="#ff0000" />
+            <Ionicons name="alert-circle" size={24} color={Colors.error} />
             <View style={{ marginLeft: 12, flex: 1 }}>
-                <Text style={{ color: Colors.textPrimary, fontSize: 16, fontWeight: 'bold' }}>
+                <Text style={{ color: Colors.text, fontSize: 16, fontWeight: 'bold' }}>
                     {props.text1}
                 </Text>
                 {props.text2 && (
-                    <Text style={{ color: '#ff0000', fontSize: 14, marginTop: 4 }}>
+                    <Text style={{ color: Colors.error, fontSize: 14, marginTop: 4 }}>
                         {props.text2}
                     </Text>
                 )}
@@ -85,7 +90,7 @@ const toastConfig = {
         }]}>
             <Ionicons name="checkmark-circle" size={24} color={Colors.success} />
             <View style={{ marginLeft: 12, flex: 1 }}>
-                <Text style={{ color: Colors.textPrimary, fontSize: 16, fontWeight: 'bold' }}>
+                <Text style={{ color: Colors.text, fontSize: 16, fontWeight: 'bold' }}>
                     {props.text1}
                 </Text>
                 {props.text2 && (
@@ -187,14 +192,14 @@ export default function SignUpPage() {
 
             await addClient({ username, email, password });
             setUser({ username, email, profilePic: null });
-            
+
             Toast.show({
                 type: 'success',
                 text1: 'Success!',
                 text2: 'Account created! Please verify your email.',
                 position: 'bottom'
             });
-            
+
         } catch (error: any) {
             Toast.show({
                 type: 'error',
@@ -240,15 +245,15 @@ export default function SignUpPage() {
             style={styles.container}
             behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
-            <Text style={styles.title}>Join Letterboxd</Text>
+            <Text style={styles.title}>Join Cinematic</Text>
             <Text style={styles.subtitle}>Create your account to get started</Text>
 
             <View style={styles.inputContainer}>
                 <Ionicons name="person-outline" size={20} color={Colors.textSecondary} style={styles.inputIcon} />
                 <TextInput
                     style={[styles.input, errors.username && touched.username && styles.inputError]}
-                    placeholder="Username"
-                    placeholderTextColor={Colors.inputPlaceholder}
+                    placeholder="Email"
+                    placeholderTextColor={Colors.textSecondary}
                     value={username}
                     onChangeText={setUsername}
                     onBlur={() => handleBlur('username')}
@@ -263,7 +268,7 @@ export default function SignUpPage() {
                 <TextInput
                     style={[styles.input, errors.email && touched.email && styles.inputError]}
                     placeholder="Email"
-                    placeholderTextColor={Colors.inputPlaceholder}
+                    placeholderTextColor={Colors.textSecondary}
                     value={email}
                     onChangeText={setEmail}
                     onBlur={() => handleBlur('email')}
@@ -280,7 +285,7 @@ export default function SignUpPage() {
                 <TextInput
                     style={[styles.input, errors.password && touched.password && styles.inputError]}
                     placeholder="Password"
-                    placeholderTextColor={Colors.inputPlaceholder}
+                    placeholderTextColor={Colors.textSecondary}
                     value={password}
                     onChangeText={setPassword}
                     onBlur={() => handleBlur('password')}
@@ -313,7 +318,7 @@ export default function SignUpPage() {
             </View>
 
             <TouchableOpacity style={styles.goBackButton} onPress={() => router.back()}>
-                <Ionicons name="arrow-back-outline" size={20} color={Colors.textPrimary} />
+                <Ionicons name="arrow-back-outline" size={20} color={Colors.text} />
                 <Text style={styles.goBackButtonText}>Go Back</Text>
             </TouchableOpacity>
 
@@ -323,43 +328,49 @@ export default function SignUpPage() {
 }
 
 const styles = StyleSheet.create({
-    container: { 
-        flex: 1, 
-        justifyContent: "center", 
-        alignItems: "center", 
-        backgroundColor: Colors.background, 
-        paddingHorizontal: 20 
+    container: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: Colors.background,
+        paddingHorizontal: 20,
     },
-    title: { 
-        fontSize: 32, 
-        fontWeight: "bold", 
-        color: Colors.textPrimary, 
-        marginBottom: 10 
+    title: {
+        fontSize: 32,
+        fontWeight: "bold",
+        color: Colors.text,
+        marginBottom: 10,
+        fontFamily: "Satoshi",
+
     },
-    subtitle: { 
-        fontSize: 16, 
-        color: Colors.textSecondary, 
-        marginBottom: 30 
+    subtitle: {
+        fontSize: 16,
+        color: Colors.textSecondary,
+        marginBottom: 30,
+        fontFamily: "Satoshi",
+
     },
-    inputContainer: { 
-        flexDirection: "row", 
-        alignItems: "center", 
-        width: "100%", 
-        marginBottom: 5, 
-        backgroundColor: Colors.cardBackground, 
-        borderRadius: 10, 
-        borderWidth: 1, 
-        borderColor: Colors.border, 
-        paddingHorizontal: 15, 
-        paddingVertical: 10 
+    inputContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        width: "100%",
+        marginBottom: 5,
+        backgroundColor: Colors.cardBackground,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: Colors.border,
+        paddingHorizontal: 15,
+        paddingVertical: 10,
     },
-    inputIcon: { 
-        marginRight: 10 
+    inputIcon: {
+        marginRight: 10
     },
-    input: { 
-        flex: 1, 
-        color: Colors.textPrimary, 
-        fontSize: 16 
+    input: {
+        flex: 1,
+        color: Colors.text,
+        fontSize: 16,
+        fontFamily: "Satoshi",
+
     },
     inputError: {
         borderColor: Colors.error,
@@ -369,54 +380,63 @@ const styles = StyleSheet.create({
         fontSize: 12,
         marginBottom: 10,
         alignSelf: 'flex-start',
-        marginLeft: 15
+        marginLeft: 15,
+        fontFamily: "Satoshi",
+
     },
-    joinButton: { 
-        backgroundColor: Colors.buttonPrimary, 
-        padding: 15, 
-        borderRadius: 10, 
-        width: "100%", 
-        alignItems: "center", 
-        marginTop: 10, 
-        shadowColor: "#000", 
-        shadowOffset: { width: 0, height: 2 }, 
-        shadowOpacity: 0.3, 
-        shadowRadius: 4, 
-        elevation: 5 
+    joinButton: {
+        backgroundColor: Colors.primary,
+        padding: 15,
+        borderRadius: 10,
+        width: "100%",
+        alignItems: "center",
+        marginTop: 10,
+        shadowColor: Colors.primary,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 5
     },
     joinButtonDisabled: {
-        opacity: 0.7
+        opacity: 0.7,
+        backgroundColor: Colors.accent
     },
-    joinButtonText: { 
-        color: "white", 
-        fontSize: 16, 
-        fontWeight: "bold" 
+    joinButtonText: {
+        color: Colors.text,
+        fontSize: 16,
+        fontWeight: "bold",
+        fontFamily: "Satoshi",
+
     },
-    dividerContainer: { 
-        flexDirection: "row", 
-        alignItems: "center", 
-        marginVertical: 20, 
-        width: "100%" 
+    dividerContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginVertical: 20,
+        width: "100%"
     },
-    dividerLine: { 
-        flex: 1, 
-        height: 1, 
-        backgroundColor: Colors.border 
+    dividerLine: {
+        flex: 1,
+        height: 1,
+        backgroundColor: Colors.border
     },
-    dividerText: { 
-        marginHorizontal: 10, 
-        color: Colors.textSecondary, 
-        fontSize: 14 
+    dividerText: {
+        marginHorizontal: 10,
+        color: Colors.textSecondary,
+        fontSize: 14,
+        fontFamily: "Satoshi",
+
     },
-    goBackButton: { 
-        flexDirection: "row", 
-        alignItems: "center", 
-        marginTop: 20 
+    goBackButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginTop: 20
     },
-    goBackButtonText: { 
-        color: Colors.textPrimary, 
-        fontSize: 16, 
-        fontWeight: "bold", 
-        marginLeft: 5 
+    goBackButtonText: {
+        color: Colors.text,
+        fontSize: 16,
+        fontWeight: "bold",
+        marginLeft: 5,
+        fontFamily: "Satoshi",
+
     },
 });
