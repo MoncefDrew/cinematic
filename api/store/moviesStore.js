@@ -144,11 +144,9 @@ export const useMovieStore = create(
         }),
         {
             name: 'movie-storage',
-            partialize: (state) => ({
-                movies: state.movies,
-                moviesByGenre: state.moviesByGenre,
-                selectedGenre: state.selectedGenre
-            }),
-        }
+            getStorage: () => AsyncStorage, // Use AsyncStorage as the storage mechanism
+
+        },
+        
     )
 );

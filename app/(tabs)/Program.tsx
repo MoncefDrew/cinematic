@@ -1,34 +1,71 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, Image, StyleSheet, FlatList, TouchableOpacity, TextInput, StatusBar} from 'react-native';
+import {View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, StatusBar, ActivityIndicator} from 'react-native';
 import {useFonts} from 'expo-font';
 import {useNavigation} from "@react-navigation/native";
 import {useMovieStore} from "@/api/store/moviesStore";
 import {useProjectionStore} from "@/api/store/ProjectionStore";
-import {Movie} from "@/constants/Movie";
 import {LinearGradient} from "expo-linear-gradient";
 import AppHeader from "@/components/AppHeader";
 import {SPACING} from "@/theme/theme";
+import MovieProjectionItem from "@/components/MovieProjectionItem";
 
 const WeeklyMovieSchedule = () => {
     const [loaded] = useFonts({Satoshi: require('../../assets/fonts/Satoshi-Variable.ttf'),});
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedGenre, setSelectedGenre] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
     const {movies} = useMovieStore();
     const {projections, fetchProjections} = useProjectionStore();
     const navigation = useNavigation();
+    
     useEffect(() => {
-        fetchProjections();
+        setIsLoading(true);
+        fetchProjections()
+            .then(() => {
+                console.log("Projections fetched:", projections.length);
+                console.log("First few projections:", projections.slice(0, 3));
+                console.log("Available movies:", movies.length);
+            })
+            .catch(error => console.error("Error fetching projections:", error))
+            .finally(() => setIsLoading(false));
     }, [fetchProjections]);
+    
     if (!loaded) return null;
 
+    if (isLoading) {
+        return (
+            <LinearGradient
+                colors={['#02040a', '#030314']}
+                style={styles.container}
+                start={{x: 0, y: 0}}
+                end={{x: 0, y: 1}}
+            >
+                <AppHeader
+                    header={'Movie Calendar'}
+                    name='home' 
+                    transparent={false}
+                />
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#9290C3" />
+                    <Text style={styles.loadingText}>Loading projections...</Text>
+                </View>
+            </LinearGradient>
+        );
+    }
 
-
-
+    // Updated to ensure date format matches database format (YYYY-MM-DD)
     const getNextWeekDates = () => {
         const today = new Date();
-        return Array.from({length: 7}).map((_, index) => {
+        const dates = Array.from({length: 7}).map((_, index) => {
             const date = new Date(today);
             date.setDate(today.getDate() + index);
+            
+            // Format date as YYYY-MM-DD to match database format
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const formattedDate = `${year}-${month}-${day}`;
+            
             return {
                 dayName: date.toLocaleDateString('en-US', {weekday: 'long'}),
                 fullDate: date.toLocaleDateString('en-US', {
@@ -37,27 +74,99 @@ const WeeklyMovieSchedule = () => {
                     day: 'numeric',
                     year: 'numeric',
                 }),
-                date: date.toISOString().split('T')[0],
+                date: formattedDate,
                 dayNumber: date.getDate(),
             };
         });
+        console.log("Generated dates:", dates.map(d => d.date));
+        return dates;
     };
 
-    const getProjectionsWithMovies = () => projections
-        .map(projection => ({
-            ...projection,
-            movie: movies.find(movie => movie.film_id === projection.film_id),
-        }))
-        .filter(projection => projection.movie);
+    const getProjectionsWithMovies = () => {
+        const result = projections.map(projection => {
+            // Make sure projection_date is properly formatted and trimmed
+            if (projection.projection_date) {
+                projection.projection_date = projection.projection_date.trim();
+            }
+            
+            const movie = movies.find(movie => movie.film_id === projection.film_id);
+            if (!movie) {
+                console.log(`Projection ${projection.projection_id} has film_id ${projection.film_id}, but no matching movie found`);
+            }
+            return {
+                ...projection,
+                movie,
+            };
+        }).filter(projection => projection.movie);
+        
+        console.log("Projections with movies:", result.length);
+        if (result.length > 0) {
+            console.log("Sample projection with movie:", {
+                projection_id: result[0].projection_id,
+                projection_date: result[0].projection_date,
+                movie_title: result[0].movie?.title
+            });
+        }
+        return result;
+    };
 
-    const filteredMovies = getProjectionsWithMovies().filter(projection => {
-        const matchesSearch = projection.movie.title.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesGenre = !selectedGenre || projection.movie.genre.includes(selectedGenre);
+    const projectionMappings = getProjectionsWithMovies();
+    if (projectionMappings.length === 0) {
+        return (
+            <LinearGradient
+                colors={['#02040a', '#030314']}
+                style={styles.container}
+                start={{x: 0, y: 0}}
+                end={{x: 0, y: 1}}
+            >
+                <AppHeader
+                    header={'Movie Calendar'}
+                    name='home' 
+                    transparent={false}
+                />
+                <View style={styles.emptyContainer}>
+                    <Text style={styles.noMovies}>No movie projections available.</Text>
+                    <Text style={styles.debugText}>
+                        Movies: {movies.length}, Projections: {projections.length}
+                    </Text>
+                </View>
+            </LinearGradient>
+        );
+    }
+
+    const filteredMovies = projectionMappings.filter(projection => {
+        const matchesSearch = searchQuery === '' || 
+            projection.movie.title.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesGenre = !selectedGenre || 
+            (projection.movie.genre && projection.movie.genre.includes(selectedGenre));
         return matchesSearch && matchesGenre;
     });
 
-    const getMoviesForDay = (day) => filteredMovies.filter(projection => projection.projection_date === day);
+    // Improved date comparison function with more detailed logging
+    const normalizeDate = (dateStr) => {
+        if (!dateStr) return '';
+        return dateStr.toString().trim().split('T')[0];
+    };
 
+    const getMoviesForDay = (day) => {
+        console.log(`Looking for movies on ${day}`);
+        const dayMovies = filteredMovies.filter(projection => {
+            const projDate = normalizeDate(projection.projection_date);
+            const searchDate = normalizeDate(day);
+            
+            console.log(`Comparing "${projDate}" with "${searchDate}"`);
+            console.log(`Types: ${typeof projDate} vs ${typeof searchDate}`);
+            
+            const isMatch = projDate === searchDate;
+            if (isMatch) {
+                console.log(`MATCH FOUND!`);
+            }
+            
+            return isMatch;
+        });
+        console.log(`Found ${dayMovies.length} movies for ${day}`);
+        return dayMovies;
+    };
 
     const travelToMovie = (item) => {
         const {movie} = item;
@@ -74,91 +183,7 @@ const WeeklyMovieSchedule = () => {
         });
     };
 
-    //checking the streaming state
-    const isMovieStreaming = (projectionTime: string, projectionDate: string) => {
-        const now = new Date();
-
-        const [hours, minutes] = projectionTime.split(':');
-        const showtime = new Date(projectionDate);
-        showtime.setHours(parseInt(hours), parseInt(minutes));
-
-        const timeDifference = now.getTime() - showtime.getTime();
-
-        return timeDifference >= 0 && timeDifference <= 2 * 60 * 60 * 1000;
-    };
-
-    const renderMovieItem = ({item, fullDate}) => {
-        const truncatedDescription = item.movie.description.length > 70
-            ? `${item.movie.description.substring(0, 70)}...`
-            : item.movie.description;
-
-        const isStreaming = isMovieStreaming(item.start_time, item.projection_date);
-
-        const formatTime = (timeString) => {
-            const [hours, minutes] = timeString.split(':');
-            const hour = parseInt(hours, 10);
-            const period = hour >= 12 ? 'PM' : 'AM';
-            const formattedHour = hour % 12 || 12;
-            return `${formattedHour}:${minutes} ${period}`;
-        };
-
-
-        return (
-            <TouchableOpacity
-                onPress={() => travelToMovie(item)}
-                style={styles.movieContainer}
-            >
-                <LinearGradient
-                    colors={['#13122a', '#13122a',]}
-                    style={styles.movieCard}
-                    start={{x: 0, y: 0}}
-                    end={{x: 1, y: 1}}
-                >
-                    <View style={styles.headerContainer}>
-                        <View style={styles.timeContainer}>
-                            {isStreaming ? (
-                                <View style={styles.streamingContainer}>
-                                    <View style={styles.streamingDot}/>
-                                    <Text style={styles.streamingText}>Streaming</Text>
-                                </View>
-                            ) : (
-                                <Text style={styles.movieTime}>{formatTime(item.start_time)}</Text>
-                            )}
-                        </View>
-                        <Text style={styles.fullDateText}>{fullDate}</Text>
-                    </View>
-                    <View style={styles.movieContent}>
-                        <Image
-                            source={{uri: item.movie.poster_url}}
-                            style={styles.poster}
-                        />
-                        <View style={styles.movieInfo}>
-                            <Text style={styles.movieTitle} numberOfLines={1}>
-                                {item.movie.title}
-                            </Text>
-                            <Text style={styles.movieDescription}>
-                                {truncatedDescription}
-                            </Text>
-                            <View style={styles.movieDetails}>
-                                <View style={styles.movieMetadata}>
-                                    <Text style={styles.metadataText}>{item.movie.duration}</Text>
-                                    <Text style={styles.metadataDot}>•</Text>
-                                    <Text style={styles.metadataText}>{item.movie.rating}</Text>
-                                </View>
-                                <View style={styles.timePrice}>
-                                    <Text style={styles.moviePrice}>100.00 DA</Text>
-                                </View>
-                            </View>
-                        </View>
-                    </View>
-                </LinearGradient>
-            </TouchableOpacity>
-        );
-    };
-
     return (
-        <>
-
         <LinearGradient
             colors={['#02040a', '#030314']}
             style={styles.container}
@@ -167,7 +192,8 @@ const WeeklyMovieSchedule = () => {
         >
             <AppHeader
                 header={'Movie Calendar'}
-                name='home' transparent={false}
+                name='home' 
+                transparent={false}
             />
             <StatusBar hidden/>
 
@@ -197,8 +223,14 @@ const WeeklyMovieSchedule = () => {
                             <Text style={styles.dayText}>{date.fullDate}</Text>
                             <FlatList
                                 data={dayMovies}
-                                keyExtractor={(item) => item.projection_id}
-                                renderItem={({item}) => renderMovieItem({item, fullDate: date.fullDate})}
+                                keyExtractor={(item) => item.projection_id.toString()}
+                                renderItem={({item}) => (
+                                    <MovieProjectionItem 
+                                        item={item} 
+                                        fullDate={date.fullDate} 
+                                        onPress={() => travelToMovie(item)}
+                                    />
+                                )}
                                 horizontal
                                 showsHorizontalScrollIndicator={false}
                                 contentContainerStyle={styles.moviesList}
@@ -212,7 +244,6 @@ const WeeklyMovieSchedule = () => {
                 }}
             />
         </LinearGradient>
-        </>
     );
 };
 
@@ -270,121 +301,6 @@ const styles = StyleSheet.create({
     moviesList: {
         paddingHorizontal: 20,
     },
-    movieContainer: {
-        marginRight: 16,
-        marginBottom: 8,
-        borderRadius: 16,
-        overflow: 'hidden',
-    },
-    movieCard: {
-        width: 340,
-        borderRadius: 16,
-        overflow: 'hidden',
-        borderWidth: 1,
-        borderColor: '#535C91',
-    },
-    headerContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: 'rgba(83, 92, 145, 0.3)',
-    },
-    timeContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    streamingContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: 'rgba(34, 197, 94, 0.1)', // Light green background with opacity
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 12,
-    },
-    streamingDot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: '#22C55E', // Solid light green
-        marginRight: 6,
-    },
-    streamingText: {
-        color: '#22C55E', // Light green text
-        fontFamily: 'Satoshi',
-        fontSize: 14,
-        fontWeight: '500',
-    },
-    movieTime: {
-        color: '#9290C3',
-        fontSize: 14,
-        fontFamily: 'Satoshi',
-        fontWeight: '600',
-    },
-    fullDateText: {
-        color: '#9290C3',
-        fontFamily: 'Satoshi',
-        fontSize: 14,
-        fontWeight: '500',
-    },
-    movieContent: {
-        flexDirection: 'row',
-        padding: 16,
-    },
-    poster: {
-        width: 100,
-        height: 150,
-        borderRadius: 12,
-        marginRight: 16,
-    },
-    movieInfo: {
-        flex: 1,
-        justifyContent: 'space-between',
-    },
-    movieTitle: {
-        color: '#9290C3',
-        fontSize: 20,
-        fontFamily: 'Satoshi',
-        fontWeight: '700',
-        marginBottom: 8,
-    },
-    movieDescription: {
-        color: '#535C91',
-        fontSize: 14,
-        fontFamily: 'Satoshi',
-        lineHeight: 20,
-        marginBottom: 12,
-    },
-    movieDetails: {
-        flexDirection: 'column',
-        gap: 8,
-    },
-    movieMetadata: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    metadataText: {
-        color: '#535C91',
-        fontSize: 13,
-        fontFamily: 'Satoshi',
-    },
-    metadataDot: {
-        color: '#535C91',
-        marginHorizontal: 8,
-    },
-    timePrice: {
-        backgroundColor: 'rgba(27, 26, 85, 0.7)',
-        padding: 10,
-        borderRadius: 12,
-        alignSelf: 'flex-start',
-    },
-    moviePrice: {
-        color: '#9290C3',
-        fontSize: 16,
-        fontFamily: 'Satoshi',
-        fontWeight: '700',
-    },
     noMovies: {
         color: '#535C91',
         fontSize: 14,
@@ -394,6 +310,28 @@ const styles = StyleSheet.create({
         marginVertical: 16,
         marginHorizontal: 20,
     },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    loadingText: {
+        color: '#9290C3',
+        fontSize: 16,
+        fontFamily: 'Satoshi',
+        marginTop: 12,
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    debugText: {
+        color: '#535C91',
+        fontSize: 12,
+        fontFamily: 'Satoshi',
+        marginTop: 8,
+    }
 });
 
 export default WeeklyMovieSchedule;

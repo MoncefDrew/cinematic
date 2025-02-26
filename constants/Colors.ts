@@ -5,6 +5,18 @@
 
 const tintColorLight = '#0a7ea4';
 const tintColorDark = '#fff';
+export const CinematicColors = {
+    background: '#0A0B1E',
+    surface: '#12132D',
+    primary: '#6366F1',
+    primaryLight: '#818CF8',
+    accent: '#4F46E5',
+    accentSoft: 'rgba(99, 102, 241, 0.15)',
+    text: '#FFFFFF',
+    textSecondary: '#9B9BC0',
+    border: '#1E2048',
+    cardBackground: '#181935',
+};
 
 export const Colors = {
   theme: {

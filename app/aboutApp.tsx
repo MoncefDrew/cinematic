@@ -13,7 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 const { width } = Dimensions.get('window');
 
 // App color theme
-const Colors = {
+const CinematicColors = {
   background: '#0A0B1E',
   surface: '#12132D',
   primary: '#6366F1',
@@ -83,7 +83,7 @@ const About = () => {
           {slides.map((slide, index) => (
               <View key={index} style={styles.slide}>
                 <View style={styles.card}>
-                  <Ionicons name={slide.icon as any} size={60} color={Colors.primary} />
+                  <Ionicons name={slide.icon as any} size={60} color={CinematicColors.primary} />
                   <Text style={styles.title}>{slide.title}</Text>
                   <Text style={styles.description}>{slide.description}</Text>
                 </View>
@@ -135,7 +135,7 @@ const About = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: CinematicColors.background,
   },
   slide: {
     width,
@@ -145,14 +145,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   card: {
-    backgroundColor: Colors.cardBackground,
+    backgroundColor: CinematicColors.cardBackground,
     borderRadius: 20,
     padding: 30,
     width: '100%',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: Colors.border,
-    shadowColor: Colors.primary,
+    borderColor: CinematicColors.border,
+    shadowColor: CinematicColors.primary,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: Colors.text,
+    color: CinematicColors.text,
     marginTop: 20,
     marginBottom: 10,
     fontFamily: 'Satoshi',
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 16,
-    color: Colors.textSecondary,
+    color: CinematicColors.textSecondary,
     textAlign: 'center',
     lineHeight: 24,
     fontFamily: 'Satoshi',
@@ -193,15 +193,15 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: Colors.border,
+    backgroundColor: CinematicColors.border,
     marginHorizontal: 4,
   },
   paginationDotActive: {
-    backgroundColor: Colors.primary,
+    backgroundColor: CinematicColors.primary,
     width: 20,
   },
   button: {
-    backgroundColor: Colors.primary,
+    backgroundColor: CinematicColors.primary,
     paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 12,
@@ -209,10 +209,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   alreadySignedInButton: {
-    backgroundColor: Colors.accent,
+    backgroundColor: CinematicColors.accent,
   },
   buttonText: {
-    color: Colors.text,
+    color: CinematicColors.text,
     fontSize: 16,
     fontWeight: 'bold',
     fontFamily: 'Satoshi',

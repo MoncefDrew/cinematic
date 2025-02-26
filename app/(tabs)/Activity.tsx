@@ -29,6 +29,7 @@ export default function Activity({ navigation }) {
     }, [fetchPolls, user]);
 
 
+    
     // Component to display the countdown timer
     const CountdownTimer = ({ poll }) => {
         const [remainingTime, setRemainingTime] = useState(getRemainingTime(poll));
