@@ -61,7 +61,12 @@ function TabNavigator() {
                     shadowOpacity: 0.3,
                     shadowRadius: 10,
                 },
-                tabBarShowLabel: false,
+                tabBarShowLabel: true,
+                tabBarLabelStyle:{
+                    fontFamily:'Satoshi',
+                    fontSize:12,
+                    paddingTop:6,
+                }
             }}
         >
             <Tab.Screen
@@ -103,19 +108,7 @@ function TabNavigator() {
                     ),
                 }}
             />
-            <Tab.Screen
-                name="MyTickets"
-                component={MyTickets}
-                options={{
-                    tabBarIcon: ({ focused }) => (
-                        <Ionicons
-                            name="ticket"
-                            size={28}
-                            color={focused ? CinematicColors.primary : CinematicColors.textSecondary}
-                        />
-                    ),
-                }}
-            />
+           
             <Tab.Screen
                 name="Profile"
                 component={Profile}

@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image, Modal, TextInput, Alert, SafeAreaView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuthStore } from '@/api/store/AuthStore';
-import { useRouter, Link } from 'expo-router';
+import { useRouter, Link, useNavigation } from 'expo-router';
 import LogOut from "@/components/LogOut";
 import AppHeader from "@/components/AppHeader";
 import { LinearGradient } from 'expo-linear-gradient';
@@ -24,6 +24,7 @@ const CinematicColors = {
 
 export default function Profile() {
     const router = useRouter();
+    const navigation = useNavigation()
     const [showTickets, setShowTickets] = useState(false);
     const [showEditProfile, setShowEditProfile] = useState(false);
     const { user, updateProfilePicture, updateUser } = useAuthStore();
@@ -141,13 +142,12 @@ export default function Profile() {
 
                     {/* Menu Options */}
                     <View style={styles.menuContainer}>
-                        <Link href="/myTickets" asChild>
-                            <TouchableOpacity style={styles.menuItem}>
+                        
+                            <TouchableOpacity style={styles.menuItem} onPress={()=> navigation.navigate('myTickets')}>
                                 <Ionicons name="ticket" size={24} color={CinematicColors.primary} />
                                 <Text style={styles.menuText}>My Tickets</Text>
                                 <Ionicons name="chevron-forward" size={24} color={CinematicColors.primary} />
                             </TouchableOpacity>
-                        </Link>
 
                         <Link href="/Watchlist" asChild>
                             <TouchableOpacity style={styles.menuItem}>
