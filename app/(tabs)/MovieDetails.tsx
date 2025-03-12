@@ -6,10 +6,7 @@ import {
     Image,
     ScrollView,
     TouchableOpacity,
-    Modal,
-    TouchableWithoutFeedback,
-    KeyboardAvoidingView,
-    Animated, // Import Animated
+    Animated,
 } from "react-native";
 import { useNavigation, useRouter } from "expo-router";
 import MovieCard from "@/components/MovieCard";
@@ -19,8 +16,8 @@ import { RootStackParamList, Movie } from "@/constants/Movie";
 import { LinearGradient } from "expo-linear-gradient";
 import ProfilePic from "@/components/ProfilePic";
 import { StackNavigationProp } from "@react-navigation/stack";
-import {supabase} from "@/lib/supabase";
-import {useAuthStore} from "@/api/store/AuthStore";
+import MovieActionModal from "@/components/MovieActionModal";
+import MovieTimeCounter from "@/components/MovieTimeCounter";
 
 type MovieDetailsRouteProp = RouteProp<RootStackParamList, "MovieDetails">;
 type NavigationProp = StackNavigationProp<RootStackParamList, "Popular">;
@@ -34,142 +31,89 @@ export default function MovieDetails({ route }: any) {
     const navigation = useNavigation<NavigationProp>();
     const [userRating, setUserRating] = useState(0);
     const [isModalVisible, setModalVisible] = useState(false);
-    const modalY = useRef(new Animated.Value(300)).current;
-    const fadeAnim = useRef(new Animated.Value(0)).current; // Initial opacity 0 for fade-in
+    const fadeAnim = useRef(new Animated.Value(0)).current;
     const { projection_date, start_time, end_time } = route.params;
     const [canReserve, setCanReserve] = useState(false);
     const [timeRemaining, setTimeRemaining] = useState('');
-    const {user} = useAuthStore()
-    // Trigger fade-in animation when the component mounts
+    const [showFullDescription, setShowFullDescription] = useState(false);
+    const DESCRIPTION_LIMIT = 120;
+    const showReserveButton = route.params?.fromProgram || false;
+
+    // Fade-in animation
     useEffect(() => {
         Animated.timing(fadeAnim, {
-            toValue: 1, // End opacity
-            duration: 1000, // Duration of the fade-in effect
+            toValue: 1,
+            duration: 800,
             useNativeDriver: true,
         }).start();
     }, []);
 
-    // Modal fade-out animation
+    // Toggle modal function
     const toggleModal = () => {
-        if (isModalVisible) {
-            // Fade out the modal
-            Animated.timing(modalY, {
-                toValue: 300,
-                duration: 300,
-                useNativeDriver: true,
-            }).start(() => setModalVisible(false)); // Hide modal after animation
-        } else {
-            setModalVisible(true); // Show modal first
-            // Slide up
-            Animated.timing(modalY, {
-                toValue: 0,
-                duration: 300,
-                useNativeDriver: true,
-            }).start();
-        }
+        setModalVisible(!isModalVisible);
     };
 
-    // Check reservation availability
-    useEffect(() => {
-        if (showReserveButton) {
-            checkReservationAvailability();
-            const timer = setInterval(checkReservationAvailability, 60000);
-            return () => clearInterval(timer);
-        }
-    }, [projection_date, start_time]);
-
-    const showReserveButton = route.params?.fromProgram || false;
-
-    const checkReservationAvailability = async () => {
-        const [hours, minutes, seconds] = start_time.split(':');
-        const projectionDate = new Date(projection_date);
-        projectionDate.setHours(Number(hours), Number(minutes), 0);
-        const now = new Date();
-        const diffHours = (projectionDate.getTime() - now.getTime()) / (1000 * 60 * 60);
-
-        // Check if the user has already reserved a ticket for this projection
-        const { data: existingTicket, error } = await supabase
-            .from('ticket')
-            .select('*')
-            .eq('username', user?.username) // Assuming username is stored in Supabase auth
-            .eq('projection_id', projection_id)
-            .single();
-
-        if (existingTicket) {
-            setCanReserve(false);
-            setTimeRemaining('You have already reserved a ticket for this projection.');
-        } else {
-            setCanReserve(diffHours <= 24 && diffHours > 0);
-            if (diffHours > 24) {
-                const days = Math.floor(diffHours / 24);
-                setTimeRemaining(`Opens in ${days} days`);
-            } else if (diffHours > 0) {
-                const hours = Math.floor(diffHours);
-                const minutes = Math.floor((diffHours - hours) * 60);
-                setTimeRemaining(`${hours}h ${minutes}m remaining`);
-            } else {
-                setTimeRemaining('Projection ended');
-            }
-        }
+    // Handle time updates from MovieTimeCounter
+    const handleTimeUpdate = (canReserve: boolean, timeRemaining: string) => {
+        setCanReserve(canReserve);
+        setTimeRemaining(timeRemaining);
     };
 
-    // Render stars function (unchanged)
-    const renderStars = (rating: number) => {
-        return [...Array(5)].map((_, index) => (
-            <TouchableOpacity
-                key={index}
-                onPress={() => setUserRating(index + 1)}
-                style={{ margin: 10 }}
-            >
-                <Ionicons
-                    name={index < rating ? "star" : "star-outline"}
-                    size={30}
-                    color="#4A3F8C"
-                />
-            </TouchableOpacity>
-        ));
+    // Truncate description with "Read more" option
+    const renderDescription = () => {
+        if (!movie.description) return null;
+        
+        const shouldTruncate = movie.description.length > DESCRIPTION_LIMIT && !showFullDescription;
+        const displayText = shouldTruncate 
+            ? `${movie.description.substring(0, DESCRIPTION_LIMIT)}...` 
+            : movie.description;
+        
+        return (
+            <>
+                <Text style={styles.description}>{displayText}</Text>
+                {movie.description.length > DESCRIPTION_LIMIT && (
+                    <TouchableOpacity onPress={() => setShowFullDescription(!showFullDescription)}>
+                        <Text style={styles.readMoreText}>
+                            {showFullDescription ? "Show less" : "Read more"}
+                        </Text>
+                    </TouchableOpacity>
+                )}
+            </>
+        );
     };
 
     return (
-        <ScrollView style={styles.container}>
+        <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+            {/* Back Button */}
             <TouchableOpacity
                 onPress={() => navigation.goBack()}
-                style={{
-                    position: "absolute",
-                    top: 40,
-                    left: 20,
-                    zIndex: 1,
-                }}>
-                <Ionicons
-                    name="arrow-back"
-                    size={30}
-                    color="#FFFFFF" // White color for back button
-                />
+                style={styles.backButton}>
+                <Ionicons name="arrow-back" size={28} color="#FFFFFF" />
             </TouchableOpacity>
 
             {/* Cover with Gradient */}
             <View style={styles.coverContainer}>
                 <Image source={{ uri: movie.cover_url }} style={styles.cover} />
                 <LinearGradient
-                    colors={["transparent", "#030314"]} // Dark gradient
+                    colors={["transparent", "#030314"]}
                     style={styles.lineargrad}
                 />
             </View>
 
             {/* Movie Information */}
             <Animated.View style={[styles.detailsContainer, { opacity: fadeAnim }]}>
-                <View style={[styles.movieInfos, { flex: 1 }]}>
-                    <Text style={[styles.title, { fontFamily: "Satoshi" }]}>
+                <View style={styles.movieInfos}>
+                    <Text style={styles.title}>
                         {movie.title}
                     </Text>
-                    <Text style={styles.directedBy}>DIRECTED BY</Text>
-                    <Text
-                        style={[styles.directedByperson, { fontFamily: "Satoshi" }]}>
-                        {movie.directedBy}
-                    </Text>
-                    <Text style={[styles.directedBy, { fontFamily: "Satoshi" }]}>
-                        {movie.dateReleased} • {movie.projectionTime}{" "}
-                        <Text style={{ fontFamily: "Satoshi" }}>TRAILER</Text>
+                    <View style={styles.directorContainer}>
+                        <Text style={styles.directedBy}>DIRECTED BY</Text>
+                        <Text style={styles.directedByperson}>
+                            {movie.directedBy}
+                        </Text>
+                    </View>
+                    <Text style={styles.metaInfo}>
+                        {movie.dateReleased} • {movie.projectionTime}
                     </Text>
                 </View>
                 <View style={styles.cardContainer}>
@@ -177,11 +121,36 @@ export default function MovieDetails({ route }: any) {
                 </View>
             </Animated.View>
 
+            {/* Time Counter (only shown if from program view) */}
+            {showReserveButton && (
+                <View style={styles.timeCounterContainer}>
+                    <MovieTimeCounter 
+                        projection_date={projection_date}
+                        start_time={start_time}
+                        projection_id={projection_id}
+                        onTimeUpdate={handleTimeUpdate}
+                    />
+                </View>
+            )}
+
             {/* Description */}
-            <Animated.View style={[styles.disContainer, { opacity: fadeAnim }]}>
-                <Text style={styles.titleDescription}>DESCRIPTION</Text>
-                <Text style={styles.description}>{movie.description}</Text>
+            <Animated.View style={[styles.descriptionContainer, { opacity: fadeAnim }]}>
+                <Text style={styles.sectionTitle}>DESCRIPTION</Text>
+                {renderDescription()}
             </Animated.View>
+
+            <View style={styles.separator} />
+
+            {/* Rate, log, and review action */}
+            <TouchableOpacity onPress={toggleModal} style={styles.actionButtonContainer}>
+                <View style={styles.actionButton}>
+                    <ProfilePic />
+                    <Text style={styles.actionButtonText}>
+                        Rate, reserve, add to list + more
+                    </Text>
+                    <Ionicons name="ellipsis-horizontal" color="#919cd7" size={17} />
+                </View>
+            </TouchableOpacity>
 
             <View style={styles.separator} />
 
@@ -195,319 +164,205 @@ export default function MovieDetails({ route }: any) {
                     resizeMode="cover"
                 />
                 <TouchableOpacity style={styles.removeAdButton}>
-                    <Text style={styles.directedBy}>REMOVE ADS</Text>
+                    <Text style={styles.removeAdText}>REMOVE ADS</Text>
                 </TouchableOpacity>
             </Animated.View>
 
             <View style={styles.separator} />
 
-            {/* Rating Section */}
-            <Animated.View style={[styles.ratingSection, { opacity: fadeAnim }]}>
-                <Text style={styles.ratingTitle}>Ratings</Text>
-                <View style={styles.starsContainer}>
-                    <Ionicons name="star" size={15} color="#FFD700" />
-                    <Ionicons name="star" size={15} color="#FFD700" />
-                    <Ionicons name="star" size={15} color="#FFD700" />
-                </View>
-                <Text style={styles.ratingTitle}>{movie.Evaluation}</Text>
-            </Animated.View>
-
-            <View style={styles.separator} />
-
-            {/* Rate, log, and review action */}
-            <TouchableOpacity onPress={toggleModal} >
-                <View style={styles.rate}>
-                    <View style={styles.containerRate}>
-                        <ProfilePic />
-                        <Text
-                            style={{
-                                color: "#919cd7",
-                                paddingHorizontal: 18,
-                                paddingVertical: 2,
-                            }}>
-                            Rate, reserve, add to list + more
-                        </Text>
-                        <Ionicons name="ellipsis-horizontal" color="#919cd7" size={17} />
-                    </View>
-                </View>
-            </TouchableOpacity>
-
-            <View style={styles.separator} />
-
             {/* Go Back Button */}
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-                <View style={styles.rate}>
-                    <Text style={{ color: "white" }}>Go Back to Popular</Text>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.goBackContainer}>
+                <View style={styles.goBackButton}>
+                    <Text style={styles.goBackText}>Return to Popular</Text>
                 </View>
             </TouchableOpacity>
 
-            {/* Modal */}
-            <Modal
-                visible={isModalVisible}
-                transparent
-                animationType="none"
-                onRequestClose={toggleModal}>
-                <TouchableWithoutFeedback onPress={toggleModal}>
-                    <View style={styles.modalOverlay}>
-                        <KeyboardAvoidingView style={styles.bottomModal} behavior="padding">
-                            <Animated.View
-                                style={[styles.modalContainer, { transform: [{ translateY: modalY }] }]}>
-                                <Text style={styles.modalTitle}>What would you like to do?</Text>
-
-                                <View style={styles.modalRatingSection}>
-                                    <Text style={styles.modalButtonText}>Rate the Movie:</Text>
-                                    <View style={styles.starsContainer}>{renderStars(userRating)}</View>
-                                </View>
-
-
-                                {showReserveButton && (
-                                    <TouchableOpacity
-                                        onPress={() => {
-                                            if (canReserve) {
-                                                toggleModal();
-                                                // @ts-ignore
-                                                navigation.navigate("ReserveTicket", { movie, seats, projection_id,projection_date,start_time });
-                                            }
-                                        }}
-                                        style={[styles.reserveTicket, !canReserve && styles.disabledButton]}
-                                        disabled={!canReserve}>
-                                        <Ionicons name="ticket" size={25} color="white" />
-                                        <Text style={styles.modalButtonText}>
-                                            {canReserve ? "Reserve Ticket" : timeRemaining}
-                                        </Text>
-                                    </TouchableOpacity>
-                                )}
-
-                                <TouchableOpacity style={styles.modalButton}>
-                                    <Text style={styles.modalButtonText}>Mark as Watched</Text>
-                                </TouchableOpacity>
-
-                                <TouchableOpacity
-                                    style={[styles.modalButton, styles.closeButton]}
-                                    onPress={toggleModal}>
-                                    <Text style={styles.modalButtonText}>Confirm</Text>
-                                </TouchableOpacity>
-                            </Animated.View>
-                        </KeyboardAvoidingView>
-                    </View>
-                </TouchableWithoutFeedback>
-            </Modal>
+            {/* Movie Action Modal Component */}
+            <MovieActionModal
+                isVisible={isModalVisible}
+                toggleModal={toggleModal}
+                userRating={userRating}
+                setUserRating={setUserRating}
+                movie={movie}
+                seats={seats}
+                projection_id={projection_id}
+                projection_date={projection_date}
+                start_time={start_time}
+                canReserve={canReserve}
+                timeRemaining={timeRemaining}
+                showReserveButton={showReserveButton}
+            />
         </ScrollView>
     );
 }
-const styles = StyleSheet.create({
-    modalContainer: {
-        width: "100%",
-        backgroundColor: "#030314", // Even darker blue-purple
-        padding: 20,
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        alignItems: "center",
-    },
-    background: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        width: '100%',
-        height: '100%'
-    },
-    separator: {
-        height: 0.25,
-        backgroundColor: "#2E2A4A", // Deep purple for separators
-        marginVertical: 10
-    },
-    container: {
 
+const styles = StyleSheet.create({
+    container: {
         flex: 1,
-        backgroundColor: "#030314" // Darkest blue-purple background
+        backgroundColor: "#030314",
+    },
+    backButton: {
+        position: "absolute",
+        top: 20,
+        left: 20,
+        zIndex: 10,
+        backgroundColor: "rgba(3, 3, 20, 0.5)",
+        borderRadius: 20,
+        padding: 8,
     },
     coverContainer: {
         width: '100%',
-        height: 200,
-        position: 'relative'
+        height: 220,
+        position: 'relative',
+        marginBottom: 10,
     },
     cover: {
         width: '100%',
         height: '100%',
-        resizeMode: 'cover'
+        resizeMode: 'cover',
     },
     lineargrad: {
         position: 'absolute',
         left: 0,
         right: 0,
         top: 0,
-        bottom: 0
+        bottom: 0,
     },
     detailsContainer: {
         flexDirection: 'row',
         paddingHorizontal: 20,
-        paddingVertical: 5,
-        backgroundColor: "#030314", // Darkest blue-purple
-
+        paddingVertical: 10,
+        backgroundColor: "#030314",
     },
     movieInfos: {
-        justifyContent: 'center'
+        flex: 1,
+        justifyContent: 'center',
+        paddingRight: 10,
     },
     cardContainer: {
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
     },
     title: {
-        fontSize: 25,
+        fontSize: 28,
         color: "#9290C3",
+        fontFamily: "Satoshi",
         fontWeight: 'bold',
-        marginBottom: 10
+        marginBottom: 8,
     },
-    subtitle: {
-        marginTop: 13,
-        fontSize: 14,
-        color: "#6B668F", // Muted purple for secondary text
-        marginBottom: 10
-    },
-    titleDescription: {
-        fontWeight: 400,
-        color: "#6B668F", // Muted purple
-        marginBottom: 10
-    },
-    description: {
-        fontWeight: 300,
-        fontSize: 14,
-        color: "#6B668F" // Muted purple
-    },
-    disContainer: {
-        paddingVertical: 10,
-        paddingHorizontal: 20
+    directorContainer: {
+        marginVertical: 4,
     },
     directedBy: {
-        marginTop: 12,
-        fontWeight: 300,
-        color: "#6B668F" // Muted purple
+        fontSize: 12,
+        color: "#6B668F",
+        fontFamily: "Satoshi",
+        letterSpacing: 0.5,
     },
     directedByperson: {
         color: "#FFFFFF",
+        fontFamily: "Satoshi",
         fontWeight: 'bold',
-        fontSize: 14
+        fontSize: 16,
+        marginTop: 2,
+    },
+    metaInfo: {
+        marginTop: 8,
+        fontSize: 14,
+        color: "#6B668F",
+        fontFamily: "Satoshi",
+    },
+    timeCounterContainer: {
+        paddingHorizontal: 20,
+        marginVertical: 10,
+    },
+    descriptionContainer: {
+        paddingHorizontal: 20,
+        paddingVertical: 15,
+    },
+    sectionTitle: {
+        fontFamily: "Satoshi",
+        fontSize: 14,
+        letterSpacing: 1,
+        color: "#6B668F",
+        marginBottom: 10,
+    },
+    description: {
+        fontFamily: "Satoshi",
+        fontSize: 15,
+        lineHeight: 22,
+        color: "#9290C3",
+    },
+    readMoreText: {
+        fontFamily: "Satoshi",
+        fontSize: 14,
+        color: "#919cd7",
+        fontWeight: 'bold',
+        marginTop: 8,
+    },
+    actionButtonContainer: {
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+    },
+    actionButton: {
+        backgroundColor: '#13123b',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#535C91',
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    actionButtonText: {
+        color: "#919cd7",
+        fontFamily: "Satoshi",
+        fontSize: 15,
+    },
+    separator: {
+        height: 1,
+        backgroundColor: "#2E2A4A",
+        marginVertical: 15,
     },
     adSection: {
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 10
+        padding: 15,
     },
     adBanner: {
         width: '100%',
-        height: 90,
-        borderRadius: 3,
-        backgroundColor: '#0A0821', // Very dark purple
-        padding: 20
+        height: 100,
+        borderRadius: 8,
+        backgroundColor: '#0A0821',
     },
     removeAdButton: {
-        borderRadius: 5,
-        alignItems: 'center'
+        marginTop: 10,
+        padding: 8,
     },
-    ratingSection: {
+    removeAdText: {
+        fontFamily: "Satoshi",
+        fontSize: 12,
+        color: "#6B668F",
+        letterSpacing: 1,
+    },
+    goBackContainer: {
         alignItems: 'center',
-        flexDirection: 'row',
-        justifyContent: 'center'
-    },
-    ratingTitle: {
-        fontSize: 15,
-        fontWeight: 200,
-        color: '#FFFFFF'
-    },
-    starsContainer: {
-        marginHorizontal: 20,
-        flexDirection: 'row',
-        justifyContent: 'space-between'
-    },
-    rate: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingHorizontal: 20,
-        margin: 10,
-
-    },
-    containerRate: {
-            backgroundColor: '#13123b',
-            borderRadius: 8,
-            borderWidth: 1,
-            borderColor: '#535C91',
-            paddingHorizontal: 20,
-            alignItems: 'center',
-            elevation: 3, // Add shadow for Android
-            shadowColor: '#000', // Add shadow for iOS
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.3,
-            shadowRadius: 4,
-
-
-        justifyContent: 'center',
-        flexDirection: 'row',
-        height: 40,
-
-    },
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: "rgba(3, 3, 20, 0.95)", // Almost black with slight purple tint
-        justifyContent: "flex-end"
-    },
-    bottomModal: {
-
-        width: "100%",
-        backgroundColor: "#030314", // Darkest blue-purple
-        padding: 20,
-        borderColor: '#2E2A4A', // Deep purple for borders
-        borderTopWidth:1,
-        alignItems: "center"
-    },
-    reserveTicket: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        width: "100%",
-        backgroundColor: "#121023", // Rich purple for primary action
-        padding: 15,
-        borderRadius: 5,
-        borderColor:'#2E2A4A',
-        alignItems: "center",
-        marginVertical: 5
-    },
-    modalTitle: {
-        fontSize: 18,
-        fontWeight: "bold",
         marginBottom: 20,
-        color: "#FFFFFF",
-        marginHorizontal: 20
+        paddingHorizontal: 20,
     },
-    modalButton: {
-        borderWidth:1,
-        borderColor: '#2E2A4A', // Deep purple for borders
-        width: "100%",
-        padding: 15,
-        backgroundColor: "#0A0821", // Very dark purple for secondary buttons
-        borderRadius: 5,
-        alignItems: "center",
-        marginVertical: 5
+    goBackButton: {
+        backgroundColor: '#13123b',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#535C91',
+        paddingVertical: 12,
+        width: '100%',
+        alignItems: 'center',
     },
-    modalButtonText: {
-        fontFamily:'Satoshi',
-        fontWeight:600,
-        color: "#897cdc",
-        fontSize: 16,
-        paddingHorizontal: 15
+    goBackText: {
+        color: "white",
+        fontFamily: "Satoshi",
+        fontSize: 15,
     },
-    closeButton: {
-        backgroundColor: "#0A0821" // Very dark purple
-    },
-    modalRatingSection: {
-        alignItems: "center",
-        marginVertical: 10
-    },
-    starRatingContainer: {
-        flexDirection: "row",
-        justifyContent: "center",
-        marginVertical: 10
-    },
-    disabledButton: {
-        backgroundColor: '#0A0821', // Very dark purple
-        opacity: 0.7
-    }
 });

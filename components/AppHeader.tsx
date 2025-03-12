@@ -49,6 +49,7 @@ export default function AppHeader({ name, header, action }: AppHeaderProps) {
             if (route === 'back') {
                 router.back();
             } else {
+                //@ts-ignore
                 router.push(route);
             }
             // Reset opacity after navigation
@@ -69,9 +70,10 @@ export default function AppHeader({ name, header, action }: AppHeaderProps) {
             <Animated.View style={[styles.headerContainer, { opacity }]}>
                 <TouchableOpacity
                     onPress={() => navigateWithAnimation('back')}
-                    style={styles.iconButton}
+                    style={styles.backButton}
                 >
                     <Ionicons
+                    //@ts-ignore
                         name={name}
                         size={24}
                         color={CinematicColors.text}
@@ -124,5 +126,13 @@ const styles = StyleSheet.create({
         height: 40,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    backButton: {
+        position: "absolute",
+        
+        zIndex: 10,
+        backgroundColor: "rgba(3, 3, 20, 0.5)",
+        borderRadius: 20,
+        padding: 8,
     },
 });

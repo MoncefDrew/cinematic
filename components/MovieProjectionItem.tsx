@@ -1,3 +1,4 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import React, { RefAttributes } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, TouchableOpacityProps } from 'react-native';
 
@@ -5,7 +6,7 @@ import { View, Text, Image, StyleSheet, TouchableOpacity, TouchableOpacityProps 
 interface MovieProjectionItemProps {
     item:any,
     fullDate:string,
-    onPress:IntrinsicAttributes & TouchableOpacityProps & RefAttributes<View>,
+    onPress:any,
 }
 const MovieProjectionItem = ({ item, fullDate, onPress }:MovieProjectionItemProps) => {
     // Handle cases where movie might be null or undefined
@@ -58,6 +59,12 @@ const MovieProjectionItem = ({ item, fullDate, onPress }:MovieProjectionItemProp
             onPress={onPress}
             style={styles.movieContainer}
         >
+            <LinearGradient
+                                colors={['rgba(99, 102, 241, 0.15)', 'rgba(99, 102, 241, 0.05)']}
+                                style={styles.cardGradient}
+                                start={{x: 0, y: 0}}
+                                end={{x: 1, y: 1}}
+                            />
             <View style={styles.movieCard}>
                 <View style={styles.headerContainer}>
                     <View style={styles.timeContainer}>
@@ -216,6 +223,13 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontFamily: 'Satoshi',
         fontWeight: '700',
+    },
+    cardGradient: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
     },
 });
 

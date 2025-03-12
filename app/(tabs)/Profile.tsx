@@ -149,13 +149,7 @@ export default function Profile() {
                                 <Ionicons name="chevron-forward" size={24} color={CinematicColors.primary} />
                             </TouchableOpacity>
 
-                        <Link href="/Watchlist" asChild>
-                            <TouchableOpacity style={styles.menuItem}>
-                                <Ionicons name="bookmark" size={24} color={CinematicColors.primary} />
-                                <Text style={styles.menuText}>Watchlist</Text>
-                                <Ionicons name="chevron-forward" size={24} color={CinematicColors.primary} />
-                            </TouchableOpacity>
-                        </Link>
+                        
 
                         <LogOut/>
                     </View>

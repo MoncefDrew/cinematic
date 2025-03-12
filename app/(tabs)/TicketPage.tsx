@@ -8,6 +8,7 @@ import {useSeatStore} from '@/api/store/seatsStore';
 import {useTicketStore} from '@/api/store/TicketStore';
 import {BORDERRADIUS, FONTSIZE, SPACING} from "@/theme/theme";
 import {useRouter} from "expo-router";
+import Toast from 'react-native-toast-message';
 
 export default function TicketPage({ navigation, route }: any) {
     const [fontsLoaded] = useFonts({
@@ -106,6 +107,13 @@ export default function TicketPage({ navigation, route }: any) {
             console.error('Error submitting ticket:', error);
         } finally {
             setIsLoading(false);
+            Toast.show({
+                      type: "success",
+                      text1: `Ticket Reserved Successfully`, 
+                      visibilityTime: 3000,
+                      position: "top",
+                      topOffset: 50,
+                    })
         }
     };
 
