@@ -1,37 +1,49 @@
-# Welcome to your Expo app 👋
+# 🎬 Cinematik
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**Cinematik** is a sleek mobile ticket booking app built using **React Native**, **Zustand**, and **Supabase**. It allows users to effortlessly browse movies, book tickets, and manage reservations — all in real-time. With its responsive design and intuitive flow, Cinematik makes planning your movie night easier than ever.
 
-## Get started
+---
 
-1. Install dependencies
+<p align="center"> <img src="assets/1.png" width="249" /> <img src="assets/2.png" width="249" /> <img src="assets/3.png" width="249" /> <img src="assets/4.png" width="249" /> <img src="assets/5.png" width="249" /> <img src="assets/6.png" width="249" /> </p>
 
-   ```bash
-   npm install
-   ```
+---
 
-2. Start the app
+## 🚀 Features
 
-   ```bash
-    npx expo start
-   ```
+- 🔍 **Movie Listings**  
+  Explore a curated list of current and upcoming movies with detailed information like title, genre, ratings, and showtimes.
 
-In the output, you'll find options to open the app in a
+- 🔐 **User Authentication**  
+  Login and register securely with **Supabase Auth**, ensuring safe handling of user credentials.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- 🔄 **Real-Time Projections**  
+  Get instant updates on projections and bookings using Supabase’s powerful real-time features.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- 🎟️ **Seamless Ticket Booking**  
+  Book tickets in just a few taps, view booking status, and manage reservations directly from the app.
 
-## Get a fresh project
+- ⚛️ **Zustand for State Management**  
+  Lightweight, scalable state management using Zustand for a super smooth and snappy experience.
 
-When you're ready, run:
+---
+
+## 🛠️ Tech Stack
+
+- [React Native](https://reactnative.dev/) — cross-platform mobile app framework
+- [Zustand](https://github.com/pmndrs/zustand) — fast and minimal state management
+- [Supabase](https://supabase.io/) — backend as a service (auth, database, real-time)
+- [Expo](https://expo.dev/) — (optional) used for streamlined development & deployment
+
+---
+
+## 📦 Getting Started
+
+### 1. Clone the Repository
 
 ```bash
-npm run reset-project
-```
+git clone https://github.com/MoncefDrew/cinematic.git
+cd cinematic
+
 
 This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
 
